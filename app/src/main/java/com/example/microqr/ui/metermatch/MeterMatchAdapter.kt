@@ -13,41 +13,49 @@ import com.example.microqr.R
 import com.example.microqr.ui.files.MeterStatus
 
 class MeterMatchAdapter(
-    private val onItemClick: (MeterStatus) -> Unit = {}
+    private val onItemClick: (MeterStatus) -> Unit
 ) : ListAdapter<MeterStatus, MeterMatchAdapter.MeterViewHolder>(MeterDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MeterViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_match_meter, parent, false)
-        return MeterViewHolder(view)
+        return MeterViewHolder(view, onItemClick)
     }
 
     override fun onBindViewHolder(holder: MeterViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    inner class MeterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class MeterViewHolder(
+        itemView: View,
+        private val onItemClick: (MeterStatus) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
+
         private val tvMeterNumber: TextView = itemView.findViewById(R.id.tvMeterNumber)
         private val tvSerialNumber: TextView = itemView.findViewById(R.id.tvSerialNumber)
         private val tvPlace: TextView = itemView.findViewById(R.id.tvPlace)
         private val tvSourceFile: TextView = itemView.findViewById(R.id.tvSourceFile)
-        private val statusIndicator: View = itemView.findViewById(R.id.status_indicator)
         private val tvMatchStatus: TextView = itemView.findViewById(R.id.tvMatchStatus)
-        private val ivQrStatus: ImageView = itemView.findViewById(R.id.ivQrStatus)
+        private val statusIndicator: View = itemView.findViewById(R.id.status_indicator)
+        private val ivRegistrationStatus: ImageView = itemView.findViewById(R.id.ivRegistrationStatus)
 
         // Meter number badge background (the circular container)
         private val meterNumberBadge: View = itemView.findViewById(R.id.meter_number_badge)
 
+        private var currentMeter: MeterStatus? = null
+
         init {
             itemView.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    onItemClick(getItem(position))
+                currentMeter?.let { meter ->
+                    onItemClick(meter)
                 }
             }
         }
 
         fun bind(meter: MeterStatus) {
+            // Store current meter for click handling
+            currentMeter = meter
+
             // Set meter number (show just the number part)
             tvMeterNumber.text = meter.number
 
@@ -61,14 +69,14 @@ class MeterMatchAdapter(
             tvSourceFile.text = "From: ${getShortFileName(meter.fromFile)}"
 
             // Determine status and colors based on scan status
-            val (statusText, statusColor, badgeColor, qrIcon) = when {
+            val (statusText, statusColor, badgeColor, registrationIcon) = when {
                 meter.isChecked -> {
                     // Scanned: Green badge, success status
                     Tuple4("Scanned ✓", R.color.success_green, R.color.success_green, R.drawable.ic_check_circle)
                 }
                 else -> {
-                    // Pending: Blue badge, pending status
-                    Tuple4("Pending Scan", R.color.primary_color, R.color.primary_color, R.drawable.ic_qr_code_scanner_24)
+                    // Pending: Default badge, pending status
+                    Tuple4("Pending Scan", R.color.md_theme_light_onSurface, R.color.md_theme_light_primary, R.drawable.ic_pending_24)
                 }
             }
 
@@ -82,15 +90,15 @@ class MeterMatchAdapter(
             // Set meter number badge background color
             meterNumberBadge.backgroundTintList = ContextCompat.getColorStateList(itemView.context, badgeColor)
 
-            // Set QR status icon
-            ivQrStatus.visibility = View.VISIBLE
-            ivQrStatus.setImageResource(qrIcon)
-            ivQrStatus.setColorFilter(ContextCompat.getColor(itemView.context, statusColor))
+            // Set Registration status icon (replaces QR status icon)
+            ivRegistrationStatus.visibility = View.VISIBLE
+            ivRegistrationStatus.setImageResource(registrationIcon)
+            ivRegistrationStatus.setColorFilter(ContextCompat.getColor(itemView.context, statusColor))
 
             // Set meter number text color for better contrast
             val textColor = when {
                 meter.isChecked -> R.color.white // White text on green background
-                else -> R.color.white // White text on blue background
+                else -> R.color.white // White text on primary background
             }
             tvMeterNumber.setTextColor(ContextCompat.getColor(itemView.context, textColor))
 
@@ -112,16 +120,13 @@ class MeterMatchAdapter(
             if (itemView is com.google.android.material.card.MaterialCardView) {
                 val elevation = if (!meter.isChecked) 4f else 2f // Slightly higher elevation for pending items
                 (itemView as com.google.android.material.card.MaterialCardView).cardElevation = elevation
-            }
 
-            // Add subtle border for pending items
-            if (itemView is com.google.android.material.card.MaterialCardView) {
-                val strokeColor = if (!meter.isChecked) R.color.primary_color else R.color.stroke_color
-                val strokeWidth = if (!meter.isChecked) 2 else 1
+                // REMOVED: Blue border logic - no longer adding stroke colors or widths
+                // Simply use default stroke settings from layout
                 (itemView as com.google.android.material.card.MaterialCardView).strokeColor =
-                    ContextCompat.getColor(itemView.context, strokeColor)
+                    ContextCompat.getColor(itemView.context, R.color.stroke_color)
                 (itemView as com.google.android.material.card.MaterialCardView).strokeWidth =
-                    (strokeWidth * itemView.context.resources.displayMetrics.density).toInt()
+                    (1 * itemView.context.resources.displayMetrics.density).toInt()
             }
         }
 

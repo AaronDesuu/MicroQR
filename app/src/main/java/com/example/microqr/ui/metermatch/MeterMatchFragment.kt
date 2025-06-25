@@ -497,9 +497,7 @@ class MeterMatchFragment : Fragment() {
     }
 
     private fun showMeterDetailDialog(meter: MeterStatus) {
-        val scanStatusText = if (meter.isChecked) "✅ Already Scanned" else "❌ Pending Scan"
-        val registrationStatusText = if (meter.registered) "✅ Registered" else "❌ Not Registered"
-
+        val scanStatusText = if (meter.isChecked) "✅ Scanned & Registered" else "❌ Pending Scan"
         val message = """
         📊 Meter Information
         
@@ -508,9 +506,8 @@ class MeterMatchFragment : Fragment() {
         📍 Location: ${meter.place}
         📁 Source: ${meter.fromFile}
         
-        📋 Status Summary:
-        • Registration: $registrationStatusText
-        • QR Scan: $scanStatusText
+        📋 Status :
+        $scanStatusText
     """.trimIndent()
 
         val dialogBuilder = MaterialAlertDialogBuilder(requireContext())

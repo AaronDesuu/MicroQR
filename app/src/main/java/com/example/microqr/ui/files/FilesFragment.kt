@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton // Added
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -18,24 +19,22 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.microqr.R
+import com.example.microqr.databinding.FragmentFilesBinding // Import ViewBinding
 
 class FilesFragment : Fragment() {
 
     private val filesViewModel: FilesViewModel by activityViewModels()
     private lateinit var filePickerLauncher: ActivityResultLauncher<Array<String>>
-    private lateinit var filesAdapter: FilesAdapter
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var noFilesContainer: LinearLayout
-    private lateinit var uploadedFilesTitleTextView: TextView
-    private lateinit var uploadButton: Button
-    private lateinit var instructionsTextView: TextView
+
+    // ViewBinding
+    private var _binding: FragmentFilesBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         filePickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             uri?.let {
-                // Process the file first, then show destination selection
                 showDestinationSelectionDialog(it)
             }
         }
@@ -44,32 +43,51 @@ class FilesFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_files, container, false)
+    ): View {
+        _binding = FragmentFilesBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        uploadButton = view.findViewById(R.id.button_upload_csv)
-        recyclerView = view.findViewById(R.id.recyclerView_uploaded_files)
-        noFilesContainer = view.findViewById(R.id.textView_no_files)
-        uploadedFilesTitleTextView = view.findViewById(R.id.textView_uploaded_files_title)
-        instructionsTextView = view.findViewById(R.id.textView_instructions)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        uploadButton.setOnClickListener {
+        binding.buttonUploadCsv.setOnClickListener {
             openFilePicker()
         }
 
         setupRecyclerView()
-        setupInstructions()
+        setupInstructionsToggle() // Call the new setup method
+        setInstructionsText() // Set the actual instruction text
 
-        return view
+        // Observe toast messages
+        filesViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
+            if (message.isNotEmpty()) {
+                Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
+                filesViewModel.clearToastMessage()
+            }
+        }
+
+        // Observe file items
+        filesViewModel.fileItems.observe(viewLifecycleOwner) { fileItems ->
+            (binding.recyclerViewUploadedFiles.adapter as FilesAdapter).submitList(fileItems)
+            if (fileItems.isNullOrEmpty()) {
+                binding.textViewNoFiles.visibility = View.VISIBLE
+                binding.recyclerViewUploadedFiles.visibility = View.GONE
+                binding.textViewUploadedFilesTitle.visibility = View.GONE
+            } else {
+                binding.textViewNoFiles.visibility = View.GONE
+                binding.recyclerViewUploadedFiles.visibility = View.VISIBLE
+                binding.textViewUploadedFilesTitle.visibility = View.VISIBLE
+            }
+        }
     }
 
     private fun setupRecyclerView() {
-        filesAdapter = FilesAdapter(
+        val filesAdapter = FilesAdapter( // filesAdapter is local now, accessed via binding.recyclerViewUploadedFiles.adapter
             onDeleteClicked = { fileName ->
                 showDeleteConfirmationDialog(fileName)
             },
             onProcessForMeterCheck = { fileName ->
-                // Only allow processing if file is processable
                 val fileItem = filesViewModel.fileItems.value?.find { it.fileName == fileName }
                 if (fileItem?.isProcessable() == true) {
                     filesViewModel.processForMeterCheck(fileName)
@@ -79,7 +97,6 @@ class FilesFragment : Fragment() {
                 }
             },
             onProcessForMatch = { fileName ->
-                // Only allow processing if file is processable
                 val fileItem = filesViewModel.fileItems.value?.find { it.fileName == fileName }
                 if (fileItem?.isProcessable() == true) {
                     filesViewModel.processForMatch(fileName)
@@ -89,11 +106,26 @@ class FilesFragment : Fragment() {
                 }
             }
         )
-        recyclerView.adapter = filesAdapter
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewUploadedFiles.adapter = filesAdapter
+        binding.recyclerViewUploadedFiles.layoutManager = LinearLayoutManager(requireContext())
     }
 
-    private fun setupInstructions() {
+    private fun setupInstructionsToggle() {
+        binding.buttonToggleInstructions.setOnClickListener {
+            if (binding.textViewInstructions.visibility == View.VISIBLE) {
+                binding.textViewInstructions.visibility = View.GONE
+                binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_down) // Ensure you have this drawable
+            } else {
+                binding.textViewInstructions.visibility = View.VISIBLE
+                binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_up) // Ensure you have this drawable
+            }
+        }
+        // Ensure initial state is collapsed
+        binding.textViewInstructions.visibility = View.GONE
+        binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_down)
+    }
+
+    private fun setInstructionsText() {
         val instructions = """
             📋 Instructions:
             
@@ -113,10 +145,11 @@ class FilesFragment : Fragment() {
             Maximum file size: 10MB
         """.trimIndent()
 
-        instructionsTextView.text = instructions
+        binding.textViewInstructions.text = instructions
     }
 
     private fun showDestinationSelectionDialog(uri: Uri) {
+        // Assuming DialogHelper is correctly implemented
         DialogHelper.showDestinationDialog(
             context = requireContext(),
             onMeterCheck = {
@@ -152,37 +185,16 @@ class FilesFragment : Fragment() {
             .show()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        // Observe toast messages
-        filesViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
-            if (message.isNotEmpty()) {
-                Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
-                filesViewModel.clearToastMessage()
-            }
-        }
-
-        // Observe file items
-        filesViewModel.fileItems.observe(viewLifecycleOwner) { fileItems ->
-            filesAdapter.submitList(fileItems)
-            if (fileItems.isNullOrEmpty()) {
-                noFilesContainer.visibility = View.VISIBLE
-                recyclerView.visibility = View.GONE
-                uploadedFilesTitleTextView.visibility = View.GONE
-            } else {
-                noFilesContainer.visibility = View.GONE
-                recyclerView.visibility = View.VISIBLE
-                uploadedFilesTitleTextView.visibility = View.VISIBLE
-            }
-        }
-    }
-
     private fun openFilePicker() {
         filePickerLauncher.launch(FileConstants.SUPPORTED_MIME_TYPES)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // Important for ViewBinding to avoid memory leaks
+    }
+
     companion object {
-        fun newInstance() = FilesFragment()
+        fun newInstance() = FilesFragment() // This is fine if you don't pass arguments
     }
 }

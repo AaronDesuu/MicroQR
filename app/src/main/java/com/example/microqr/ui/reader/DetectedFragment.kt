@@ -7,11 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.activityViewModels // <<< IMPORT THIS for shared ViewModel
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.microqr.R
 import com.example.microqr.databinding.FragmentDetectedBinding
-import com.example.microqr.ui.files.FilesViewModel // <<< IMPORT FilesViewModel
+import com.example.microqr.ui.files.FilesViewModel
 
 class DetectedFragment : Fragment() {
 
@@ -19,7 +19,7 @@ class DetectedFragment : Fragment() {
     private val binding get() = _binding!!
 
     // Get the shared FilesViewModel instance
-    private val filesViewModel: FilesViewModel by activityViewModels() // <<< ADD THIS
+    private val filesViewModel: FilesViewModel by activityViewModels()
 
     companion object {
         private const val TAG = "DetectedFragment"
@@ -47,10 +47,10 @@ class DetectedFragment : Fragment() {
         if (rawQrValue != null) {
             parseRawQrValue(rawQrValue) // Call the simplified parsing function
 
-            if (extractedSerialNumber != null) { // <<< CONDITION CHANGED HERE
+            if (extractedSerialNumber != null) {
                 binding.serialNumberText.text = "S/N: $extractedSerialNumber"
                 binding.detectedInfoText.text = "(Raw: $rawQrValue)"
-                binding.nextButton.text = getString(R.string.check_serial) // Set text to "Check Serial" or similar
+                binding.nextButton.text = getString(R.string.check_serial)
                 binding.nextButton.visibility = View.VISIBLE
                 binding.nextButton.isEnabled = true
                 binding.nextButton.setOnClickListener {
@@ -73,8 +73,6 @@ class DetectedFragment : Fragment() {
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
-
-        // REMOVED: The duplicate setOnClickListener that was overriding the first one
     }
 
     /**
@@ -98,22 +96,30 @@ class DetectedFragment : Fragment() {
     private fun checkSerialNumberInTable(serialNumberToCheck: String) {
         Log.d(TAG, "Checking serial number: $serialNumberToCheck")
 
-        // Call a new/modified method on the FilesViewModel instance
-        // that only requires the serial number.
+        // ✅ FIXED: Use the new method that works with MeterCheck specific data
         val (success, foundItemFile) = filesViewModel.updateMeterCheckedStatusBySerial(serialNumberToCheck)
 
         if (success) {
             val toastMessage: String
             val statusMessage: String
 
-            // To provide better feedback, we get the fromFile of the item that was actually updated.
+            // ✅ UPDATED: Check against the correct data source that MeterCheck uses
             if (foundItemFile != null) {
-                // Check the actual status from the ViewModel's LiveData for confirmation
-                val isActuallyChecked = filesViewModel.meterStatusList.value
-                    ?.find { it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile } // Check the specific item
+                // Check the actual status from the MeterCheck specific data
+                val isActuallyChecked = filesViewModel.meterCheckMeters.value
+                    ?.find { it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile }
                     ?.isChecked ?: false
 
-                if (isActuallyChecked) {
+                // ✅ FALLBACK: If not found in meterCheckMeters, check the general meterStatusList
+                val isCheckedInGeneral = if (!isActuallyChecked) {
+                    filesViewModel.meterStatusList.value
+                        ?.find { it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile }
+                        ?.isChecked ?: false
+                } else {
+                    isActuallyChecked
+                }
+
+                if (isCheckedInGeneral) {
                     toastMessage = "'$serialNumberToCheck' (from $foundItemFile) is now marked as CHECKED!"
                     statusMessage = "\n\nStatus: VERIFIED CHECKED (from $foundItemFile)"
                 } else {
@@ -128,6 +134,7 @@ class DetectedFragment : Fragment() {
                 toastMessage = "'$serialNumberToCheck' status updated (file not specified)."
                 statusMessage = "\n\nStatus: CHECKED (file not specified)"
             }
+
             Toast.makeText(requireContext(), toastMessage, Toast.LENGTH_LONG).show()
             binding.detectedInfoText.append(statusMessage)
 
@@ -137,10 +144,29 @@ class DetectedFragment : Fragment() {
                 findNavController().navigate(R.id.action_detectedFragment_to_meterCheckFragment)
             }
 
-
         } else {
-            Toast.makeText(requireContext(), "'$serialNumberToCheck' NOT FOUND in any loaded meter list.", Toast.LENGTH_LONG).show()
+            // ✅ IMPROVED: Provide more helpful error message based on available data sources
+            val meterCheckCount = filesViewModel.meterCheckMeters.value?.size ?: 0
+            val generalMeterCount = filesViewModel.meterStatusList.value?.size ?: 0
+
+            val errorMessage = when {
+                meterCheckCount > 0 -> "'$serialNumberToCheck' NOT FOUND in the loaded MeterCheck data ($meterCheckCount meters)."
+                generalMeterCount > 0 -> "'$serialNumberToCheck' NOT FOUND in any meter data. Try processing your files for MeterCheck first."
+                else -> "'$serialNumberToCheck' NOT FOUND. No meter data is currently loaded."
+            }
+
+            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
             binding.detectedInfoText.append("\n\nStatus: NOT FOUND")
+
+            // ✅ HELPFUL: Add suggestion button if no MeterCheck data is loaded
+            if (meterCheckCount == 0 && generalMeterCount > 0) {
+                binding.nextButton.text = "Go to Files"
+                binding.nextButton.visibility = View.VISIBLE
+                binding.nextButton.isEnabled = true
+                binding.nextButton.setOnClickListener {
+                    findNavController().navigate(R.id.navigation_files)
+                }
+            }
         }
     }
 

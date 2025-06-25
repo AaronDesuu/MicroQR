@@ -27,7 +27,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             app:cardCornerRadius="24dp"
-            app:cardBackgroundColor="@color/primary_color"
+            app:cardBackgroundColor="@color/md_theme_light_primary"
             app:cardElevation="0dp">
 
             <TextView
@@ -58,54 +58,27 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/md_theme_light_onSurface"
-                tools:text="ABC123456789" />
-
-            <TextView
-                android:id="@+id/tvSerialNumberLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Serial Number"
-                android:textSize="12sp"
-                android:textColor="@color/md_theme_light_onSurfaceVariant"
-                android:layout_marginTop="2dp" />
+                tools:text="MTR-12345-ABC" />
 
             <!-- Place -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvPlace"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="4dp">
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:contentDescription="location"
-                    android:src="@drawable/ic_location_24"
-                    android:layout_marginEnd="4dp"
-                    app:tint="@color/md_theme_light_onSurfaceVariant" />
-
-                <TextView
-                    android:id="@+id/tvPlace"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="12sp"
-                    android:textColor="@color/md_theme_light_onSurfaceVariant"
-                    tools:text="Main Building - Floor 1" />
-
-            </LinearLayout>
+                android:textSize="14sp"
+                android:textColor="@color/md_theme_light_onSurfaceVariant"
+                android:layout_marginTop="2dp"
+                tools:text="Building A - Floor 2" />
 
             <!-- Source File -->
             <TextView
                 android:id="@+id/tvSourceFile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceCaption"
                 android:textSize="12sp"
-                android:layout_marginTop="4dp"
                 android:textColor="@color/md_theme_light_onSurfaceVariant"
-                tools:text="From: meters_batch_1.csv" />
+                android:layout_marginTop="4dp"
+                tools:text="From: meter_data.csv" />
 
         </LinearLayout>
 
@@ -115,37 +88,38 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginStart="8dp">
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="12dp">
 
-            <!-- Status Indicator Dot -->
-            <View
-                android:id="@+id/status_indicator"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:background="@drawable/circle_background"
-                tools:backgroundTint="@color/success_green" />
+            <!-- Registration Status Icon (renamed from QR Status) -->
+            <ImageView
+                android:id="@+id/ivRegistrationStatus"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginBottom="4dp"
+                tools:src="@drawable/ic_check_circle"
+                tools:tint="@color/success_green"
+                android:contentDescription="Registration Status" />
 
             <!-- Status Text -->
             <TextView
                 android:id="@+id/tvMatchStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10sp"
+                android:textSize="12sp"
+                android:textStyle="bold"
                 tools:text="Scanned ✓"
                 tools:textColor="@color/success_green"
-                android:layout_marginTop="4dp"
                 android:gravity="center" />
 
-            <!-- QR Status Icon -->
-            <ImageView
-                android:id="@+id/ivQrStatus"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:contentDescription="QR status"
-                android:src="@drawable/ic_qr_code_scanner_24"
+            <!-- Status Indicator Dot -->
+            <View
+                android:id="@+id/status_indicator"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:layout_marginTop="4dp"
-                app:tint="@color/primary_color"
-                tools:visibility="visible" />
+                android:background="@drawable/circle_background"
+                tools:backgroundTint="@color/success_green" />
 
         </LinearLayout>
 
