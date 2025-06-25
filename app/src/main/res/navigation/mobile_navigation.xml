@@ -107,7 +107,15 @@
     <fragment
         android:id="@+id/matchFragment"
         android:name="com.example.microqr.ui.metermatch.MeterMatchFragment"
-        android:label="@string/title_match" />
+        android:label="@string/title_match">
+        <action
+            android:id="@+id/action_matchFragment_to_meterDetailScanFragment"
+            app:destination="@id/meterDetailScanFragment"
+            app:enterAnim="@anim/slide_in_up"
+            app:exitAnim="@anim/slide_out_down"
+            app:popEnterAnim="@anim/slide_in_down"
+            app:popExitAnim="@anim/slide_out_up" />
+    </fragment>
 
     <fragment
         android:id="@+id/detectedFragment"
@@ -125,5 +133,10 @@
             app:popExitAnim="@anim/slide_out_up" />
     </fragment>
 
+    <fragment
+        android:id="@+id/meterDetailScanFragment"
+        android:name="com.example.microqr.ui.metermatch.MeterDetailScanFragment"
+        android:label="Scan Meter"
+        tools:layout="@layout/fragment_meter_detail_scan" />
 
 </navigation>

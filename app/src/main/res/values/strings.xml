@@ -3,6 +3,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+
     <!-- Strings related to login -->
     <string name="prompt_email">Username</string>
     <string name="prompt_password">Password</string>
@@ -13,7 +14,14 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_login" translatable="false">LoginActivity</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in_to_continue">Sign in to continue</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="app_logo_description">App Logo</string>
 
+    <!-- QR Code Scanner -->
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="point_camera_qr">Point camera at QR code</string>
     <string name="scanning">Scanning…</string>
@@ -23,45 +31,31 @@
     <string name="title_upload">File Upload</string>
     <string name="test_title_placeholder">Verification</string>
     <string name="test_message_placeholder">Details</string>
-
-    <string name="back">back</string>
-    <string name="next">next</string>
     <string name="detection_success_message">QR code detected</string>
-    <string name="detection_completed">successfuly detected\n</string>
+    <string name="detection_completed">Successfully detected\n</string>
     <string name="detection_success">Micro QR Read</string>
     <string name="qr_scanner">QR Code Reader</string>
+    <string name="scan_again">Please scan again</string>
+    <string name="qr_code_detected">QR Code Detected</string>
+    <string name="qr_scan_instruction">Please align the QR code within Camera</string>
+    <string name="close">close</string>
+    <string name="toggle_flash">Toggle Flash</string>
+    <string name="turn_flash_on">Turn flash on</string>
+    <string name="turn_flash_off">Turn flash off</string>
+
+    <!-- File Management & Upload -->
     <string name="upload_meter_csv_file">Upload Meter CSV File</string>
     <string name="meter_serial">Serial Number</string>
-
-    <string name="welcome_back">Welcome Back</string>
-    <string name="sign_in_to_continue">Sign in to continue</string>
-    <string name="forgot_password">Forgot Password?</string>
-    <string name="dont_have_account">Don\'t have an account?</string>
-    <string name="sign_up">Sign Up</string>
-    <string name="app_logo_description">App Logo</string>
-    <string name="title_settings">settings</string>
-    <string name="title_profile">profile</string>
-
-    <!-- 👇 Strings for root_preferences.xml 👇 -->
-    <string name="messages_header">Messages</string>
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
-
-    <string name="sync_header">Sync</string>
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
-    <string name="delete_file">Delete File</string>
-        <!-- Other strings -->
-        <string name="status_registered">Registered</string>
-        <string name="status_unregistered">Unregistered</string>
-    <string name="file_manager">File Manager</string>
     <string name="upload_and_manage_your_csv_meter_files">Upload and manage your CSV meter files</string>
     <string name="uploaded_files">Uploaded Files</string>
-    <string name="refresh">Refresh</string>
     <string name="no_files_uploaded_yet">No files uploaded yet</string>
     <string name="upload_your_first_csv_file_to_get_started">Upload your first CSV file to get started</string>
+    <string name="delete_file">Delete File</string>
+    <string name="load_file">Load file</string>
+    <string name="file_manager">File Manager</string>
+    <string name="refresh">Refresh</string>
+
+    <!-- Meter Dashboard & Details -->
     <string name="monitor_your_devices">Monitor your devices</string>
     <string name="total_meters">Total Meters</string>
     <string name="zero" translatable="false">0</string>
@@ -72,28 +66,19 @@
     <string name="no_meters">No meters</string>
     <string name="no_meters_found">No Meters Found</string>
     <string name="add_your_meter_data">Add your meter data from a CSV file to get started</string>
-    <string name="load_file">Load file</string>
     <string name="register_meter">Register meter</string>
-    <string name="scan_again">Please scan again</string>
-    <string name="qr_code_detected">QR Code Detected</string>
-    <string name="qr_scan_instruction">Please align the QR code within Camera</string>
-    <string name="close">close</string>
-    <string name="toggle_flash">Toggle Flash</string>
-    <string name="prompt_user" translatable="false">Username</string>
-    <string name="check_serial">Check Serial</string>
-    <string name="detected_serial_number">Detected Serial Number:</string>
-    <string name="turn_flash_on">Turn flash on</string>
-    <string name="turn_flash_off">Turn flash off</string>
-
+    <string name="status_registered">Registered</string>
+    <string name="status_unregistered">Unregistered</string>
     <string name="no_files_uploaded">No files uploaded yet. Go to the Files tab to upload CSVs.</string>
     <string name="files_no_meter">Uploaded files contain no meter data.</string>
     <string name="no_meter_found">No meters found matching your search.</string>
     <string name="no_meter_data">No meter data to display.</string>
-    <string name="guest_placeholder">Guest</string>
-    <string name="no_files_loaded">No files loaded.</string>
-    <string name="data_file" translatable="false">"File Data : "</string>
 
-    <string name="title_all_meters_dashboard" translatable="false">All Meter Dashboard</string>
+    <!-- Navigation and Actions -->
+    <string name="back">back</string>
+    <string name="next">next</string>
+    <string name="check_serial">Check Serial</string>
+    <string name="detected_serial_number">Detected Serial Number:</string>
     <string name="serial_checked">Back to Home</string>
     <string name="title_match">Matching</string>
     <string name="title_metercheck">Register</string>
@@ -103,4 +88,53 @@
     <string name="app_logo">MicroQR</string>
     <string name="file_upload_icon">Upload</string>
     <string name="scan_register"><![CDATA[Scan & Register]]></string>
+    <string name="copy">Copy</string>
+
+    <!-- Settings/Preferences -->
+    <string name="title_settings">settings</string>
+    <string name="title_profile">profile</string>
+    <string name="messages_header">Messages</string>
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+    <string name="sync_header">Sync</string>
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+    <!-- Placeholders -->
+    <string name="guest_placeholder">Guest</string>
+    <string name="no_files_loaded">No files loaded.</string>
+    <string name="data_file" translatable="false">"File Data : "</string>
+    <string name="title_all_meters_dashboard" translatable="false">All Meter Dashboard</string>
+    <string name="prompt_user" translatable="false">Username</string>
+
+    <!-- NEW: Meter Scanning Feature -->
+    <string name="scan_meter">Scan Meter</string>
+    <string name="target_meter_info">Target Meter Information</string>
+    <string name="scan_meter_qr">Scan the QR code on the target meter</string>
+    <string name="position_qr_within_frame">Position QR code within the frame</string>
+    <string name="scanning_meter">Scanning for meter: %s</string>
+    <string name="meter_verified">Meter verified and marked as scanned!</string>
+
+    <!-- NEW: Match Results -->
+    <string name="perfect_match">Perfect Match!</string>
+    <string name="serial_mismatch">Serial Number Mismatch</string>
+    <string name="no_match_found">No Match Found</string>
+    <string name="choose_alternative">Choose Alternative</string>
+    <string name="qr_code_mismatch">QR Code Mismatch</string>
+    <string name="select_meter_to_mark">Select Meter to Mark as Scanned</string>
+
+    <!-- NEW: Status messages -->
+    <string name="expected_serial">Expected: %s</string>
+    <string name="scanned_serial">Scanned: %s</string>
+    <string name="meter_marked_scanned">Meter %s marked as scanned!</string>
+    <string name="verify_correct_meter">Please verify you\'re scanning the correct meter</string>
+    <string name="alternative_matches_found">However, the scanned serial number matches these other meters:</string>
+    <string name="no_other_matches">The scanned QR code doesn\'t match the expected meter serial number, and no other meters with this serial number were found in the system.</string>
+
+    <!-- NEW: Actions -->
+    <string name="toggle_scan_status">Toggle Scan Status</string>
+    <string name="unable_start_camera">Unable to start camera scan</string>
+    <string name="pending_scan">Pending Scan</string>
 </resources>

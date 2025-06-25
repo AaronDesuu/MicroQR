@@ -1,109 +1,135 @@
 <resources>
-    <!-- App Information -->
     <!-- app_name is translatable="false", so no translation needed here -->
-
-    <!-- Generic UI Elements -->
-    <string name="back">戻る</string>
-    <string name="next">次へ</string>
-    <string name="refresh">更新</string>
-    <string name="search_meters">メーターを検索...</string>
-    <!-- zero is "0", usually not translated if it's just the digit -->
-
-    <!-- Navigation Titles / Activity Titles -->
     <string name="title_home">ホーム</string>
     <string name="title_dashboard">ダッシュボード</string>
     <string name="title_notifications">通知</string>
-    <!-- title_activity_login is translatable="false" -->
-    <string name="title_reader">QRリーダー</string>
-    <string name="title_upload">ファイル</string>
-    <string name="title_settings">設定</string>
-    <string name="title_profile">プロフィール</string>
-    <string name="file_manager">ファイルマネージャー</string>
-    <!-- Login & Authentication -->
-    <string name="prompt_email">ユーザ名</string>
+
+    <!-- ログイン関連 -->
+    <string name="prompt_email">ユーザー名</string>
     <string name="prompt_password">パスワード</string>
     <string name="action_sign_in">ログイン</string>
     <string name="action_sign_in_short">サインイン</string>
     <string name="welcome">"ようこそ！"</string>
     <string name="invalid_username">有効なユーザー名ではありません</string>
-    <string name="invalid_password">パスワードは5文字以上</string>
+    <string name="invalid_password">パスワードは5文字以上で入力してください</string>
     <string name="login_failed">"ログインに失敗しました"</string>
     <string name="welcome_back">おかえりなさい</string>
-    <string name="sign_in_to_continue">ログインをしてください</string>
+    <string name="sign_in_to_continue">続行するにはサインインしてください</string>
     <string name="forgot_password">パスワードをお忘れですか？</string>
     <string name="dont_have_account">アカウントをお持ちでないですか？</string>
     <string name="sign_up">サインアップ</string>
-    <string name="app_logo_description">アプリアイコン</string>
+    <string name="app_logo_description">アプリロゴ</string>
 
-    <!-- QR Code Scanner -->
+    <!-- QRコードスキャナー -->
     <string name="scan_qr_code">QRコードをスキャン</string>
     <string name="point_camera_qr">カメラをQRコードに向けてください</string>
     <string name="scanning">スキャン中…</string>
     <string name="camera_permission_required">QRコードをスキャンするにはカメラの許可が必要です</string>
     <string name="verification_info">スキャンされたコード: %s</string>
+    <string name="title_reader">QRリーダー</string>
+    <string name="title_upload">ファイルアップロード</string>
+    <string name="test_title_placeholder">検証</string>
+    <string name="test_message_placeholder">詳細</string>
     <string name="detection_success_message">QRコードが検出されました</string>
-    <string name="detection_completed">正常に検出されました\n</string> <!-- Assuming typo "successfully" fixed -->
+    <string name="detection_completed">正常に検出されました\n</string>
     <string name="detection_success">マイクロQR読み取り完了</string>
     <string name="qr_scanner">QRコードリーダー</string>
-    <string name="scan_again">もう一度読み取ってください</string>
-    <string name="qr_code_detected">QRコード発見されました</string>
+    <string name="scan_again">もう一度スキャンしてください</string>
+    <string name="qr_code_detected">QRコードが検出されました</string>
     <string name="qr_scan_instruction">QRコードをカメラの枠内に合わせてください</string>
     <string name="close">閉じる</string>
-    <string name="toggle_flash">フラッシュ</string>
+    <string name="toggle_flash">フラッシュ切り替え</string>
+    <string name="turn_flash_on">フラッシュをオンにする</string>
+    <string name="turn_flash_off">フラッシュをオフにする</string>
 
-    <!-- File Management & Upload -->
-    <string name="upload_meter_csv_file">メーターCSVをアップロード</string>
-    <string name="upload_and_manage_your_csv_meter_files">CSVメーターファイルをアップロードして管理します</string>
+    <!-- ファイル管理・アップロード -->
+    <string name="upload_meter_csv_file">メーターCSVファイルをアップロード</string>
+    <string name="meter_serial">シリアル番号</string>
+    <string name="upload_and_manage_your_csv_meter_files">CSVメーターファイルをアップロードして管理する</string>
     <string name="uploaded_files">アップロードされたファイル</string>
-    <string name="no_files_uploaded_yet">ファイルはアップロードされていません</string>
-    <string name="upload_your_first_csv_file_to_get_started">CSVファイルをアップロードしてください</string>
+    <string name="no_files_uploaded_yet">まだファイルがアップロードされていません</string>
+    <string name="upload_your_first_csv_file_to_get_started">最初のCSVファイルをアップロードして開始してください</string>
     <string name="delete_file">ファイルを削除</string>
     <string name="load_file">ファイルを読み込む</string>
+    <string name="file_manager">ファイルマネージャー</string>
+    <string name="refresh">更新</string>
 
-    <!-- Meter Dashboard & Details -->
-    <string name="meter_serial">シリアル番号</string>
-    <string name="monitor_your_devices">デバイスを監視</string>
+    <!-- メーターダッシュボード・詳細 -->
+    <string name="monitor_your_devices">デバイスを監視する</string>
     <string name="total_meters">総メーター数</string>
     <string name="registered">登録済み</string>
     <string name="unregistered">未登録</string>
+    <string name="search_meters">メーターを検索...</string>
     <string name="your_meters">あなたのメーター</string>
-    <string name="no_meters">メーターなし</string>
+    <string name="no_meters">メーターがありません</string>
     <string name="no_meters_found">メーターが見つかりません</string>
-    <string name="add_your_meter_data">先にCSVファイルをアップロードを追加してください</string>
+    <string name="add_your_meter_data">CSVファイルからメーターデータを追加して開始してください</string>
     <string name="register_meter">メーターを登録</string>
     <string name="status_registered">登録済み</string>
     <string name="status_unregistered">未登録</string>
-    <string name="no_files_uploaded">まだファイルがアップロードされていません。</string>
+    <string name="no_files_uploaded">まだファイルがアップロードされていません。ファイルタブからCSVをアップロードしてください。</string>
     <string name="files_no_meter">アップロードされたファイルにメーターデータが含まれていません。</string>
-    <string name="no_meter_found">検索条件にメーターは見つかりませんでした。</string>
-    <string name="no_meter_data">表示するメーターデータはありません。</string>
+    <string name="no_meter_found">検索条件に一致するメーターが見つかりません。</string>
+    <string name="no_meter_data">表示するメーターデータがありません。</string>
 
-    <!-- Settings/Preferences (from root_preferences.xml) -->
+    <!-- ナビゲーション・アクション -->
+    <string name="back">戻る</string>
+    <string name="next">次へ</string>
+    <string name="check_serial">シリアル確認</string>
+    <string name="detected_serial_number">検出されたシリアル番号:</string>
+    <string name="serial_checked">ホームに戻る</string>
+    <string name="title_match">マッチング</string>
+    <string name="title_metercheck">登録</string>
+    <string name="navigate_forward">前進</string>
+    <string name="meter_check_icon">メーター確認アイコン</string>
+    <string name="match_meter_icon">メーターマッチアイコン</string>
+    <string name="app_logo">MicroQR</string>
+    <string name="file_upload_icon">アップロード</string>
+    <string name="scan_register"><![CDATA[スキャン & 登録]]></string>
+    <string name="copy">コピー</string>
+
+    <!-- 設定・環境設定 -->
+    <string name="title_settings">設定</string>
+    <string name="title_profile">プロフィール</string>
     <string name="messages_header">メッセージ</string>
     <string name="signature_title">あなたの署名</string>
-    <string name="reply_title">デフォルトの返信アクション</string>
+    <string name="reply_title">デフォルト返信アクション</string>
     <string name="sync_header">同期</string>
     <string name="sync_title">定期的にメールを同期</string>
     <string name="attachment_title">受信添付ファイルをダウンロード</string>
-    <string name="attachment_summary_on">受信メールの添付ファイルを自動的にダウンロードします</string>
-    <string name="attachment_summary_off">手動で要求された場合にのみ添付ファイルをダウンロードします</string>
+    <string name="attachment_summary_on">受信メールの添付ファイルを自動的にダウンロード</string>
+    <string name="attachment_summary_off">手動で要求された場合のみ添付ファイルをダウンロード</string>
 
-    <!-- Placeholders / Developer Strings -->
-    <string name="test_title_placeholder">検証</string>
-    <string name="test_message_placeholder">詳細</string>
+    <!-- プレースホルダー -->
+    <string name="guest_placeholder">ゲスト</string>
+    <string name="no_files_loaded">ファイルが読み込まれていません。</string>
 
-    <string name="check_serial">S/Nを登録</string>
-    <string name="detected_serial_number">検出したS/N:</string>
+    <!-- 新機能: メータースキャン機能 -->
+    <string name="scan_meter">メーターをスキャン</string>
+    <string name="target_meter_info">対象メーター情報</string>
+    <string name="scan_meter_qr">対象メーターのQRコードをスキャンしてください</string>
+    <string name="position_qr_within_frame">QRコードを枠内に配置してください</string>
+    <string name="scanning_meter">メーターをスキャン中: %s</string>
+    <string name="meter_verified">メーターが確認され、スキャン済みとしてマークされました！</string>
 
-    <string name="turn_flash_on">ライトON</string>
-    <string name="turn_flash_off">ライトOFF</string>
-    <string name="guest_placeholder">Guest</string>
-    <string name="no_files_loaded">No files loaded.</string>
-    <string name="serial_checked">ホームへ確認</string>
-    <string name="title_match">Matching</string>
-    <string name="navigate_forward">navigate forward</string>
-    <string name="meter_check_icon">meter check icon</string>
-    <string name="file_upload_icon">Upload</string>
+    <!-- 新機能: マッチング結果 -->
+    <string name="perfect_match">完全一致！</string>
+    <string name="serial_mismatch">シリアル番号不一致</string>
+    <string name="no_match_found">一致が見つかりません</string>
+    <string name="choose_alternative">代替を選択</string>
+    <string name="qr_code_mismatch">QRコード不一致</string>
+    <string name="select_meter_to_mark">スキャン済みとしてマークするメーターを選択</string>
 
+    <!-- 新機能: ステータスメッセージ -->
+    <string name="expected_serial">期待値: %s</string>
+    <string name="scanned_serial">スキャン値: %s</string>
+    <string name="meter_marked_scanned">メーター %s がスキャン済みとしてマークされました！</string>
+    <string name="verify_correct_meter">正しいメーターをスキャンしていることを確認してください</string>
+    <string name="alternative_matches_found">ただし、スキャンされたシリアル番号は以下の他のメーターと一致します:</string>
+    <string name="no_other_matches">スキャンされたQRコードは期待されるメーターのシリアル番号と一致せず、このシリアル番号を持つ他のメーターもシステムで見つかりませんでした。</string>
 
+    <!-- 新機能: アクション -->
+    <string name="toggle_scan_status">スキャンステータス切り替え</string>
+    <string name="unable_start_camera">カメラスキャンを開始できません</string>
+    <string name="pending_scan">スキャン待機中</string>
 </resources>

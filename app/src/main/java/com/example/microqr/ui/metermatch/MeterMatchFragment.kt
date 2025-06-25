@@ -21,6 +21,8 @@ import com.example.microqr.ui.files.ProcessingDestination
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import androidx.navigation.fragment.findNavController
+import com.example.microqr.R
 
 class MeterMatchFragment : Fragment() {
 
@@ -161,16 +163,8 @@ class MeterMatchFragment : Fragment() {
     private fun setupRecyclerView() {
         meterAdapter = MeterMatchAdapter(
             onItemClick = { meter ->
-                // Handle meter item click - could navigate to detail view or start QR scan
+                // Handle meter item click - show detail dialog with scan option
                 showMeterDetailDialog(meter)
-            },
-            onCheckChanged = { meter, isChecked ->
-                // Update the meter's selection status
-                filesViewModel.updateMeterSelectionStatus(meter.serialNumber, isChecked, meter.fromFile)
-
-                // Show feedback to user
-                val statusText = if (isChecked) "selected ✅" else "deselected ❌"
-                Toast.makeText(context, "Meter ${meter.number} $statusText", Toast.LENGTH_SHORT).show()
             }
         )
 
@@ -179,6 +173,7 @@ class MeterMatchFragment : Fragment() {
             adapter = meterAdapter
         }
     }
+
 
     private fun setupSearchView() {
         binding.etSearch.addTextChangedListener(object : TextWatcher {
@@ -502,31 +497,59 @@ class MeterMatchFragment : Fragment() {
     }
 
     private fun showMeterDetailDialog(meter: MeterStatus) {
-        val message = """
-            📊 Meter Information
-            
-            🔢 Number: ${meter.number}
-            🏷️ Serial: ${meter.serialNumber}
-            📍 Location: ${meter.place}
-            📁 Source: ${meter.fromFile}
-            
-            📋 Status Summary:
-            • Registration: ${if (meter.registered) "✅ Registered" else "❌ Not Registered"}
-            • QR Scan: ${if (meter.isChecked) "✅ Scanned" else "❌ Not Scanned"}
-            • Selection: ${if (meter.isSelectedForProcessing) "✅ Selected" else "❌ Not Selected"}
-        """.trimIndent()
+        val scanStatusText = if (meter.isChecked) "✅ Already Scanned" else "❌ Pending Scan"
+        val registrationStatusText = if (meter.registered) "✅ Registered" else "❌ Not Registered"
 
-        MaterialAlertDialogBuilder(requireContext())
+        val message = """
+        📊 Meter Information
+        
+        🔢 Number: ${meter.number}
+        🏷️ Serial: ${meter.serialNumber}
+        📍 Location: ${meter.place}
+        📁 Source: ${meter.fromFile}
+        
+        📋 Status Summary:
+        • Registration: $registrationStatusText
+        • QR Scan: $scanStatusText
+    """.trimIndent()
+
+        val dialogBuilder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("Meter Details")
             .setMessage(message)
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-            .setNeutralButton("Toggle Scan Status") { _, _ ->
-                filesViewModel.updateMeterCheckedStatus(meter.serialNumber, !meter.isChecked, meter.fromFile)
-                Toast.makeText(context,
-                    if (!meter.isChecked) "Marked as scanned ✅" else "Marked as not scanned ❌",
-                    Toast.LENGTH_SHORT).show()
+
+        // Only show scan option if not already scanned
+        if (!meter.isChecked) {
+            dialogBuilder.setNeutralButton("Scan Meter") { _, _ ->
+                // Navigate to the scan fragment with meter details
+                navigateToScanMeter(meter)
             }
-            .show()
+        }
+
+        // Option to manually toggle scan status (for testing/correction)
+        dialogBuilder.setNegativeButton(
+            if (meter.isChecked) "Mark as Unscanned" else "Mark as Scanned"
+        ) { _, _ ->
+            filesViewModel.updateMeterCheckedStatus(meter.serialNumber, !meter.isChecked, meter.fromFile)
+            Toast.makeText(context,
+                if (!meter.isChecked) "Marked as scanned ✅" else "Marked as not scanned ❌",
+                Toast.LENGTH_SHORT).show()
+        }
+
+        dialogBuilder.show()
+    }
+
+    private fun navigateToScanMeter(meter: MeterStatus) {
+        try {
+            val bundle = MeterDetailScanFragment.createBundle(meter)
+            findNavController().navigate(
+                R.id.action_matchFragment_to_meterDetailScanFragment,
+                bundle
+            )
+        } catch (e: Exception) {
+            Log.e("MeterMatchFragment", "Navigation error: ${e.message}")
+            Toast.makeText(context, "Unable to start camera scan", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // Helper method to get current statistics for external use
@@ -541,13 +564,6 @@ class MeterMatchFragment : Fragment() {
     fun getFilteredCount(): Int = currentFilteredList.size
 
     // Debug method - you can call this from anywhere to check current state
-    fun debugCurrentState() {
-        Log.d("MeterMatchFragment", "🔍 DEBUG: MeterMatchFragment State")
-        Log.d("MeterMatchFragment", "   - currentCompleteMeterList: ${currentCompleteMeterList.size}")
-        Log.d("MeterMatchFragment", "   - currentFilteredList: ${currentFilteredList.size}")
-        Log.d("MeterMatchFragment", "   - ViewModel meters: ${viewModel.uiState.value.allMeters.size}")
-        filesViewModel.logCurrentState()
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()

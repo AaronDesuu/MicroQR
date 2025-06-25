@@ -3,7 +3,6 @@ package com.example.microqr.ui.metermatch
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -14,8 +13,7 @@ import com.example.microqr.R
 import com.example.microqr.ui.files.MeterStatus
 
 class MeterMatchAdapter(
-    private val onItemClick: (MeterStatus) -> Unit = {},
-    private val onCheckChanged: (MeterStatus, Boolean) -> Unit = { _, _ -> }
+    private val onItemClick: (MeterStatus) -> Unit = {}
 ) : ListAdapter<MeterStatus, MeterMatchAdapter.MeterViewHolder>(MeterDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MeterViewHolder {
@@ -36,20 +34,15 @@ class MeterMatchAdapter(
         private val statusIndicator: View = itemView.findViewById(R.id.status_indicator)
         private val tvMatchStatus: TextView = itemView.findViewById(R.id.tvMatchStatus)
         private val ivQrStatus: ImageView = itemView.findViewById(R.id.ivQrStatus)
-        private val checkboxIsChecked: CheckBox = itemView.findViewById(R.id.checkboxIsChecked)
+
+        // Meter number badge background (the circular container)
+        private val meterNumberBadge: View = itemView.findViewById(R.id.meter_number_badge)
 
         init {
             itemView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onItemClick(getItem(position))
-                }
-            }
-
-            checkboxIsChecked.setOnCheckedChangeListener { _, isChecked ->
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    onCheckChanged(getItem(position), isChecked)
                 }
             }
         }
@@ -67,22 +60,15 @@ class MeterMatchAdapter(
             // Set source file
             tvSourceFile.text = "From: ${getShortFileName(meter.fromFile)}"
 
-            // Set checkbox state
-            checkboxIsChecked.isChecked = meter.isSelectedForProcessing
-
-            // Determine status based on registered and isChecked
-            val (statusText, statusColor, indicatorColor) = when {
-                meter.isChecked && meter.registered -> {
-                    Triple("Scanned & Registered", R.color.success_green, R.color.success_green)
-                }
-                meter.isChecked && !meter.registered -> {
-                    Triple("Scanned", R.color.purple_700, R.color.purple_700)
-                }
-                !meter.isChecked && meter.registered -> {
-                    Triple("Registered", R.color.warning_orange, R.color.warning_orange)
+            // Determine status and colors based on scan status
+            val (statusText, statusColor, badgeColor, qrIcon) = when {
+                meter.isChecked -> {
+                    // Scanned: Green badge, success status
+                    Tuple4("Scanned ✓", R.color.success_green, R.color.success_green, R.drawable.ic_check_circle)
                 }
                 else -> {
-                    Triple("Pending", R.color.secondary_text_color, R.color.secondary_text_color)
+                    // Pending: Blue badge, pending status
+                    Tuple4("Pending Scan", R.color.primary_color, R.color.primary_color, R.drawable.ic_qr_code_scanner_24)
                 }
             }
 
@@ -90,27 +76,53 @@ class MeterMatchAdapter(
             tvMatchStatus.text = statusText
             tvMatchStatus.setTextColor(ContextCompat.getColor(itemView.context, statusColor))
 
-            // Set status indicator color
-            statusIndicator.backgroundTintList = ContextCompat.getColorStateList(itemView.context, indicatorColor)
+            // Set status indicator color (small dot)
+            statusIndicator.backgroundTintList = ContextCompat.getColorStateList(itemView.context, statusColor)
+
+            // Set meter number badge background color
+            meterNumberBadge.backgroundTintList = ContextCompat.getColorStateList(itemView.context, badgeColor)
 
             // Set QR status icon
+            ivQrStatus.visibility = View.VISIBLE
+            ivQrStatus.setImageResource(qrIcon)
+            ivQrStatus.setColorFilter(ContextCompat.getColor(itemView.context, statusColor))
+
+            // Set meter number text color for better contrast
+            val textColor = when {
+                meter.isChecked -> R.color.white // White text on green background
+                else -> R.color.white // White text on blue background
+            }
+            tvMeterNumber.setTextColor(ContextCompat.getColor(itemView.context, textColor))
+
+            // Enhanced visual styling based on scan status
             if (meter.isChecked) {
-                ivQrStatus.visibility = View.VISIBLE
-                ivQrStatus.setImageResource(R.drawable.ic_qr_code_scanner_24)
-                ivQrStatus.setColorFilter(ContextCompat.getColor(itemView.context, R.color.success_green))
+                // Already scanned - normal styling
+                tvSerialNumber.alpha = 1.0f
+                itemView.alpha = 1.0f
             } else {
-                ivQrStatus.visibility = View.GONE
+                // Not scanned yet - emphasize for action
+                tvSerialNumber.alpha = 1.0f
+                itemView.alpha = 1.0f
             }
 
-            // Set card background based on status
-            val cardBackgroundTint = when {
-                meter.isChecked && meter.registered -> R.color.success_green
-                meter.isChecked -> R.color.purple_200
-                meter.registered -> R.color.warning_orange
-                else -> android.R.color.transparent
+            // Keep card background white - remove any background tinting
+            itemView.backgroundTintList = ContextCompat.getColorStateList(itemView.context, R.color.white)
+
+            // Set card elevation based on status
+            if (itemView is com.google.android.material.card.MaterialCardView) {
+                val elevation = if (!meter.isChecked) 4f else 2f // Slightly higher elevation for pending items
+                (itemView as com.google.android.material.card.MaterialCardView).cardElevation = elevation
             }
 
-            itemView.backgroundTintList = ContextCompat.getColorStateList(itemView.context, cardBackgroundTint)
+            // Add subtle border for pending items
+            if (itemView is com.google.android.material.card.MaterialCardView) {
+                val strokeColor = if (!meter.isChecked) R.color.primary_color else R.color.stroke_color
+                val strokeWidth = if (!meter.isChecked) 2 else 1
+                (itemView as com.google.android.material.card.MaterialCardView).strokeColor =
+                    ContextCompat.getColor(itemView.context, strokeColor)
+                (itemView as com.google.android.material.card.MaterialCardView).strokeWidth =
+                    (strokeWidth * itemView.context.resources.displayMetrics.density).toInt()
+            }
         }
 
         private fun getShortFileName(fileName: String): String {
@@ -132,3 +144,6 @@ class MeterMatchAdapter(
         }
     }
 }
+
+// Helper data class for multiple return values
+private data class Tuple4<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)

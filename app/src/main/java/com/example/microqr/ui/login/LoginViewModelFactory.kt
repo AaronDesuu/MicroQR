@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.microqr.ui.data.LoginRepository
-import com.example.microqr.ui.data.LoginDataSource
+import com.example.microqr.data.repository.LoginRepository
+import com.example.microqr.data.LoginDataSource
 
 class LoginViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")

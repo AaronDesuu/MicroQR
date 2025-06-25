@@ -152,7 +152,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_forward__24"
+                    android:src="@drawable/ic_arrow_forward_24"
                     android:contentDescription="@string/navigate_forward" />
 
             </LinearLayout>
@@ -219,7 +219,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_forward__24"
+                    android:src="@drawable/ic_arrow_forward_24"
                     android:contentDescription="@string/navigate_forward" />
 
             </LinearLayout>
@@ -285,7 +285,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_forward__24"
+                    android:src="@drawable/ic_arrow_forward_24"
                     android:contentDescription="@string/navigate_forward" />
 
             </LinearLayout>

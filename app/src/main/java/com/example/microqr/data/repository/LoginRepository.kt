@@ -1,6 +1,8 @@
-package com.example.microqr.ui.data
+package com.example.microqr.data.repository
 
-import com.example.microqr.ui.data.model.LoggedInUser
+import com.example.microqr.data.LoginDataSource
+import com.example.microqr.data.Result
+import com.example.microqr.data.model.LoggedInUser
 
 /**
  * Class that requests authentication and user information from the data source and

@@ -1,4 +1,4 @@
-package com.example.microqr.ui.data.model
+package com.example.microqr.data.model
 
 /**
  * Data class that captures user information for logged in users retrieved from LoginRepository

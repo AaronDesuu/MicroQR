@@ -1,4 +1,4 @@
-package com.example.microqr.ui.data // Or wherever your Result class is
+package com.example.microqr.data // Or wherever your Result class is
 
 /**
  * A generic class that holds a value with its loading status.

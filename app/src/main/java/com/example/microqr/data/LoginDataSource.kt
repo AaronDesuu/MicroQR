@@ -1,9 +1,9 @@
-package com.example.microqr.ui.data
+package com.example.microqr.data
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import com.example.microqr.ui.data.model.LoggedInUser
+import com.example.microqr.data.model.LoggedInUser
 import kotlinx.coroutines.delay
 import java.io.IOException
 

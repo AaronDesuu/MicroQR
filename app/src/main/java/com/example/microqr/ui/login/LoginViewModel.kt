@@ -3,11 +3,10 @@ package com.example.microqr.ui.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.util.Patterns
 import androidx.lifecycle.viewModelScope
 import com.example.microqr.R
-import com.example.microqr.ui.data.LoginRepository
-import com.example.microqr.ui.data.Result
+import com.example.microqr.data.repository.LoginRepository
+import com.example.microqr.data.Result
 import com.example.microqr.util.Event
 import kotlinx.coroutines.launch
 

@@ -3,7 +3,6 @@ package com.example.microqr.ui.metercheck
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,7 +52,6 @@ class MeterCheckFragment : Fragment() {
         setupRecyclerView()
         setupSearchFunctionality()
         setupClickListeners()
-        Log.d("MeterCheckFragment", "onCreateView completed")
         return view
     }
 
@@ -65,48 +63,20 @@ class MeterCheckFragment : Fragment() {
 
         observeViewModel()
         observeFilesViewModel()
-
-        // DO NOT call loadDataForFragment() here - let observers handle data loading
-
-        Log.d("MeterCheckFragment", "onViewCreated completed - fragment initialized empty")
     }
 
     override fun onResume() {
         super.onResume()
-        // DO NOT refresh data automatically - only show what's in the dedicated LiveData
-        Log.d("MeterCheckFragment", "onResume - checking meterCheckMeters: ${filesViewModel.meterCheckMeters.value?.size ?: 0}")
-    }
-
-    private fun loadDataForFragment() {
-        // Load meters specifically processed for MeterCheck
-        val meterCheckMeters = filesViewModel.getMetersByDestination(ProcessingDestination.METER_CHECK)
-        if (meterCheckMeters.isNotEmpty()) {
-            currentCompleteMeterList = meterCheckMeters
-            viewModel.updateScreenTitle("MeterCheck - ${meterCheckMeters.size} meters")
-            updateStatisticsAndApplyFilter()
-        } else {
-            // Fallback to selected meters if no MeterCheck specific data
-            val selectedMeters = filesViewModel.selectedMetersForProcessing.value
-            if (!selectedMeters.isNullOrEmpty()) {
-                currentCompleteMeterList = selectedMeters
-                viewModel.updateScreenTitle("MeterCheck - ${selectedMeters.size} meters")
-                updateStatisticsAndApplyFilter()
-            } else {
-                // Clear data if no relevant meters
-                clearFragmentData()
-            }
-        }
+        // Don't auto-refresh data - only show what's specifically assigned to MeterCheck
     }
 
     private fun clearFragmentData() {
-        Log.d("MeterCheckFragment", "🧹 Clearing fragment data")
         currentCompleteMeterList = emptyList()
         currentFilteredList = emptyList()
         meterAdapter.submitList(emptyList())
         viewModel.updateStatistics(0, 0, 0)
         viewModel.updateScreenTitle("MeterCheck")
         updateEmptyState(emptyList(), "")
-        Log.d("MeterCheckFragment", "✅ Fragment data cleared - showing empty state")
     }
 
     private fun initializeViews(view: View) {
@@ -151,7 +121,6 @@ class MeterCheckFragment : Fragment() {
 
     private fun setupClickListeners() {
         refreshButton.setOnClickListener {
-            Log.d("MeterCheckFragment", "Refresh button clicked")
             viewModel.clearSearch()
             searchEditText.text?.clear()
 
@@ -195,78 +164,50 @@ class MeterCheckFragment : Fragment() {
     }
 
     private fun observeFilesViewModel() {
-        // Observe selected meters for processing (priority)
-        filesViewModel.selectedMetersForProcessing.observe(viewLifecycleOwner) { selectedMeters ->
-            Log.d("MeterCheckFragment", "Selected meters changed: ${selectedMeters.size}")
-
-            // Only update if this is for MeterCheck or if no destination-specific data exists
-            val meterCheckMeters = filesViewModel.getMetersByDestination(ProcessingDestination.METER_CHECK)
-
+        // ✅ FIXED: ONLY observe meterCheckMeters - this is the ONLY source of data for MeterCheck
+        filesViewModel.meterCheckMeters.observe(viewLifecycleOwner) { meterCheckMeters ->
             if (meterCheckMeters.isNotEmpty()) {
-                // Use MeterCheck specific data
                 currentCompleteMeterList = meterCheckMeters
                 viewModel.updateScreenTitle("MeterCheck - ${meterCheckMeters.size} meters")
-            } else if (selectedMeters.isNotEmpty()) {
-                // Fallback to selected meters
-                currentCompleteMeterList = selectedMeters
-                viewModel.updateScreenTitle("MeterCheck - ${selectedMeters.size} meters")
+                updateStatisticsAndApplyFilter()
+                updateCurrentFilesDisplay()
                 Toast.makeText(
                     context,
-                    "Loaded ${selectedMeters.size} meters for checking",
+                    "Loaded ${meterCheckMeters.size} meters for checking",
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                // Clear data
+                // No MeterCheck specific data, clear display
                 clearFragmentData()
-                return@observe
-            }
-
-            updateStatisticsAndApplyFilter()
-        }
-
-        // Observe all meters to detect changes/deletions
-        filesViewModel.meterStatusList.observe(viewLifecycleOwner) { allMeters ->
-            Log.i("MeterCheckFragment", "All meters changed: ${allMeters?.size ?: 0}")
-
-            // Check if our current data is still valid
-            if (currentCompleteMeterList.isNotEmpty()) {
-                val currentFileNames = currentCompleteMeterList.map { it.fromFile }.distinct()
-                val stillValidMeters = allMeters?.filter { it.fromFile in currentFileNames } ?: emptyList()
-
-                if (stillValidMeters.size != currentCompleteMeterList.size) {
-                    // Some meters were removed, update our data
-                    Log.d("MeterCheckFragment", "Detected meter removal, updating data")
-                    loadDataForFragment()
-                }
-            } else {
-                // Try to load data if we have none
-                loadDataForFragment()
             }
         }
 
-        // Observe file changes to detect deletions
+        // ✅ REMOVED: All other observers that were causing cross-contamination
+        // - selectedMetersForProcessing observer
+        // - meterStatusList observer
+        // - fileItems observer
+        // These were triggering unwanted data loading
+
+        // ✅ ONLY observe file changes for cleanup when files are deleted
         filesViewModel.fileItems.observe(viewLifecycleOwner) { fileItems ->
-            val fileNames = fileItems.filter { it.isValid }.map { it.fileName }
-            updateCurrentFilesDisplay(fileNames)
-
-            // Check if files we depend on were deleted
+            // Only handle file deletions - check if our current files still exist
             if (currentCompleteMeterList.isNotEmpty()) {
                 val currentFileNames = currentCompleteMeterList.map { it.fromFile }.distinct()
+                val existingFileNames = fileItems.filter { it.isValid }.map { it.fileName }
+
                 val filesStillExist = currentFileNames.all { fileName ->
-                    fileNames.contains(fileName)
+                    existingFileNames.contains(fileName)
                 }
 
                 if (!filesStillExist) {
-                    Log.d("MeterCheckFragment", "Source files were deleted, clearing data")
-                    clearFragmentData()
+                    // Some files were deleted, but let meterCheckMeters observer handle the update
+                    // Don't clear data here, let the observer do it
                 }
             }
         }
     }
 
-    private fun updateCurrentFilesDisplay(fileNames: List<String>) {
-        // Temporarily disable this to prevent any side effects
-        // Only show files if we actually have MeterCheck data
+    private fun updateCurrentFilesDisplay() {
         if (currentCompleteMeterList.isNotEmpty()) {
             val relevantFiles = currentCompleteMeterList.map { it.fromFile }.distinct()
             if (relevantFiles.isNotEmpty()) {
@@ -282,19 +223,16 @@ class MeterCheckFragment : Fragment() {
     }
 
     private fun updateStatisticsAndApplyFilter() {
-        Log.d("MeterCheckFragment", "📊 updateStatisticsAndApplyFilter called with ${currentCompleteMeterList.size} meters")
         updateStatistics(currentCompleteMeterList)
         applySearchFilter(viewModel.searchQuery.value ?: "")
     }
 
     private fun updateStatistics(meters: List<MeterStatus>) {
-        Log.d("MeterCheckFragment", "📈 Updating statistics: ${meters.size} total meters")
         val total = meters.size
         val registered = meters.count { it.isChecked }
         val unregistered = total - registered
 
         viewModel.updateStatistics(total, registered, unregistered)
-        Log.d("MeterCheckFragment", "   - Total: $total, Registered: $registered, Unregistered: $unregistered")
     }
 
     private fun applySearchFilter(query: String) {
@@ -309,12 +247,9 @@ class MeterCheckFragment : Fragment() {
             }
         }
 
-        Log.d("MeterCheckFragment", "🔍 Applied search filter '$query': ${currentCompleteMeterList.size} → ${currentFilteredList.size} meters")
         meterAdapter.submitList(currentFilteredList.toList()) // Ensure new list instance
         updateEmptyState(currentFilteredList, query)
-
-        // Update file display based on current data
-        updateCurrentFilesDisplay(emptyList()) // Pass empty to force recalculation
+        updateCurrentFilesDisplay()
     }
 
     private fun updateEmptyState(meters: List<MeterStatus>, searchQuery: String) {
@@ -328,7 +263,7 @@ class MeterCheckFragment : Fragment() {
         if (isEmpty) {
             val emptyTextView = emptyStateLayout.findViewById<TextView>(R.id.empty_state_text)
             emptyTextView?.text = when {
-                !hasAnyMeters -> "No meters available\nProcess CSV files to see meters here"
+                !hasAnyMeters -> "No meters available\nProcess CSV files for MeterCheck to see meters here"
                 hasSearchQuery -> "No meters found\nTry adjusting your search query"
                 else -> "No meter data available"
             }
