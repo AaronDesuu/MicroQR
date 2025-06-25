@@ -268,8 +268,7 @@ class MeterDetailScanFragment : Fragment() {
         shutdownCamera()
 
         // Show success and navigate back
-        Toast.makeText(requireContext(), "✅ Meter verified and marked as scanned!", Toast.LENGTH_LONG).show()
-
+        Toast.makeText(requireContext(), getString(R.string.meter_marked_scanned_toast), Toast.LENGTH_LONG)
         // Delay navigation to allow user to see the success message
         handler.postDelayed({
             if (isAdded && _binding != null) {
@@ -476,30 +475,15 @@ class MeterDetailScanFragment : Fragment() {
             "• ${it.number} (${it.place}) from ${it.fromFile}"
         }
 
-        val message = """
-            ❌ Serial Number Mismatch
-            
-            Expected: $targetSerial
-            Scanned: $scannedSerial
-            
-            However, the scanned serial number matches these other meters:
-            
-            $meterInfo
-            
-            Would you like to mark one of these meters as scanned instead?
-        """.trimIndent()
+        val message = getString(R.string.no_match_dialog_message, targetSerial, scannedSerial)
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Serial Number Mismatch")
-            .setMessage(message)
-            .setPositiveButton("Choose Alternative") { _, _ ->
-                showAlternativeMeterSelection(scannedSerial, matchingMeters)
+            .setTitle(getString(R.string.serial_mismatch))            .setMessage(message)
+            .setPositiveButton(getString(R.string.choose_alternative)) { _, _ ->                showAlternativeMeterSelection(scannedSerial, matchingMeters)
             }
-            .setNegativeButton("Scan Again") { _, _ ->
-                restartScanning()
+            .setNegativeButton(getString(R.string.scan_again_button)) { _, _ ->                restartScanning()
             }
-            .setNeutralButton("Cancel") { _, _ ->
-                findNavController().navigateUp()
+            .setNeutralButton(getString(R.string.cancel)) { _, _ ->                findNavController().navigateUp()
             }
             .setCancelable(false)
             .show()
@@ -511,7 +495,7 @@ class MeterDetailScanFragment : Fragment() {
         }.toTypedArray()
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Select Meter to Mark as Scanned")
+            .setTitle(getString(R.string.select_meter_to_mark))
             .setItems(meterDescriptions) { _, which ->
                 val selectedMeter = matchingMeters[which]
 
@@ -522,11 +506,7 @@ class MeterDetailScanFragment : Fragment() {
                     selectedMeter.fromFile
                 )
 
-                Toast.makeText(
-                    requireContext(),
-                    "✅ Meter ${selectedMeter.number} marked as scanned!",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(requireContext(), getString(R.string.meter_marked_scanned_toast, selectedMeter.number), Toast.LENGTH_LONG)
 
                 // Navigate back
                 handler.postDelayed({
@@ -535,7 +515,7 @@ class MeterDetailScanFragment : Fragment() {
                     }
                 }, 1500)
             }
-            .setNegativeButton("Cancel") { _, _ ->
+            .setNegativeButton(getString(R.string.cancel)) { _, _ ->
                 restartScanning()
             }
             .show()
@@ -544,24 +524,15 @@ class MeterDetailScanFragment : Fragment() {
     private fun showNoMatchDialog(scannedSerial: String) {
         val targetSerial = targetMeter.serialNumber
 
-        val message = """
-            ❌ No Match Found
-            
-            Expected: $targetSerial
-            Scanned: $scannedSerial
-            
-            The scanned QR code doesn't match the expected meter serial number, and no other meters with this serial number were found in the system.
-            
-            Please verify you're scanning the correct meter.
-        """.trimIndent()
+        val message = getString(R.string.no_match_dialog_message, targetSerial, scannedSerial)
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("QR Code Mismatch")
+            .setTitle(getString(R.string.serial_mismatch))
             .setMessage(message)
-            .setPositiveButton("Scan Again") { _, _ ->
+            .setNegativeButton(getString(R.string.scan_again_button)) { _, _ ->
                 restartScanning()
             }
-            .setNegativeButton("Cancel") { _, _ ->
+            .setNegativeButton(getString(R.string.cancel)) { _, _ ->
                 findNavController().navigateUp()
             }
             .setCancelable(false)

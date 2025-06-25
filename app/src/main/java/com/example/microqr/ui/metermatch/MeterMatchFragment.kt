@@ -255,10 +255,10 @@ class MeterMatchFragment : Fragment() {
 
         // Update results summary
         binding.tvResultsSummary.text = when {
-            count == total && total > 0 -> "Showing all $count meters"
-            count < total -> "Showing $count of $total meters"
-            total == 0 -> "No meters loaded"
-            else -> "No results match your filters"
+            count == total && total > 0 -> getString(R.string.showing_all_meters, count)
+            count < total -> getString(R.string.showing_filtered_meters, count, total)
+            total == 0 -> getString(R.string.no_meters_loaded)
+            else -> getString(R.string.no_results_match_filters)
         }
 
         // Update empty state
@@ -268,14 +268,14 @@ class MeterMatchFragment : Fragment() {
 
         if (isEmpty) {
             if (uiState.searchQuery.isNotEmpty() || hasActiveFilters(uiState.filterState)) {
-                binding.tvEmptyTitle.text = "No meters found"
-                binding.tvEmptyMessage.text = "Try adjusting your search or filters"
+                binding.tvEmptyTitle.text = getString(R.string.no_meters_found_search)
+                binding.tvEmptyMessage.text = getString(R.string.try_adjusting_search)
             } else if (currentCompleteMeterList.isEmpty()) {
-                binding.tvEmptyTitle.text = "No meters available"
-                binding.tvEmptyMessage.text = "Process CSV files for MeterMatch to see meters here"
+                binding.tvEmptyTitle.text = getString(R.string.no_meters_available)
+                binding.tvEmptyMessage.text = getString(R.string.process_csv_files_message)
             } else {
-                binding.tvEmptyTitle.text = "All meters filtered out"
-                binding.tvEmptyMessage.text = "Clear filters to see all meters"
+                binding.tvEmptyTitle.text = getString(R.string.all_meters_filtered_out)
+                binding.tvEmptyMessage.text = getString(R.string.clear_filters_to_see_all)
             }
         }
 
@@ -300,15 +300,15 @@ class MeterMatchFragment : Fragment() {
         // Update place filter button
         val placeCount = uiState.filterState.selectedPlaces.size
         binding.btnFilterPlace.text = if (placeCount > 0) {
-            "Place ($placeCount)"
+            getString(R.string.place_filter_count, placeCount)
         } else {
-            "Filter Place"
+            getString(R.string.filter_place)
         }
 
         // Update file filter button
         val fileCount = uiState.filterState.selectedFiles.size
         binding.btnFilterFile.text = if (fileCount > 0) {
-            "File ($fileCount)"
+            getString(R.string.file_filter_count, fileCount)
         } else {
             "Filter File"
         }
@@ -331,13 +331,13 @@ class MeterMatchFragment : Fragment() {
 
         if (isEmpty) {
             if (hasSearchQuery || hasActiveFilters(viewModel.uiState.value.filterState)) {
-                binding.tvEmptyTitle.text = "No meters found"
-                binding.tvEmptyMessage.text = "Try adjusting your search or filters"
+                binding.tvEmptyTitle.text = getString(R.string.no_meters_found_search)
+                binding.tvEmptyMessage.text = getString(R.string.try_adjusting_search)
             } else if (!hasAnyMeters) {
-                binding.tvEmptyTitle.text = "No meters available"
-                binding.tvEmptyMessage.text = "Process CSV files for MeterMatch to see meters here"
+                binding.tvEmptyTitle.text = getString(R.string.no_meters_available)
+                binding.tvEmptyMessage.text = getString(R.string.process_csv_files_message)
             } else {
-                binding.tvEmptyTitle.text = "No meter data available"
+                binding.tvEmptyTitle.text = getString(R.string.no_meters_available)
             }
         }
     }
@@ -438,7 +438,7 @@ class MeterMatchFragment : Fragment() {
         val checkedItems = availablePlaces.map { it in selectedPlaces }.toBooleanArray()
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Filter by Place")
+            .setTitle(getString(R.string.filter_by_place))
             .setMultiChoiceItems(availablePlaces.toTypedArray(), checkedItems) { _, which, _ ->
                 val place = availablePlaces[which]
                 viewModel.togglePlaceFilter(place)
@@ -459,7 +459,7 @@ class MeterMatchFragment : Fragment() {
         val checkedItems = availableFiles.map { it in selectedFiles }.toBooleanArray()
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Filter by Source File")
+            .setTitle(getString(R.string.filter_by_source_file))
             .setMultiChoiceItems(availableFiles.toTypedArray(), checkedItems) { _, which, _ ->
                 val file = availableFiles[which]
                 viewModel.toggleFileFilter(file)
@@ -486,7 +486,7 @@ class MeterMatchFragment : Fragment() {
         val selectedIndex = sortOptions.indexOf(uiState.sortOption)
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Sort by")
+            .setTitle(getString(R.string.sort_by))
             .setSingleChoiceItems(optionNames, selectedIndex) { dialog, which ->
                 viewModel.setSortOption(sortOptions[which])
                 applyCurrentFilters()
@@ -498,20 +498,16 @@ class MeterMatchFragment : Fragment() {
 
     private fun showMeterDetailDialog(meter: MeterStatus) {
         val scanStatusText = if (meter.isChecked) "✅ Scanned & Registered" else "❌ Pending Scan"
-        val message = """
-        📊 Meter Information
-        
-        🔢 Number: ${meter.number}
-        🏷️ Serial: ${meter.serialNumber}
-        📍 Location: ${meter.place}
-        📁 Source: ${meter.fromFile}
-        
-        📋 Status :
-        $scanStatusText
-    """.trimIndent()
+        val message = getString(R.string.meter_information) + "\n\n" +
+                getString(R.string.meter_number_label, meter.number) + "\n" +
+                getString(R.string.meter_serial_label, meter.serialNumber) + "\n" +
+                getString(R.string.meter_location_label, meter.place) + "\n" +
+                getString(R.string.meter_source_label, meter.fromFile) + "\n\n" +
+                getString(R.string.status_summary) + "\n" +
+                getString(R.string.qr_scan_status, scanStatusText)
 
         val dialogBuilder = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Meter Details")
+            .setTitle(getString(R.string.meter_details))
             .setMessage(message)
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
 
@@ -525,11 +521,11 @@ class MeterMatchFragment : Fragment() {
 
         // Option to manually toggle scan status (for testing/correction)
         dialogBuilder.setNegativeButton(
-            if (meter.isChecked) "Mark as Unscanned" else "Mark as Scanned"
+            if (meter.isChecked) getString(R.string.marked_as_not_scanned) else getString(R.string.marked_as_scanned)
         ) { _, _ ->
             filesViewModel.updateMeterCheckedStatus(meter.serialNumber, !meter.isChecked, meter.fromFile)
             Toast.makeText(context,
-                if (!meter.isChecked) "Marked as scanned ✅" else "Marked as not scanned ❌",
+                if (!meter.isChecked) getString(R.string.marked_as_scanned) else getString(R.string.marked_as_not_scanned),
                 Toast.LENGTH_SHORT).show()
         }
 
@@ -545,7 +541,7 @@ class MeterMatchFragment : Fragment() {
             )
         } catch (e: Exception) {
             Log.e("MeterMatchFragment", "Navigation error: ${e.message}")
-            Toast.makeText(context, "Unable to start camera scan", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.unable_start_camera), Toast.LENGTH_SHORT).show()
         }
     }
 
