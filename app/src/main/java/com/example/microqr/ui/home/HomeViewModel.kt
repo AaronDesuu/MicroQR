@@ -1,13 +1,20 @@
 package com.example.microqr.ui.home
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.asLiveData
+import com.example.microqr.R
+import com.example.microqr.data.repository.MeterRepository
+import com.example.microqr.ui.files.ProcessingDestination
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = MeterRepository(application)
+    private val context = application
 
     // Navigation events
     enum class NavigationEvent {
@@ -24,12 +31,23 @@ class HomeViewModel : ViewModel() {
     private val _userGreeting = MutableLiveData<String>()
     val userGreeting: LiveData<String> = _userGreeting
 
-    // Quick stats
+    // Total meters count from repository
     private val _totalMeters = MutableLiveData<Int>()
     val totalMeters: LiveData<Int> = _totalMeters
 
-    private val _recentScans = MutableLiveData<Int>()
-    val recentScans: LiveData<Int> = _recentScans
+    // Match-specific stats (from METER_MATCH destination)
+    private val _matchedMeters = MutableLiveData<Int>()
+    val matchedMeters: LiveData<Int> = _matchedMeters
+
+    private val _unmatchedMeters = MutableLiveData<Int>()
+    val unmatchedMeters: LiveData<Int> = _unmatchedMeters
+
+    // Check-specific stats (from METER_CHECK destination)
+    private val _scannedMeters = MutableLiveData<Int>()
+    val scannedMeters: LiveData<Int> = _scannedMeters
+
+    private val _unscannedMeters = MutableLiveData<Int>()
+    val unscannedMeters: LiveData<Int> = _unscannedMeters
 
     // UI state
     private val _isLoading = MutableLiveData<Boolean>()
@@ -38,12 +56,61 @@ class HomeViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
+    // LiveData from repository for real-time updates
+    val meterCheckMeters = repository.getMetersByDestination(ProcessingDestination.METER_CHECK).asLiveData()
+    val meterMatchMeters = repository.getMetersByDestination(ProcessingDestination.METER_MATCH).asLiveData()
+
     init {
-        // Initialize with default values
-        _userGreeting.value = "Ready to manage your meters?"
+        // Initialize with default values using string resources
+        _userGreeting.value = context.getString(R.string.ready_to_manage_meters)
         _totalMeters.value = 0
-        _recentScans.value = 0
+        _matchedMeters.value = 0
+        _unmatchedMeters.value = 0
+        _scannedMeters.value = 0
+        _unscannedMeters.value = 0
         _isLoading.value = false
+
+        // Observe real-time data changes
+        observeDataChanges()
+    }
+
+    private fun observeDataChanges() {
+        // Observe MeterCheck data changes
+        meterCheckMeters.observeForever { checkMeters ->
+            checkMeters?.let {
+                val scanned = it.count { meter -> meter.isChecked }
+                val unscanned = it.size - scanned
+
+                _scannedMeters.value = scanned
+                _unscannedMeters.value = unscanned
+
+                updateTotalCount()
+            }
+        }
+
+        // Observe MeterMatch data changes
+        meterMatchMeters.observeForever { matchMeters ->
+            matchMeters?.let {
+                val matched = it.count { meter -> meter.isChecked }
+                val unmatched = it.size - matched
+
+                _matchedMeters.value = matched
+                _unmatchedMeters.value = unmatched
+
+                updateTotalCount()
+            }
+        }
+    }
+
+    private fun updateTotalCount() {
+        viewModelScope.launch {
+            try {
+                val total = repository.getTotalMeterCount()
+                _totalMeters.value = total
+            } catch (e: Exception) {
+                _errorMessage.value = context.getString(R.string.failed_to_get_total_count, e.message)
+            }
+        }
     }
 
     fun loadUserData() {
@@ -51,16 +118,12 @@ class HomeViewModel : ViewModel() {
             try {
                 _isLoading.value = true
 
-                // Simulate loading user data
-                // In a real app, you would load from SharedPreferences, database, or API
-                delay(500) // Simulate network delay
-
-                // Get current time-based greeting
+                // Get current time-based greeting using string resources
                 val greeting = getTimeBasedGreeting()
                 _userGreeting.value = greeting
 
             } catch (e: Exception) {
-                _errorMessage.value = "Failed to load user data: ${e.message}"
+                _errorMessage.value = context.getString(R.string.failed_to_load_user_data, e.message)
             } finally {
                 _isLoading.value = false
             }
@@ -70,19 +133,44 @@ class HomeViewModel : ViewModel() {
     fun loadQuickStats() {
         viewModelScope.launch {
             try {
-                // Simulate loading stats from database or shared preferences
-                // In a real app, you would query your database for actual counts
+                _isLoading.value = true
 
-                // For now, we'll simulate some data
-                val totalMetersCount = getTotalMetersFromStorage()
-                val recentScansCount = getRecentScansFromStorage()
-
-                _totalMeters.value = totalMetersCount
-                _recentScans.value = recentScansCount
+                // Load real statistics from repository
+                loadMatchStatsFromRepository()
+                loadCheckStatsFromRepository()
+                updateTotalCount()
 
             } catch (e: Exception) {
-                _errorMessage.value = "Failed to load statistics: ${e.message}"
+                _errorMessage.value = context.getString(R.string.failed_to_load_statistics, e.message)
+            } finally {
+                _isLoading.value = false
             }
+        }
+    }
+
+    private suspend fun loadMatchStatsFromRepository() {
+        try {
+            val matchMeters = repository.getMetersByDestination(ProcessingDestination.METER_MATCH).asLiveData().value ?: emptyList()
+            val matched = matchMeters.count { it.isChecked }
+            val unmatched = matchMeters.size - matched
+
+            _matchedMeters.value = matched
+            _unmatchedMeters.value = unmatched
+        } catch (e: Exception) {
+            _errorMessage.value = context.getString(R.string.failed_to_load_match_statistics, e.message)
+        }
+    }
+
+    private suspend fun loadCheckStatsFromRepository() {
+        try {
+            val checkMeters = repository.getMetersByDestination(ProcessingDestination.METER_CHECK).asLiveData().value ?: emptyList()
+            val scanned = checkMeters.count { it.isChecked }
+            val unscanned = checkMeters.size - scanned
+
+            _scannedMeters.value = scanned
+            _unscannedMeters.value = unscanned
+        } catch (e: Exception) {
+            _errorMessage.value = context.getString(R.string.failed_to_load_check_statistics, e.message)
         }
     }
 
@@ -111,7 +199,7 @@ class HomeViewModel : ViewModel() {
                 _navigationEvent.value = NavigationEvent.NAVIGATE_TO_LOGIN
 
             } catch (e: Exception) {
-                _errorMessage.value = "Logout failed: ${e.message}"
+                _errorMessage.value = context.getString(R.string.logout_failed, e.message)
             } finally {
                 _isLoading.value = false
             }
@@ -122,66 +210,128 @@ class HomeViewModel : ViewModel() {
         _errorMessage.value = null
     }
 
-    // Helper methods
+    // Helper methods using string resources
     private fun getTimeBasedGreeting(): String {
         val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
         return when (hour) {
-            in 5..11 -> "Good morning! Ready to start your day?"
-            in 12..17 -> "Good afternoon! Ready to manage your meters?"
-            in 18..21 -> "Good evening! Let's get some work done."
-            else -> "Working late? Ready to manage your meters?"
+            in 5..11 -> context.getString(R.string.greeting_morning)
+            in 12..17 -> context.getString(R.string.greeting_afternoon)
+            in 18..21 -> context.getString(R.string.greeting_evening)
+            else -> context.getString(R.string.greeting_late)
         }
     }
 
-    private fun getTotalMetersFromStorage(): Int {
-        // In a real app, you would:
-        // 1. Query your database for total meter count
-        // 2. Or read from SharedPreferences
-        // 3. Or call an API
-
-        // For demo purposes, return a simulated count
-        // You can replace this with actual data loading logic
-        return (0..100).random() // Random number for demo
+    private fun performLogout() {
+        // Simulate logout operations
+        Thread.sleep(1000)
     }
 
-    private fun getRecentScansFromStorage(): Int {
-        // In a real app, you would:
-        // 1. Query your database for scans in the last 7 days
-        // 2. Or read from SharedPreferences
-        // 3. Or call an API
-
-        // For demo purposes, return a simulated count
-        // You can replace this with actual data loading logic
-        return (0..20).random() // Random number for demo
+    /**
+     * Refresh stats when user returns to home screen
+     */
+    fun refreshStats() {
+        loadQuickStats()
     }
 
-    private suspend fun performLogout() {
-        // Simulate logout delay
-        delay(1000)
-
-        // In a real app, you would:
-        // 1. Clear user session data
-        // 2. Clear SharedPreferences
-        // 3. Clear any cached data
-        // 4. Revoke authentication tokens
-        // 5. Clear database if needed
-
-        // Example logout operations:
-        // clearUserSession()
-        // clearSharedPreferences()
-        // clearAuthTokens()
+    /**
+     * Force refresh data from repository
+     */
+    fun forceRefreshData() {
+        viewModelScope.launch {
+            try {
+                updateTotalCount()
+            } catch (e: Exception) {
+                _errorMessage.value = context.getString(R.string.failed_to_refresh_statistics, e.message)
+            }
+        }
     }
 
-    // These methods would be implemented based on your data storage strategy
-    private fun clearUserSession() {
-        // Clear user session data
+    /**
+     * Get detailed statistics for debugging or analytics
+     */
+    fun getDetailedStats(): DetailedStats {
+        return DetailedStats(
+            totalMeters = _totalMeters.value ?: 0,
+            matchedMeters = _matchedMeters.value ?: 0,
+            unmatchedMeters = _unmatchedMeters.value ?: 0,
+            scannedMeters = _scannedMeters.value ?: 0,
+            unscannedMeters = _unscannedMeters.value ?: 0
+        )
     }
 
-    private fun clearSharedPreferences() {
-        // Clear stored preferences
+    /**
+     * Handle deep link navigation
+     */
+    fun handleDeepLink(destination: String) {
+        when (destination.lowercase()) {
+            "match", "meter_match" -> onMatchMeterClicked()
+            "check", "meter_check" -> onMeterCheckClicked()
+            "upload", "file_upload" -> onFileUploadClicked()
+            else -> {
+                _errorMessage.value = context.getString(R.string.unknown_destination, destination)
+            }
+        }
     }
 
-    private fun clearAuthTokens() {
-        // Clear authentication tokens
+    /**
+     * Get summary text for current stats using string resources
+     */
+    fun getStatsSummary(): String {
+        val total = _totalMeters.value ?: 0
+        val matched = _matchedMeters.value ?: 0
+        val scanned = _scannedMeters.value ?: 0
+
+        return context.getString(R.string.stats_summary, total, matched, scanned)
+    }
+
+    /**
+     * Check if there's any work pending
+     */
+    fun hasPendingWork(): Boolean {
+        val unmatchedCount = _unmatchedMeters.value ?: 0
+        val unscannedCount = _unscannedMeters.value ?: 0
+        return unmatchedCount > 0 || unscannedCount > 0
+    }
+
+    /**
+     * Get work priority suggestion using string resources
+     */
+    fun getWorkPrioritySuggestion(): String? {
+        val unmatched = _unmatchedMeters.value ?: 0
+        val unscanned = _unscannedMeters.value ?: 0
+
+        return when {
+            unmatched > unscanned && unmatched > 0 ->
+                context.getString(R.string.pending_match_suggestion, unmatched)
+            unscanned > unmatched && unscanned > 0 ->
+                context.getString(R.string.pending_scan_suggestion, unscanned)
+            unmatched > 0 && unscanned > 0 ->
+                context.getString(R.string.pending_both_suggestion, unmatched, unscanned)
+            else -> null
+        }
+    }
+
+    // Data classes for statistics
+    data class DetailedStats(
+        val totalMeters: Int,
+        val matchedMeters: Int,
+        val unmatchedMeters: Int,
+        val scannedMeters: Int,
+        val unscannedMeters: Int
+    ) {
+        val matchTotal: Int get() = matchedMeters + unmatchedMeters
+        val checkTotal: Int get() = scannedMeters + unscannedMeters
+        val matchPercentage: Float get() = if (matchTotal > 0) (matchedMeters.toFloat() / matchTotal * 100) else 0f
+        val scanPercentage: Float get() = if (checkTotal > 0) (scannedMeters.toFloat() / checkTotal * 100) else 0f
+    }
+
+    /**
+     * Clean up resources when ViewModel is cleared
+     */
+    override fun onCleared() {
+        super.onCleared()
+        // Remove observers to prevent memory leaks
+        meterCheckMeters.removeObserver { }
+        meterMatchMeters.removeObserver { }
     }
 }

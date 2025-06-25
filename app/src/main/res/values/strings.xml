@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">MicroQR</string>
     <string name="title_home">Home</string>
@@ -109,7 +110,7 @@
     <string name="title_all_meters_dashboard" translatable="false">All Meter Dashboard</string>
     <string name="prompt_user" translatable="false">Username</string>
 
-    <!-- NEW: Meter Scanning Feature -->
+    <!-- Meter Scanning Feature -->
     <string name="scan_meter">Scan Meter</string>
     <string name="target_meter_info">Target Meter Information</string>
     <string name="scan_meter_qr">Scan the QR code on the target meter</string>
@@ -117,7 +118,7 @@
     <string name="scanning_meter">Scanning for meter: %s</string>
     <string name="meter_verified">Meter verified and marked as scanned!</string>
 
-    <!-- NEW: Match Results -->
+    <!-- Match Results -->
     <string name="perfect_match">Perfect Match!</string>
     <string name="serial_mismatch">Serial Number Mismatch</string>
     <string name="no_match_found">No Match Found</string>
@@ -125,7 +126,7 @@
     <string name="qr_code_mismatch">QR Code Mismatch</string>
     <string name="select_meter_to_mark">Select Meter to Mark as Scanned</string>
 
-    <!-- NEW: Status messages -->
+    <!-- Status messages -->
     <string name="expected_serial">Expected: %s</string>
     <string name="scanned_serial">Scanned: %s</string>
     <string name="meter_marked_scanned">Meter %s marked as scanned!</string>
@@ -133,8 +134,91 @@
     <string name="alternative_matches_found">However, the scanned serial number matches these other meters:</string>
     <string name="no_other_matches">The scanned QR code doesn\'t match the expected meter serial number, and no other meters with this serial number were found in the system.</string>
 
-    <!-- NEW: Actions -->
+    <!-- Actions -->
     <string name="toggle_scan_status">Toggle Scan Status</string>
     <string name="unable_start_camera">Unable to start camera scan</string>
     <string name="pending_scan">Pending Scan</string>
+
+    <!-- NEW: Home Fragment Hardcoded Strings -->
+    <string name="welcome_back_home">Welcome Back!</string>
+    <string name="ready_to_manage_meters">Ready to manage your meters?</string>
+    <string name="qr_meter_management_system">QR Meter Management System</string>
+    <string name="qr_management_description">• Match meters with existing data records\n• Scan QR codes to register new meters\n• Manage meter locations and assignments\n• Export and upload meter data files</string>
+    <string name="match_meter">Match Meter</string>
+    <string name="meter_check">Meter Check</string>
+    <string name="file_upload">File Upload</string>
+    <string name="match_meter_description">Match new meters with existing records</string>
+    <string name="meter_check_description">Check and scan QR codes on meters</string>
+    <string name="file_upload_description">Upload and manage meter data files</string>
+    <string name="logout">Logout</string>
+    <string name="quick_statistics">Quick Statistics</string>
+    <string name="match_meters">Match Meters</string>
+    <string name="check_meters">Check Meters</string>
+    <string name="matched">matched</string>
+    <string name="pending">pending</string>
+    <string name="scanned">scanned</string>
+    <string name="total_meters_label">Total Meters: </string>
+
+    <!-- NEW: Time-based Greetings -->
+    <string name="greeting_morning">Good morning! Ready to start your day?</string>
+    <string name="greeting_afternoon">Good afternoon! Ready to manage your meters?</string>
+    <string name="greeting_evening">Good evening! Let\'s get some work done.</string>
+    <string name="greeting_late">Working late? Ready to manage your meters?</string>
+
+    <!-- NEW: Error Messages -->
+    <string name="failed_to_load_user_data">Failed to load user data: %s</string>
+    <string name="failed_to_load_statistics">Failed to load statistics: %s</string>
+    <string name="failed_to_load_match_statistics">Failed to load match statistics: %s</string>
+    <string name="failed_to_load_check_statistics">Failed to load check statistics: %s</string>
+    <string name="logout_failed">Logout failed: %s</string>
+    <string name="failed_to_get_total_count">Failed to get total count: %s</string>
+    <string name="failed_to_refresh_statistics">Failed to refresh statistics: %s</string>
+    <string name="unknown_destination">Unknown destination: %s</string>
+
+    <!-- NEW: Toast Messages -->
+    <string name="meter_scanned_successfully">✅ Meter scanned successfully!\nSerial: %1$s\nFile: %2$s</string>
+    <string name="meter_not_found_toast">\'%s\' NOT FOUND in any loaded meter list.</string>
+    <string name="meter_marked_checked_toast">\'%1$s\' (from %2$s) is now marked as CHECKED!</string>
+    <string name="meter_already_checked_toast">\'%1$s\' (from %2$s) was ALREADY CHECKED.</string>
+    <string name="meter_status_updated_toast">\'%s\' status updated (file not specified).</string>
+    <string name="loaded_meters_for_checking">Loaded %d meters for checking</string>
+    <string name="loaded_meters_for_matching">Loaded %d meters for matching</string>
+
+    <!-- NEW: Dialog Messages -->
+    <string name="meter_not_found_dialog_title">Meter Not Found</string>
+    <string name="meter_not_found_dialog_message">Serial number \'%s\' was not found in the loaded meter data.\n\nThis could mean:\n• The meter is from a different batch\n• The serial number was misread\n• The meter data hasn\'t been loaded</string>
+    <string name="show_all_meters">Show All Meters</string>
+    <string name="ok">OK</string>
+
+    <!-- NEW: Empty State Messages -->
+    <string name="no_meters_found_search">No meters found\nTry adjusting your search query</string>
+    <string name="no_meter_data_available">No meter data available</string>
+    <string name="no_metercheck_data_loaded">No MeterCheck data loaded</string>
+    <string name="metercheck_data_from">MeterCheck data from: %s</string>
+
+    <!-- NEW: Work Priority Messages -->
+    <string name="pending_match_suggestion">You have %d meters pending match. Consider processing them first.</string>
+    <string name="pending_scan_suggestion">You have %d meters pending scan. Consider checking them first.</string>
+    <string name="pending_both_suggestion">You have both matching (%1$d) and scanning (%2$d) work pending.</string>
+
+    <!-- NEW: Stats Summary -->
+    <string name="stats_summary">Total: %1$d meters. Matched: %2$d, Scanned: %3$d</string>
+
+    <!-- NEW: Fragment Display Names -->
+    <string name="metercheck_title_with_count">MeterCheck - %d meters</string>
+    <string name="metermatch_title_with_count">MeterMatch - %d meters</string>
+
+    <!-- NEW: Status Display Texts -->
+    <string name="status_not_found">NOT FOUND</string>
+    <string name="status_verified_checked">VERIFIED CHECKED (from %s)</string>
+    <string name="status_verified_already_checked">VERIFIED ALREADY CHECKED (from %s)</string>
+    <string name="status_checked_file_not_specified">CHECKED (file not specified)</string>
+
+<!--    Home part -->
+    <string name="qr_management_icon">Manage</string>
+    <string name="match_meters_with_existing_data_records_n_scan_qr_codes_to_register_new_meters_n_manage_meter_locations_and_assignments_n_export_and_upload_meter_data_files">• Match meters with existing data records\n• Scan QR codes to register new meters\n• Manage meter locations and assignments\n• Export and upload meter data files</string>
+    <string name="match_new_meters_with_existing_records">Match new meters with existing records</string>
+    <string name="ready_to_manage_your_meters">Ready to manage your meters?</string>
+    <string name="check_and_scan_qr_codes_on_meters">Check and scan QR codes on meters</string>
+    <string name="upload_and_manage_meter_data_files">Upload and manage meter data files</string>
 </resources>

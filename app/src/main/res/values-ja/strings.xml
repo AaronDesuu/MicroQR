@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- app_name is translatable="false", so no translation needed here -->
+    <!-- app_name は translatable="false" なので翻訳不要 -->
     <string name="title_home">ホーム</string>
     <string name="title_dashboard">ダッシュボード</string>
     <string name="title_notifications">通知</string>
@@ -104,7 +105,7 @@
     <string name="guest_placeholder">ゲスト</string>
     <string name="no_files_loaded">ファイルが読み込まれていません。</string>
 
-    <!-- 新機能: メータースキャン機能 -->
+    <!-- メータースキャン機能 -->
     <string name="scan_meter">メーターをスキャン</string>
     <string name="target_meter_info">対象メーター情報</string>
     <string name="scan_meter_qr">対象メーターのQRコードをスキャンしてください</string>
@@ -112,7 +113,7 @@
     <string name="scanning_meter">メーターをスキャン中: %s</string>
     <string name="meter_verified">メーターが確認され、スキャン済みとしてマークされました！</string>
 
-    <!-- 新機能: マッチング結果 -->
+    <!-- マッチング結果 -->
     <string name="perfect_match">完全一致！</string>
     <string name="serial_mismatch">シリアル番号不一致</string>
     <string name="no_match_found">一致が見つかりません</string>
@@ -120,7 +121,7 @@
     <string name="qr_code_mismatch">QRコード不一致</string>
     <string name="select_meter_to_mark">スキャン済みとしてマークするメーターを選択</string>
 
-    <!-- 新機能: ステータスメッセージ -->
+    <!-- ステータスメッセージ -->
     <string name="expected_serial">期待値: %s</string>
     <string name="scanned_serial">スキャン値: %s</string>
     <string name="meter_marked_scanned">メーター %s がスキャン済みとしてマークされました！</string>
@@ -128,8 +129,91 @@
     <string name="alternative_matches_found">ただし、スキャンされたシリアル番号は以下の他のメーターと一致します:</string>
     <string name="no_other_matches">スキャンされたQRコードは期待されるメーターのシリアル番号と一致せず、このシリアル番号を持つ他のメーターもシステムで見つかりませんでした。</string>
 
-    <!-- 新機能: アクション -->
+    <!-- アクション -->
     <string name="toggle_scan_status">スキャンステータス切り替え</string>
     <string name="unable_start_camera">カメラスキャンを開始できません</string>
     <string name="pending_scan">スキャン待機中</string>
+
+    <!-- ホームフラグメントのハードコードされた文字列 -->
+    <string name="welcome_back_home">おかえりなさい！</string>
+    <string name="ready_to_manage_meters">メーターの管理を開始しますか？</string>
+    <string name="qr_meter_management_system">QRメーター管理システム</string>
+    <string name="qr_management_description">• 既存データレコードとメーターをマッチング\n• QRコードをスキャンして新しいメーターを登録\n• メーターの場所と割り当てを管理\n• メーターデータファイルのエクスポートとアップロード</string>
+    <string name="match_meter">メーターマッチ</string>
+    <string name="meter_check">メーター確認</string>
+    <string name="file_upload">ファイルアップロード</string>
+    <string name="match_meter_description">新しいメーターを既存レコードとマッチング</string>
+    <string name="meter_check_description">メーターのQRコードを確認してスキャン</string>
+    <string name="file_upload_description">メーターデータファイルをアップロードして管理</string>
+    <string name="logout">ログアウト</string>
+    <string name="quick_statistics">クイック統計</string>
+    <string name="match_meters">マッチメーター</string>
+    <string name="check_meters">チェックメーター</string>
+    <string name="matched">マッチ済み</string>
+    <string name="pending">保留中</string>
+    <string name="scanned">スキャン済み</string>
+    <string name="total_meters_label">総メーター数: </string>
+
+    <!-- 時間ベースの挨拶 -->
+    <string name="greeting_morning">おはようございます！今日も頑張りましょう！</string>
+    <string name="greeting_afternoon">こんにちは！メーターの管理を始めますか？</string>
+    <string name="greeting_evening">こんばんは！作業を進めましょう。</string>
+    <string name="greeting_late">遅くまでお疲れ様です！メーターの管理を始めますか？</string>
+
+    <!-- エラーメッセージ -->
+    <string name="failed_to_load_user_data">ユーザーデータの読み込みに失敗しました: %s</string>
+    <string name="failed_to_load_statistics">統計の読み込みに失敗しました: %s</string>
+    <string name="failed_to_load_match_statistics">マッチ統計の読み込みに失敗しました: %s</string>
+    <string name="failed_to_load_check_statistics">チェック統計の読み込みに失敗しました: %s</string>
+    <string name="logout_failed">ログアウトに失敗しました: %s</string>
+    <string name="failed_to_get_total_count">総数の取得に失敗しました: %s</string>
+    <string name="failed_to_refresh_statistics">統計の更新に失敗しました: %s</string>
+    <string name="unknown_destination">不明な宛先: %s</string>
+
+    <!-- トーストメッセージ -->
+    <string name="meter_scanned_successfully">✅ メーターのスキャンが成功しました！\nシリアル: %1$s\nファイル: %2$s</string>
+    <string name="meter_not_found_toast">\'%s\' は読み込まれたメーターリストに見つかりません。</string>
+    <string name="meter_marked_checked_toast">\'%1$s\' (ファイル %2$s) がチェック済みとしてマークされました！</string>
+    <string name="meter_already_checked_toast">\'%1$s\' (ファイル %2$s) は既にチェック済みでした。</string>
+    <string name="meter_status_updated_toast">\'%s\' のステータスが更新されました（ファイル未指定）。</string>
+    <string name="loaded_meters_for_checking">チェック用に %d 個のメーターを読み込みました</string>
+    <string name="loaded_meters_for_matching">マッチング用に %d 個のメーターを読み込みました</string>
+
+    <!-- ダイアログメッセージ -->
+    <string name="meter_not_found_dialog_title">メーターが見つかりません</string>
+    <string name="meter_not_found_dialog_message">シリアル番号 \'%s\' は読み込まれたメーターデータに見つかりませんでした。\n\n考えられる原因:\n• メーターが別のバッチからのもの\n• シリアル番号が誤読された\n• メーターデータが読み込まれていない</string>
+    <string name="show_all_meters">すべてのメーターを表示</string>
+    <string name="ok">OK</string>
+
+    <!-- 空状態メッセージ -->
+    <string name="no_meters_found_search">メーターが見つかりません\n検索条件を調整してください</string>
+    <string name="no_meter_data_available">利用可能なメーターデータがありません</string>
+    <string name="no_metercheck_data_loaded">MeterCheckデータが読み込まれていません</string>
+    <string name="metercheck_data_from">MeterCheckデータの元: %s</string>
+
+    <!-- 作業優先度メッセージ -->
+    <string name="pending_match_suggestion">%d 個のメーターのマッチングが保留中です。最初に処理することを検討してください。</string>
+    <string name="pending_scan_suggestion">%d 個のメーターのスキャンが保留中です。最初にチェックすることを検討してください。</string>
+    <string name="pending_both_suggestion">マッチング (%1$d) とスキャン (%2$d) の両方の作業が保留中です。</string>
+
+    <!-- 統計サマリー -->
+    <string name="stats_summary">合計: %1$d メーター。マッチ済み: %2$d、スキャン済み: %3$d</string>
+
+    <!-- フラグメント表示名 -->
+    <string name="metercheck_title_with_count">MeterCheck - %d メーター</string>
+    <string name="metermatch_title_with_count">MeterMatch - %d メーター</string>
+
+    <!-- ステータス表示テキスト -->
+    <string name="status_not_found">見つかりません</string>
+    <string name="status_verified_checked">確認済みチェック完了 (ファイル %s)</string>
+    <string name="status_verified_already_checked">確認済み既にチェック完了 (ファイル %s)</string>
+    <string name="status_checked_file_not_specified">チェック完了 (ファイル未指定)</string>
+
+    <string name="qr_management_icon">管理</string>
+    <string name="match_meters_with_existing_data_records_n_scan_qr_codes_to_register_new_meters_n_manage_meter_locations_and_assignments_n_export_and_upload_meter_data_files">既存のデータ記録とメーターを照合\n• 新しいメーターを登録するためにQRコードをスキャン\n• メーターの場所と割り当てを管理\n• メーターデータファイルのエクスポートとアップロード</string>
+    <string name="match_new_meters_with_existing_records">新しいメーターを既存の記録と照合します</string>
+    <string name="ready_to_manage_your_meters">メーターを管理する準備はできましたか？</string>
+    <string name="check_and_scan_qr_codes_on_meters">メーターのQRコードを確認してスキャンします</string>
+    <string name="upload_and_manage_meter_data_files">メーターデータファイルのアップロードと管理</string>
+
 </resources>

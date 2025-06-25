@@ -5,28 +5,32 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageButton // Added
-import android.widget.LinearLayout
-import android.widget.TextView
+// import android.widget.Button // No longer needed directly if using MaterialButton from XML
+// import android.widget.ImageButton // No longer needed directly if using ImageButton from XML
+// import android.widget.LinearLayout // No longer needed directly
+// import android.widget.TextView // No longer needed directly
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
+// import androidx.navigation.fragment.findNavController // Not used in this snippet
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+// import androidx.recyclerview.widget.RecyclerView // No longer needed directly
 import com.example.microqr.R
-import com.example.microqr.databinding.FragmentFilesBinding // Import ViewBinding
+import com.example.microqr.databinding.FragmentFilesBinding
+import androidx.core.view.isVisible
+import androidx.transition.TransitionManager // Import for animations
+import androidx.transition.Fade // Import for Fade transition
+import androidx.transition.ChangeBounds // Import for ChangeBounds transition
+import android.view.animation.AccelerateDecelerateInterpolator // For smoother animation timing
 
 class FilesFragment : Fragment() {
 
     private val filesViewModel: FilesViewModel by activityViewModels()
     private lateinit var filePickerLauncher: ActivityResultLauncher<Array<String>>
 
-    // ViewBinding
     private var _binding: FragmentFilesBinding? = null
     private val binding get() = _binding!!
 
@@ -56,10 +60,9 @@ class FilesFragment : Fragment() {
         }
 
         setupRecyclerView()
-        setupInstructionsToggle() // Call the new setup method
-        setInstructionsText() // Set the actual instruction text
+        setupInstructionsToggle()
+        setInstructionsText()
 
-        // Observe toast messages
         filesViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
             if (message.isNotEmpty()) {
                 Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
@@ -67,23 +70,16 @@ class FilesFragment : Fragment() {
             }
         }
 
-        // Observe file items
         filesViewModel.fileItems.observe(viewLifecycleOwner) { fileItems ->
             (binding.recyclerViewUploadedFiles.adapter as FilesAdapter).submitList(fileItems)
-            if (fileItems.isNullOrEmpty()) {
-                binding.textViewNoFiles.visibility = View.VISIBLE
-                binding.recyclerViewUploadedFiles.visibility = View.GONE
-                binding.textViewUploadedFilesTitle.visibility = View.GONE
-            } else {
-                binding.textViewNoFiles.visibility = View.GONE
-                binding.recyclerViewUploadedFiles.visibility = View.VISIBLE
-                binding.textViewUploadedFilesTitle.visibility = View.VISIBLE
-            }
+            binding.textViewNoFiles.isVisible = fileItems.isNullOrEmpty()
+            binding.recyclerViewUploadedFiles.isVisible = !fileItems.isNullOrEmpty()
+            binding.textViewUploadedFilesTitle.isVisible = !fileItems.isNullOrEmpty()
         }
     }
 
     private fun setupRecyclerView() {
-        val filesAdapter = FilesAdapter( // filesAdapter is local now, accessed via binding.recyclerViewUploadedFiles.adapter
+        val filesAdapter = FilesAdapter(
             onDeleteClicked = { fileName ->
                 showDeleteConfirmationDialog(fileName)
             },
@@ -111,18 +107,32 @@ class FilesFragment : Fragment() {
     }
 
     private fun setupInstructionsToggle() {
-        binding.buttonToggleInstructions.setOnClickListener {
-            if (binding.textViewInstructions.visibility == View.VISIBLE) {
-                binding.textViewInstructions.visibility = View.GONE
-                binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_down) // Ensure you have this drawable
-            } else {
-                binding.textViewInstructions.visibility = View.VISIBLE
-                binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_up) // Ensure you have this drawable
-            }
-        }
-        // Ensure initial state is collapsed
+        // Ensure initial state is collapsed without animation
         binding.textViewInstructions.visibility = View.GONE
         binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_down)
+
+        binding.buttonToggleInstructions.setOnClickListener {
+            // Define the scene root for the transition. This is usually the parent layout
+            // that contains the views being animated.
+            val sceneRoot = binding.root.parent as? ViewGroup ?: binding.root as ViewGroup
+
+            // Create a transition set for a smoother effect
+            val transition = androidx.transition.TransitionSet()
+                .addTransition(Fade()) // For fading in/out
+                .addTransition(ChangeBounds()) // For animating layout changes (size, position)
+                .setInterpolator(AccelerateDecelerateInterpolator()) // Smoother timing
+                .setDuration(300) // Animation duration in milliseconds
+
+            TransitionManager.beginDelayedTransition(sceneRoot, transition)
+
+            if (binding.textViewInstructions.isVisible) {
+                binding.textViewInstructions.visibility = View.GONE
+                binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_down)
+            } else {
+                binding.textViewInstructions.visibility = View.VISIBLE
+                binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_up)
+            }
+        }
     }
 
     private fun setInstructionsText() {
@@ -149,7 +159,6 @@ class FilesFragment : Fragment() {
     }
 
     private fun showDestinationSelectionDialog(uri: Uri) {
-        // Assuming DialogHelper is correctly implemented
         DialogHelper.showDestinationDialog(
             context = requireContext(),
             onMeterCheck = {
@@ -191,10 +200,10 @@ class FilesFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // Important for ViewBinding to avoid memory leaks
+        _binding = null
     }
 
     companion object {
-        fun newInstance() = FilesFragment() // This is fine if you don't pass arguments
+        fun newInstance() = FilesFragment()
     }
 }
