@@ -1,0 +1,1 @@
+Now, when you call loginViewModel.login("test@example.com", "password"), the flow will be: LoginFragment -> LoginViewModel -> LoginRepository -> LoginDataSource (returns mock Result.Success) -> LoginRepository (caches mock user) -> LoginViewModel (updates _loginResult and _navigateToHomeEvent) -> LoginFragment (updates UI and navigates).

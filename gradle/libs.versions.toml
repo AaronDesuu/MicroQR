@@ -1,0 +1,89 @@
+[versions]
+activityCompose = "1.10.1"
+agp = "8.11.0-rc02"
+barcodeScanning = "17.3.0"
+boofcvAndroid = "1.2.2"
+boofcvAndroidVersion = "0.43.1"
+boofcvCore = "1.2.2"
+boofcvRecognition = "1.2.2"
+cameraXVersion = "1.4.2"
+core = "3.5.3"
+guava = "33.4.8-android"
+kotlin = "2.0.21"
+coreKtx = "1.16.0"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+appcompat = "1.7.1"
+lifecycleViewmodelCompose = "2.9.1"
+material = "1.12.0"
+constraintlayout = "2.2.1"
+lifecycleLivedataKtx = "2.9.1"
+lifecycleViewmodelKtx = "2.9.1"
+navigationCompose = "2.9.0"
+navigationFragmentKtx = "2.9.0"
+navigationUiKtx = "2.9.0"
+annotation = "1.9.1"
+legacySupportV4 = "1.0.0"
+fragmentKtx = "1.5.6"
+composeCompiler = "1.5.8"
+toolsCore = "1.0.0-alpha13"
+firebaseCrashlyticsBuildtools = "3.0.4"
+zbarscannerlibrary = "X.Y.Z"
+zxingAndroidEmbedded = "4.3.0"
+runtime = "1.0.0-alpha04"
+cameraMlkitVision = "1.4.2"
+preference = "1.2.0"
+preferenceKtx = "1.2.1"
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraXVersion" }
+androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraXVersion" }
+androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "cameraXVersion" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraXVersion" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraXVersion" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-material3 = { module = "androidx.compose.material3:material3" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-ui = { module = "androidx.compose.ui:ui" }
+androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
+boofcv-android = { module = "org.boofcv:boofcv-android", version.ref = "boofcvAndroid" }
+boofcv-android-v0431 = { module = "org.boofcv:boofcv-android", version.ref = "boofcvAndroidVersion" }
+boofcv-core = { module = "org.boofcv:boofcv-core", version.ref = "boofcvCore" }
+boofcv-recognition = { module = "org.boofcv:boofcv-recognition", version.ref = "boofcvRecognition" }
+core = { module = "com.google.zxing:core", version.ref = "core" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
+androidx-legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
+androidx-tools-core = { group = "androidx.privacysandbox.tools", name = "tools-core", version.ref = "toolsCore" }
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+zbarscannerlibrary = { module = "com.github.dm77:ZBarScannerLibrary", version.ref = "zbarscannerlibrary" }
+zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
+androidx-runtime = { group = "androidx.xr.runtime", name = "runtime", version.ref = "runtime" }
+androidx-camera-mlkit-vision = { group = "androidx.camera", name = "camera-mlkit-vision", version.ref = "cameraMlkitVision" }
+androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
+androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

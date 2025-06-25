@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Legacy Colors -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Material Design 3 Theme Colors -->
+    <color name="md_theme_light_primary">#6750A4</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#EADDFF</color>
+    <color name="md_theme_light_onPrimaryContainer">#21005D</color>
+    <color name="md_theme_light_surface">#FFFBFE</color>
+    <color name="md_theme_light_onSurface">#1C1B1F</color>
+    <color name="md_theme_light_surfaceVariant">#E7E0EC</color>
+    <color name="md_theme_light_onSurfaceVariant">#49454F</color>
+
+    <!-- Login Page Colors -->
+    <color name="primary_color">#2196F3</color>
+    <color name="primary_color_dark">#1976D2</color>
+    <color name="primary_color_light">#BBDEFB</color>
+    <color name="primary_text_color">#212121</color>
+    <color name="secondary_text_color">#757575</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="loading_overlay_background">#80000000</color>
+
+    <!-- Status Colors -->
+    <color name="error_red">#F44336</color>
+    <color name="success_green">#4CAF50</color>
+    <color name="warning_orange">#FF9800</color>
+
+    <!-- Background Colors -->
+    <color name="background_light">#FAFAFA</color>
+    <color name="stroke_color">#E0E0E0</color>
+
+    <!-- File Manager UI Colors (using your existing color scheme) -->
+    <color name="primary">@color/primary_color</color>
+    <color name="primary_container">@color/primary_color_light</color>
+    <color name="on_primary_container">@color/primary_color_dark</color>
+    <color name="surface">@color/card_background</color>
+    <color name="text_primary">@color/primary_text_color</color>
+    <color name="text_secondary">@color/secondary_text_color</color>
+    <color name="stroke_light">@color/stroke_color</color>
+    <color name="error">@color/error_red</color>
+
+    <!-- Additional File Manager Colors -->
+    <color name="surface_elevated">#FFFFFF</color>
+    <color name="surface_tint">#F5F5F5</color>
+    <color name="outline">#BDBDBD</color>
+    <color name="outline_variant">#E0E0E0</color>
+
+    <!-- File Type Colors -->
+    <color name="file_csv_background">#E8F5E8</color>
+    <color name="file_csv_icon">#2E7D32</color>
+
+    <!-- Interactive States -->
+    <color name="ripple_color">#1F000000</color>
+    <color name="pressed_overlay">#0F000000</color>
+    <color name="hover_overlay">#08000000</color>
+
+    <!-- Shadow Colors -->
+    <color name="shadow_light">#0D000000</color>
+    <color name="shadow_medium">#1A000000</color>
+
+    <color name="scan_overlay">#99000000</color>
+    <color name="scan_frame_color">#00FF41</color>
+</resources>

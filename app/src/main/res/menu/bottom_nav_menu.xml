@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/title_home" />
+
+    <item
+        android:id="@+id/matchFragment"
+        android:icon="@drawable/ic_match_24"
+        android:title="@string/title_match" />
+
+    <item
+        android:id="@+id/readerFragment"
+        android:icon="@drawable/ic_qr_code_scanner_24"
+        android:title="@string/title_reader" />
+
+    <item
+        android:id="@+id/navigation_metercheck"
+        android:icon="@drawable/ic_checklist_24"
+        android:title="@string/title_metercheck" />
+
+    <item
+        android:id="@+id/navigation_files"
+        android:icon="@drawable/ic_upload_file_24"
+        android:title="@string/title_upload" />
+
+<!--    <item-->
+<!--        android:id="@+id/readerFragment"-->
+<!--    android:icon="@drawable/ic_qr_code_scanner_24"-->
+<!--    android:title="@string/title_reader" />-->
+
+<!--    <item-->
+<!--        android:id="@+id/navigation_profile"-->
+<!--        android:icon="@drawable/ic_profile_24"-->
+<!--    android:title="@string/title_profile" />-->
+<!--    <item-->
+<!--        android:id="@+id/navigation_settings"-->
+<!--        android:icon="@drawable/ic_settings_24"-->
+<!--        android:title="@string/title_settings" />-->
+
+</menu>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/stroke_color"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Meter Number Badge -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="@color/primary_container"
+            app:cardElevation="0dp">
+
+            <TextView
+                android:id="@+id/tvMeterNumber"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/on_primary_container"
+                tools:text="001" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Meter Details -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <!-- Serial Number -->
+            <TextView
+                android:id="@+id/tvSerialNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_light_onSurface"
+                tools:text="ABC123456789" />
+
+            <TextView
+                android:id="@+id/tvSerialNumberLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Serial Number"
+                android:textSize="12sp"
+                android:textColor="@color/md_theme_light_onSurfaceVariant"
+                android:layout_marginTop="2dp" />
+
+            <!-- Place -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:contentDescription="location"
+                    android:src="@drawable/ic_location_24"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@color/md_theme_light_onSurfaceVariant" />
+
+                <TextView
+                    android:id="@+id/tvPlace"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:textColor="@color/md_theme_light_onSurfaceVariant"
+                    tools:text="Main Building - Floor 1" />
+
+            </LinearLayout>
+
+            <!-- Source File -->
+            <TextView
+                android:id="@+id/tvSourceFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceCaption"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/md_theme_light_onSurfaceVariant"
+                tools:text="From: meters_batch_1.csv" />
+
+        </LinearLayout>
+
+        <!-- Status Indicator -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="12dp">
+
+            <View
+                android:id="@+id/status_indicator"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                tools:background="@drawable/circle_background"
+                tools:backgroundTint="@color/success_green" />
+
+            <TextView
+                android:id="@+id/tvMatchStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                tools:text="Matched"
+                tools:textColor="@color/success_green"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- QR Status Icon (Optional - can be removed if not needed) -->
+        <ImageView
+            android:id="@+id/ivQrStatus"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="QR status"
+            android:src="@drawable/ic_qr_code_scanner_24"
+            android:layout_marginEnd="8dp"
+            app:tint="@color/success_green"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Checkbox -->
+        <CheckBox
+            android:id="@+id/checkboxIsChecked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/md_theme_light_primary"
+            android:contentDescription="Select meter" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

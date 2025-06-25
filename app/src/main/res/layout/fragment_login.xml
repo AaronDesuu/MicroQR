@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_background_gradient"
+    tools:context=".ui.login.LoginFragment">
+
+    <!-- App Logo/Icon -->
+    <ImageView
+        android:id="@+id/app_logo"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="60dp"
+        android:src="@drawable/ic_app_logo"
+        android:contentDescription="@string/app_logo_description"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Welcome Text -->
+    <TextView
+        android:id="@+id/welcome_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/welcome_back"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text_color"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/app_logo" />
+
+    <TextView
+        android:id="@+id/welcome_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/sign_in_to_continue"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcome_title" />
+
+    <!-- Login Card Container -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/login_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="24dp"
+        android:elevation="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@color/card_background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcome_subtitle">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="32dp">
+
+            <!-- Email Input with Material Design Style -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/email_input_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/prompt_user"
+                app:startIconDrawable="@drawable/ic_email_24"
+                app:startIconTint="@color/primary_color"
+                app:boxStrokeColor="@color/primary_color"
+                app:hintTextColor="@color/primary_color">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="emailAddress"
+                    android:inputType="textEmailAddress"
+                    android:selectAllOnFocus="true"
+                    android:textColor="@color/primary_text_color"
+                    android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Password Input with Material Design Style -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/password_input_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="@string/prompt_password"
+                app:startIconDrawable="@drawable/ic_lock_24"
+                app:startIconTint="@color/primary_color"
+                app:endIconTint="@color/primary_color"
+                app:boxStrokeColor="@color/primary_color"
+                app:hintTextColor="@color/primary_color">
+<!--                app:endIconMode="password_toggle"-->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="password"
+                    android:imeActionLabel="@string/action_sign_in_short"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPassword"
+                    android:selectAllOnFocus="true"
+                    android:textColor="@color/primary_text_color"
+                    android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Login Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/login"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:text="@string/action_sign_in"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:enabled="false"
+                app:cornerRadius="28dp"
+                app:backgroundTint="@color/primary_color"
+                android:textColor="@android:color/white"
+                app:rippleColor="@color/primary_color_dark" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+
+    <!-- Sign Up Link -->
+
+    <!-- Loading Overlay -->
+    <FrameLayout
+        android:id="@+id/loading_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/loading_overlay_background"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            app:indicatorColor="@color/primary_color"
+            app:trackColor="@color/primary_color_light" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

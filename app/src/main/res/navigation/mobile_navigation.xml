@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/loginFragment"
+    app:enterAnim="@anim/fade_in"
+    app:exitAnim="@anim/fade_out"
+    app:popEnterAnim="@anim/fade_in"
+    app:popExitAnim="@anim/fade_out">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.microqr.ui.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_navigation_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/mobile_navigation"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.microqr.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_matchFragment"
+            app:destination="@id/matchFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_homeFragment_to_meterCheckFragment"
+            app:destination="@id/navigation_metercheck"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_homeFragment_to_fileUploadFragment"
+            app:destination="@id/navigation_files"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_homeFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_metercheck"
+        android:name="com.example.microqr.ui.metercheck.MeterCheckFragment"
+        android:label="@string/title_metercheck"
+        tools:layout="@layout/fragment_meter_check">
+        <action
+            android:id="@+id/action_home_to_reader"
+            app:destination="@id/readerFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_files"
+        android:name="com.example.microqr.ui.files.FilesFragment"
+        android:label="@string/title_upload"
+        tools:layout="@layout/fragment_files" />
+
+    <fragment
+        android:id="@+id/readerFragment"
+        android:name="com.example.microqr.ui.reader.ReaderFragment"
+        android:label="@string/title_reader"
+        tools:layout="@layout/fragment_reader">
+        <action
+            android:id="@+id/action_ReaderFragment_to_DetectedFragment"
+            app:destination="@id/detectedFragment"
+            app:enterAnim="@anim/slide_in_up"
+            app:exitAnim="@anim/slide_out_down"
+            app:popEnterAnim="@anim/slide_in_down"
+            app:popExitAnim="@anim/slide_out_up" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.microqr.ui.profile.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.example.microqr.ui.settings.SettingsFragment"
+        android:label="@string/title_settings" />
+
+    <fragment
+        android:id="@+id/matchFragment"
+        android:name="com.example.microqr.ui.metermatch.MeterMatchFragment"
+        android:label="@string/title_match" />
+
+    <fragment
+        android:id="@+id/detectedFragment"
+        android:name="com.example.microqr.ui.reader.DetectedFragment"
+        android:label="@string/detection_completed"
+        tools:layout="@layout/fragment_detected">
+        <action
+            android:id="@+id/action_detectedFragment_to_meterCheckFragment"
+            app:destination="@id/navigation_metercheck"
+            app:popUpTo="@id/navigation_metercheck"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_up"
+            app:exitAnim="@anim/slide_out_down"
+            app:popEnterAnim="@anim/slide_in_down"
+            app:popExitAnim="@anim/slide_out_up" />
+    </fragment>
+
+
+</navigation>
