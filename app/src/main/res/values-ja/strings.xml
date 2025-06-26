@@ -333,10 +333,10 @@
     <!-- ========================================== -->
     <!-- SEARCH, FILTER & SORT -->
     <!-- ========================================== -->
-    <string name="filter_by_place">場所でフィルター</string>
-    <string name="filter_by_source_file">ソースファイルでフィルター</string>
-    <string name="filter_place">場所をフィルター</string>
-    <string name="sort_by">並び替え</string>
+    <string name="filter_by_place">場所</string>
+    <string name="filter_by_source_file">ファイル</string>
+    <string name="filter_place">場所</string>
+    <string name="sort_by">並替</string>
     <string name="place_filter_count">場所 (%d)</string>
     <string name="file_filter_count">ファイル (%d)</string>
     <string name="search_label">検索</string>
@@ -469,8 +469,8 @@
     <string name="meter_match_subtitle">メーターデータを比較して検証</string>
     <string name="meter_match_toolbar_title">メーターを照合</string>
     <string name="meter_match_search_hint">メーターを検索...</string>
-    <string name="meter_match_filter_place">場所をフィルター</string>
-    <string name="meter_match_filter_file">ファイルをフィルター</string>
+    <string name="meter_match_filter_place">場所</string>
+    <string name="meter_match_filter_file">ファイル</string>
     <string name="meter_match_sort">並び替え</string>
     <string name="meter_match_total_found">見つかった総数</string>
     <string name="meter_match_matched">照合済み</string>
