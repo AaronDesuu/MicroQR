@@ -75,7 +75,7 @@ class MeterCheckFragment : Fragment() {
         currentFilteredList = emptyList()
         meterAdapter.submitList(emptyList())
         viewModel.updateStatistics(0, 0, 0)
-        viewModel.updateScreenTitle("MeterCheck")
+        viewModel.updateScreenTitle(getString(R.string.meter_check_default_title))
         updateEmptyState(emptyList(), "")
     }
 
@@ -92,16 +92,18 @@ class MeterCheckFragment : Fragment() {
 
     private fun setupRecyclerView() {
         meterAdapter = MeterCheckAdapter { meterStatus, isChecked ->
-            // Callback when a checkbox in the adapter changes
             filesViewModel.updateMeterCheckedStatus(
                 meterStatus.serialNumber,
                 isChecked,
                 meterStatus.fromFile
             )
 
-            // Show feedback to user
-            val statusText = if (isChecked) "marked as scanned ✅" else "marked as not scanned ❌"
-            Toast.makeText(context, "Meter ${meterStatus.number} $statusText", Toast.LENGTH_SHORT).show()
+            val statusText = if (isChecked) {
+                getString(R.string.meter_marked_as_scanned, meterStatus.number)
+            } else {
+                getString(R.string.meter_marked_as_not_scanned, meterStatus.number)
+            }
+            Toast.makeText(context, statusText, Toast.LENGTH_SHORT).show()
         }
         meterRecyclerView.layoutManager = LinearLayoutManager(context)
         meterRecyclerView.adapter = meterAdapter
@@ -126,13 +128,13 @@ class MeterCheckFragment : Fragment() {
 
             // Show refresh feedback
             viewModel.setRefreshing(true)
-            Toast.makeText(context, "Refreshing meter data...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.refreshing_meter_data), Toast.LENGTH_SHORT).show()
 
             // Simulate refresh delay
             lifecycleScope.launch {
                 kotlinx.coroutines.delay(1000)
                 viewModel.setRefreshing(false)
-                Toast.makeText(context, "Meter data refreshed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.meter_data_refreshed), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -146,7 +148,11 @@ class MeterCheckFragment : Fragment() {
         // Observe refresh state
         viewModel.isRefreshing.observe(viewLifecycleOwner) { isRefreshing ->
             refreshButton.isEnabled = !isRefreshing
-            refreshButton.text = if (isRefreshing) "Refreshing..." else "Refresh"
+            refreshButton.text = if (isRefreshing) {
+                getString(R.string.refresh_button_refreshing)
+            } else {
+                getString(R.string.refresh_button_refresh)
+            }
         }
 
         // Observe statistics
@@ -168,12 +174,15 @@ class MeterCheckFragment : Fragment() {
         filesViewModel.meterCheckMeters.observe(viewLifecycleOwner) { meterCheckMeters ->
             if (meterCheckMeters.isNotEmpty()) {
                 currentCompleteMeterList = meterCheckMeters
-                viewModel.updateScreenTitle("MeterCheck - ${meterCheckMeters.size} meters")
+                val screenTitle = getString(R.string.meter_check_screen_title, meterCheckMeters.size)
+                viewModel.updateScreenTitle(screenTitle)
                 updateStatisticsAndApplyFilter()
                 updateCurrentFilesDisplay()
+
+                val toastMessage = getString(R.string.loaded_meters_for_checking, meterCheckMeters.size)
                 Toast.makeText(
                     context,
-                    "Loaded ${meterCheckMeters.size} meters for checking",
+                    toastMessage,
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
@@ -182,11 +191,6 @@ class MeterCheckFragment : Fragment() {
             }
         }
 
-        // ✅ REMOVED: All other observers that were causing cross-contamination
-        // - selectedMetersForProcessing observer
-        // - meterStatusList observer
-        // - fileItems observer
-        // These were triggering unwanted data loading
 
         // ✅ ONLY observe file changes for cleanup when files are deleted
         filesViewModel.fileItems.observe(viewLifecycleOwner) { fileItems ->
@@ -211,13 +215,14 @@ class MeterCheckFragment : Fragment() {
         if (currentCompleteMeterList.isNotEmpty()) {
             val relevantFiles = currentCompleteMeterList.map { it.fromFile }.distinct()
             if (relevantFiles.isNotEmpty()) {
-                currentFilesTextView.text = "MeterCheck data from: ${relevantFiles.joinToString(", ")}"
+                val fileListString = relevantFiles.joinToString(", ")
+                currentFilesTextView.text = getString(R.string.meter_check_data_from, fileListString)
                 currentFilesTextView.isVisible = true
             } else {
                 currentFilesTextView.isVisible = false
             }
         } else {
-            currentFilesTextView.text = "No MeterCheck data loaded"
+            currentFilesTextView.text = getString(R.string.no_meter_check_data_loaded)
             currentFilesTextView.isVisible = false
         }
     }
@@ -263,9 +268,9 @@ class MeterCheckFragment : Fragment() {
         if (isEmpty) {
             val emptyTextView = emptyStateLayout.findViewById<TextView>(R.id.empty_state_text)
             emptyTextView?.text = when {
-                !hasAnyMeters -> "No meters available\nProcess CSV files for MeterCheck to see meters here"
-                hasSearchQuery -> "No meters found\nTry adjusting your search query"
-                else -> "No meter data available"
+                !hasAnyMeters -> getString(R.string.meter_check_no_meters_available)
+                hasSearchQuery -> getString(R.string.meter_check_no_meters_found_search)
+                else -> getString(R.string.meter_check_no_meter_data)
             }
         }
     }
@@ -275,9 +280,10 @@ class MeterCheckFragment : Fragment() {
         val result = filesViewModel.updateMeterCheckedStatusBySerial(serialNumber)
         if (result.first) {
             val fileName = result.second
+            val message = getString(R.string.meter_scanned_successfully, serialNumber, fileName) // Use getString with parameters
             Toast.makeText(
                 context,
-                "✅ Meter scanned successfully!\nSerial: $serialNumber\nFile: $fileName",
+                message,
                 Toast.LENGTH_LONG
             ).show()
 
@@ -297,11 +303,10 @@ class MeterCheckFragment : Fragment() {
 
     private fun showMeterNotFoundDialog(serialNumber: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Meter Not Found")
-            .setMessage("Serial number '$serialNumber' was not found in the loaded meter data.\n\nThis could mean:\n• The meter is from a different batch\n• The serial number was misread\n• The meter data hasn't been loaded")
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-            .setNeutralButton("Show All Meters") { _, _ ->
-                // Clear search to show all meters
+            .setTitle(getString(R.string.dialog_meter_not_found_title))
+            .setMessage(getString(R.string.dialog_meter_not_found_message, serialNumber))
+            .setPositiveButton(getString(R.string.dialog_button_ok)) { dialog, _ -> dialog.dismiss() }
+            .setNeutralButton(getString(R.string.dialog_button_show_all_meters)) { _, _ ->
                 viewModel.clearSearch()
                 searchEditText.text?.clear()
             }

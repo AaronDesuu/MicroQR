@@ -36,7 +36,7 @@
                     android:id="@+id/welcome_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/welcome_back"
+                    android:text="@string/meter_check_welcome"
                     android:textSize="16sp"
                     android:textColor="@android:color/white"
                     android:alpha="0.8" />
@@ -69,7 +69,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:title="Verify Meters" />
+                app:title="@string/verify_meter" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -116,6 +116,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
+                        android:textColor="@android:color/black"
                         android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
 

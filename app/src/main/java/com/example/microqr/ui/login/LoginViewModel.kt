@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.microqr.R
 import com.example.microqr.data.repository.LoginRepository
 import com.example.microqr.data.Result
-import com.example.microqr.util.Event
+import com.example.microqr.utils.Event
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() {

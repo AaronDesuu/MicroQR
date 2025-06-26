@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.microqr.R
+import com.example.microqr.utils.DateUtils
 import com.google.android.material.button.MaterialButton
 
 class FilesAdapter(
@@ -44,9 +45,14 @@ class FilesAdapter(
         private val matchButton: MaterialButton = itemView.findViewById(R.id.button_match)
 
         fun bind(fileItem: FileItem) {
+            val context = itemView.context
+
             fileNameTextView.text = fileItem.fileName
-            fileDateTextView.text = fileItem.uploadDate
-            meterCountTextView.text = "${fileItem.meterCount} meters"
+
+            // Use localized date formatting
+            fileDateTextView.text = DateUtils.formatFileDate(context, fileItem.uploadDate)
+
+            meterCountTextView.text = context.getString(R.string.files_meter_count, fileItem.meterCount)
 
             // Use the extension function for better readability
             val isProcessable = fileItem.isProcessable()
@@ -55,41 +61,41 @@ class FilesAdapter(
             if (fileItem.isValid) {
                 when (fileItem.destination) {
                     ProcessingDestination.METER_CHECK -> {
-                        statusTextView.text = "✅ MeterCheck"
-                        statusTextView.setTextColor(itemView.context.getColor(android.R.color.holo_blue_dark))
+                        statusTextView.text = context.getString(R.string.files_status_meter_check)
+                        statusTextView.setTextColor(context.getColor(android.R.color.holo_blue_dark))
                         // Change button text to indicate reprocessing
-                        meterCheckButton.text = "Reprocess"
-                        matchButton.text = "Switch to Match"
+                        meterCheckButton.text = context.getString(R.string.files_button_reprocess)
+                        matchButton.text = context.getString(R.string.files_button_switch_to_match)
                     }
                     ProcessingDestination.METER_MATCH -> {
-                        statusTextView.text = "✅ MeterMatch"
-                        statusTextView.setTextColor(itemView.context.getColor(android.R.color.holo_orange_dark))
+                        statusTextView.text = context.getString(R.string.files_status_meter_match)
+                        statusTextView.setTextColor(context.getColor(android.R.color.holo_orange_dark))
                         // Change button text to indicate reprocessing
-                        meterCheckButton.text = "Switch to Check"
-                        matchButton.text = "Reprocess"
+                        meterCheckButton.text = context.getString(R.string.files_button_switch_to_check)
+                        matchButton.text = context.getString(R.string.files_button_reprocess)
                     }
                     null -> {
                         if (isProcessable) {
-                            statusTextView.text = "Valid • Ready to process"
-                            statusTextView.setTextColor(itemView.context.getColor(android.R.color.holo_green_dark))
+                            statusTextView.text = context.getString(R.string.files_status_valid_ready)
+                            statusTextView.setTextColor(context.getColor(android.R.color.holo_green_dark))
                         } else {
-                            statusTextView.text = "Valid but empty"
-                            statusTextView.setTextColor(itemView.context.getColor(android.R.color.darker_gray))
+                            statusTextView.text = context.getString(R.string.files_status_valid_empty)
+                            statusTextView.setTextColor(context.getColor(android.R.color.darker_gray))
                         }
                         // Default button text
-                        meterCheckButton.text = "MeterCheck"
-                        matchButton.text = "Match"
+                        meterCheckButton.text = context.getString(R.string.files_button_meter_check)
+                        matchButton.text = context.getString(R.string.files_button_match)
                     }
                 }
                 meterCheckButton.isEnabled = isProcessable
                 matchButton.isEnabled = isProcessable
             } else {
-                statusTextView.text = "❌ Invalid: ${fileItem.validationError}"
-                statusTextView.setTextColor(itemView.context.getColor(android.R.color.holo_red_dark))
+                statusTextView.text = context.getString(R.string.files_status_invalid, fileItem.validationError)
+                statusTextView.setTextColor(context.getColor(android.R.color.holo_red_dark))
                 meterCheckButton.isEnabled = false
                 matchButton.isEnabled = false
-                meterCheckButton.text = "MeterCheck"
-                matchButton.text = "Match"
+                meterCheckButton.text = context.getString(R.string.files_button_meter_check)
+                matchButton.text = context.getString(R.string.files_button_match)
             }
 
             deleteButton.setOnClickListener {

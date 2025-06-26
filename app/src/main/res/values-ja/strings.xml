@@ -14,7 +14,7 @@
     <string name="invalid_username">有効なユーザー名ではありません</string>
     <string name="invalid_password">パスワードは5文字以上で入力してください</string>
     <string name="login_failed">"ログインに失敗しました"</string>
-    <string name="welcome_back">おかえりなさい</string>
+    <string name="welcome_back">ようこそ</string>
     <string name="sign_in_to_continue">続行するにはサインインしてください</string>
     <string name="forgot_password">パスワードをお忘れですか？</string>
     <string name="dont_have_account">アカウントをお持ちでないですか？</string>
@@ -140,7 +140,7 @@
     <string name="qr_meter_management_system">QRメーター管理システム</string>
     <string name="qr_management_description">• 既存データレコードとメーターをマッチング\n• QRコードをスキャンして新しいメーターを登録\n• メーターの場所と割り当てを管理\n• メーターデータファイルのエクスポートとアップロード</string>
     <string name="match_meter">メーターマッチ</string>
-    <string name="meter_check">メーター確認</string>
+    <string name="meter_check">メーターチェック</string>
     <string name="file_upload">ファイルアップロード</string>
     <string name="match_meter_description">新しいメーターを既存レコードとマッチング</string>
     <string name="meter_check_description">メーターのQRコードを確認してスキャン</string>
@@ -149,9 +149,9 @@
     <string name="quick_statistics">クイック統計</string>
     <string name="match_meters">マッチメーター</string>
     <string name="check_meters">チェックメーター</string>
-    <string name="matched">マッチ済み</string>
-    <string name="pending">保留中</string>
-    <string name="scanned">スキャン済み</string>
+    <string name="matched"> マッチ済み</string>
+    <string name="pending"> 保留中</string>
+    <string name="scanned"> スキャン済み</string>
     <string name="total_meters_label">総メーター数: </string>
 
     <!-- 時間ベースの挨拶 -->
@@ -238,7 +238,7 @@
     <string name="no_qr_data">QRデータがありません</string>
     <string name="meter_marked_scanned_toast">✅ メーター %s がスキャンされました！</string>
     <string name="sort_serial_number">シリアル番号</string>
-    <string name="sort_meter_number">メーター順番</string>
+    <string name="sort_meter_number">順番</string>
     <string name="sort_place">場所</string>
     <string name="sort_source_file">ソースファイル</string>
     <string name="sort_registration_status">登録状況</string>
@@ -266,5 +266,201 @@
     <string name="error_parsing_qr">QRパースエラー</string>
     <string name="could_not_parse_serial">"QR データから有効なシリアル番号を解析できませんでした。 "</string>
     <string name="quick_stats_icon">クイック統計</string>
+
+    <!--    meter check-->
+    <string name="verify_meter">メーターチェック</string>
+
+    <!-- Strings for fragment_meter_match.xml -->
+    <string name="meter_check_welcome">メーターデータを登録しましょう</string>
+    <string name="meter_match_welcome">メーターデータを検証しましょう</string>
+    <string name="meter_match_title">照合と検証</string>
+    <string name="meter_match_subtitle">メーターデータを比較して検証します</string>
+    <string name="meter_match_toolbar_title">メーターマッチ</string>
+    <string name="meter_match_search_hint">メーターを検索...</string>
+    <string name="meter_match_filter_place">場所</string>
+    <string name="meter_match_filter_file">ファイル</string>
+    <string name="meter_match_sort">並べ替え</string>
+    <string name="meter_match_total_found">合計検出数</string>
+    <string name="meter_match_matched">照合済み</string>
+    <string name="meter_match_unmatched">未照合</string>
+    <string name="meter_match_no_results">表示する結果がありません</string>
+    <string name="meter_match_clear_all">すべてクリア</string>
+    <string name="meter_match_meter_results">メーター結果</string>
+    <string name="meter_match_empty_state_description">メーターが見つかりません</string>
+    <string name="meter_match_empty_title">メーターが見つかりません</string>
+    <string name="meter_match_empty_subtitle">検索またはフィルターの条件を調整してみてください。</string>
+    <!-- For the search chip display -->
+    <string name="search_label">検索</string>
+
+    <!-- For filter chip prefixes -->
+    <string name="location_prefix">📍</string>
+    <string name="file_prefix">📁</string>
+
+    <!-- For scanned status in chips -->
+    <string name="scanned_only">スキャンのみ</string>
+    <string name="not_scanned_only">未スキャンのみ</string>
+    <string name="loading">ロード中...</string>
+
+    <!-- NEW: FilesAdapter Japanese Translations - ADD THESE TO YOUR values-ja/strings.xml -->
+
+    <!-- ファイルステータスメッセージ -->
+    <string name="files_meter_count">%dメーター</string>
+    <string name="files_status_meter_check">✅ メーターチェック</string>
+    <string name="files_status_meter_match">✅ メーターマッチ</string>
+    <string name="files_status_valid_ready">有効 • 処理準備完了</string>
+    <string name="files_status_valid_empty">有効ですが空です</string>
+    <string name="files_status_invalid">❌ 無効: %s</string>
+
+    <!-- ファイルアクションボタン -->
+    <string name="files_button_meter_check">メーターチェック</string>
+    <string name="files_button_match">マッチ</string>
+    <string name="files_button_reprocess">再処理</string>
+    <string name="files_button_switch_to_match">マッチ切替</string>
+    <string name="files_button_switch_to_check">チェック切替</string>
+
+    <!-- ファイルUIラベル -->
+    <string name="files_from_label">元ファイル: %s</string>
+    <string name="csv_file_icon">CSVファイルアイコン</string>
+    <string name="status_valid">有効</string>
+
+    <!-- ファイル処理メッセージ -->
+    <string name="files_processing_success">ファイルの処理が成功しました</string>
+    <string name="files_processing_error">ファイル処理エラー</string>
+    <string name="files_upload_success">ファイルのアップロードが成功しました</string>
+    <string name="files_upload_error">ファイルアップロードエラー</string>
+
+    <!-- ファイル検証メッセージ -->
+    <string name="files_validation_no_data">データが見つかりません</string>
+    <string name="files_validation_invalid_format">無効なファイル形式</string>
+    <string name="files_validation_missing_columns">必要な列が不足しています</string>
+    <string name="files_validation_empty_file">ファイルが空です</string>
+    <string name="files_validation_too_large">ファイルが大きすぎます</string>
+
+    <!-- File Upload Instructions -->
+    <string name="files_upload_instructions">📋 手順:\n\n1. 次の必須列を含むCSVファイルをアップロードします:\n   • Number - メーター識別番号\n   • SerialNumber - 一意のシリアル番号\n   • Place - メーターの場所/住所\n   • Registered - ブール値 (true/false、yes/no、1/0)\n\n2. アップロード後、処理先を選択します:\n   • MeterCheck - メーター検証ワークフロー用\n   • Match - 照合操作用\n\n3. 有効なCSVファイルのみが処理できます\n\n対応ファイル形式: CSV、TXT\n最大ファイルサイズ: 10MB</string>
+
+    <!-- Destination Selection -->
+    <string name="files_choose_destination">処理先の選択</string>
+    <string name="files_destination_meter_check">MeterCheck - スキャン・登録</string>
+    <string name="files_destination_meter_match">MeterMatch - 照合・検証</string>
+    <string name="files_upload_cancelled">アップロードがキャンセルされました</string>
+
+    <!-- File Processing Status -->
+    <string name="files_processing_started">ファイルを処理しています...</string>
+    <string name="files_processing_complete">ファイルが正常に処理されました</string>
+    <string name="files_processing_failed">ファイルの処理に失敗しました</string>
+
+    <!-- File Upload Status -->
+    <string name="files_upload_started">ファイルをアップロードしています...</string>
+    <string name="files_upload_complete">ファイルが正常にアップロードされました</string>
+    <string name="files_upload_failed">ファイルのアップロードに失敗しました</string>
+
+    <!-- File Validation Error Messages -->
+    <string name="files_error_file_too_large">ファイルサイズが大きすぎます (最大10MB)</string>
+    <string name="files_error_invalid_type">無効なファイル形式です。CSVファイルを選択してください。</string>
+    <string name="files_error_no_permission">ファイル読み取り権限がありません</string>
+    <string name="files_error_corrupted">ファイルが破損しているか、読み取れないようです</string>
+
+    <!-- File Operations -->
+    <string name="files_operation_success">操作は正常に完了しました</string>
+    <string name="files_operation_failed">操作に失敗しました</string>
+    <string name="files_file_exists">この名前のファイルは既に存在します</string>
+    <string name="files_replace_existing">既存のファイルを置き換えますか？</string>
+
+    <!-- Loading States -->
+    <string name="files_loading">ファイルを読み込んでいます...</string>
+    <string name="files_scanning">ファイルの内容をスキャンしています...</string>
+    <string name="files_validating">ファイル形式を検証しています...</string>
+
+    <!-- File Management Header -->
+    <string name="files_manage_title">ファイル管理</string>
+    <string name="files_dropdown_toggle">情報ドロップダウンを切り替える</string>
+    <string name="files_upload_button">CSVファイルをアップロード</string>
+    <string name="files_no_files_icon">アップロードされたファイルはありません アイコン</string>
+    <string name="files_upload_to_start">開始するにはCSVファイルをアップロードしてください</string>
+
+    <!-- Dropdown Content -->
+    <string name="files_show_instructions">手順を表示</string>
+    <string name="files_hide_instructions">手順を非表示</string>
+
+    <!-- 日付形式の文字列 (Japanese) -->
+    <string name="date_format_short">yyyy年M月d日</string>
+    <string name="date_format_with_time">yyyy年M月d日 • HH:mm</string>
+    <string name="time_format_12h">HH:mm</string>
+    <string name="time_format_24h">HH:mm</string>
+
+    <!-- 日付/時刻ラベル -->
+    <string name="uploaded_on">アップロード日時</string>
+    <string name="created_on">作成日時</string>
+    <string name="modified_on">更新日時</string>
+
+    <!-- ファイル日付の例（テスト用） -->
+    <string name="date_today">今日</string>
+    <string name="date_yesterday">昨日</string>
+
+<!--    Meter Check-->
+    <!-- Screen Titles -->
+    <string name="meter_check_default_title">メーターチェック</string>
+    <string name="meter_check_screen_title">メーターチェック - %1$d 件</string> <!-- Already added -->
+
+    <!-- Toasts -->
+    <string name="refreshing_meter_data">メーターデータを更新中...</string>
+    <string name="meter_data_refreshed">メーターデータが更新されました</string>
+    <string name="meter_marked_as_scanned">メーター %1$s はスキャン済みとしてマークされました ✅</string>
+    <string name="meter_marked_as_not_scanned">メーター %1$s は未スキャンとしてマークされました ❌</string>
+
+    <!-- Button Texts -->
+    <string name="refresh_button_refreshing">更新中...</string>
+    <string name="refresh_button_refresh">更新</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_meter_not_found_title">メーターが見つかりません</string>
+    <string name="dialog_meter_not_found_message">シリアル番号「%1$s」は読み込まれたメーターデータに見つかりませんでした。\n\n考えられる原因:\n• メーターが別のバッチのものです\n• シリアル番号が誤読されました\n• メーターデータが読み込まれていません</string>
+    <string name="dialog_button_ok">OK</string>
+    <string name="dialog_button_show_all_meters">すべてのメーターを表示</string>
+
+    <!-- Empty States (already added previously) -->
+    <string name="meter_check_no_meters_available">利用可能なメーターはありません\nCSVファイルを処理してメーターチェックに表示してください</string>
+    <string name="meter_check_no_meters_found_search">メーターが見つかりません\n検索クエリを調整してみてください</string>
+    <string name="meter_check_no_meter_data">メーターデータがありません</string>
+
+    <!-- Current Files Display (already added previously) -->
+    <string name="meter_check_data_from">メーターチェックデータ (ファイル): %1$s</string>
+    <string name="no_meter_check_data_loaded">メーターチェックデータがロードされていません</string>
+    <string name="files_meter_check_description">リストからメーターを確認・チェックするため</string>
+    <string name="files_meter_match_description">スキャンしたQRコードをメーターデータベースと照合するため</string>
+    <string name="files_destination_dialog_subtitle">CSVファイルに適したワークフローを選択してください</string>
+    <string name="files_select_destination">処理先を選択</string>
+    <string name="files_processing_file">ファイルを処理中...</string>
+    <string name="files_processed_success">✅ %s 用にファイルが処理されました</string>
+    <string name="files_select_destination_first">まず処理先を選択してください</string>
+
+    <string name="status_scanned">スキャン済 ✓</string>
+    <string name="status_pending_scan">未スキャン</string>
+
+    <!-- メーター詳細スキャンフラグメント -->
+    <string name="meter_number_header">メーター番号</string>
+    <string name="serial_number_header">シリアル番号</string>
+    <string name="location_header">設置場所</string>
+    <string name="scan_status_header">スキャン状況</string>
+    <string name="scanning_for_meter">メーターをスキャン中: %s</string>
+    <string name="scan_complete">スキャン完了！</string>
+    <string name="scan_failed">スキャン失敗</string>
+    <string name="meter_scan_success">メーターが正常に確認されました！</string>
+    <string name="meter_scan_mismatch">QRコードが対象メーターと一致しません</string>
+    <string name="camera_permission_denied">スキャンにはカメラの許可が必要です</string>
+    <string name="camera_initialization_failed">カメラの初期化に失敗しました</string>
+
+    <!-- スキャナーUI -->
+    <string name="aim_camera_at_qr">カメラをQRコードに向けてください</string>
+    <string name="scanning_in_progress">スキャン中...</string>
+    <string name="hold_steady">デバイスを安定して保持してください</string>
+    <string name="flash_on">フラッシュオン</string>
+    <string name="flash_off">フラッシュオフ</string>
+
+    <!-- メーター情報ラベル -->
+    <string name="target_meter_information">対象メーター情報</string>
+    <string name="meter_details_card">メーター詳細</string>
+    <string name="scan_to_verify">このメーターを確認するためにQRコードをスキャンしてください</string>
 
 </resources>

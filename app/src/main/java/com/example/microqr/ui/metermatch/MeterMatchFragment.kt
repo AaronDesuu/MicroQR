@@ -13,16 +13,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.microqr.R
 import com.example.microqr.databinding.FragmentMeterMatchBinding
 import com.example.microqr.ui.files.FilesViewModel
 import com.example.microqr.ui.files.MeterStatus
-import com.example.microqr.ui.files.ProcessingDestination
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
-import androidx.navigation.fragment.findNavController
-import com.example.microqr.R
 
 class MeterMatchFragment : Fragment() {
 
@@ -53,117 +52,18 @@ class MeterMatchFragment : Fragment() {
         setupRecyclerView()
         setupSearchView()
         setupFilterButtons()
+        setupObservers()
 
-        // Initialize with empty state
-        clearFragmentData()
-
-        observeUiState()
-        observeFilesViewModel()
-
-        // DO NOT call loadDataForFragment() here - let observers handle data loading
-
-        Log.d("MeterMatchFragment", "onViewCreated completed - fragment initialized empty")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // DO NOT refresh data automatically - only show what's in the dedicated LiveData
-        Log.d("MeterMatchFragment", "onResume - checking meterMatchMeters: ${filesViewModel.meterMatchMeters.value?.size ?: 0}")
-    }
-
-    private fun loadDataForFragment() {
-        // Only load data if we have MeterMatch specific data in LiveData
-        val meterMatchMeters = filesViewModel.meterMatchMeters.value
-        if (!meterMatchMeters.isNullOrEmpty()) {
-            currentCompleteMeterList = meterMatchMeters
-            viewModel.setMeters(meterMatchMeters)
-            updateStatisticsAndApplyFilter()
-            Toast.makeText(
-                context,
-                "Loaded ${meterMatchMeters.size} meters for matching",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            // No MeterMatch specific data, clear display
-            clearFragmentData()
-        }
-    }
-
-    private fun clearFragmentData() {
-        Log.d("MeterMatchFragment", "🧹 Clearing fragment data")
-        currentCompleteMeterList = emptyList()
-        currentFilteredList = emptyList()
-        viewModel.setMeters(emptyList())
-        updateEmptyState(emptyList(), "")
-        Log.d("MeterMatchFragment", "✅ Fragment data cleared - showing empty state")
-    }
-
-    private fun updateStatisticsAndApplyFilter() {
-        applyCurrentFilters()
-    }
-
-    private fun applyCurrentFilters() {
-        // Apply the current state filters to the complete list
-        val uiState = viewModel.uiState.value
-        currentFilteredList = filterMeters(currentCompleteMeterList, uiState)
-
-        Log.d("MeterMatchFragment", "Submitting ${currentFilteredList.size} filtered meters to adapter")
-        meterAdapter.submitList(currentFilteredList.toList()) // Ensure new list instance
-        updateEmptyState(currentFilteredList, uiState.searchQuery)
-    }
-
-    private fun filterMeters(meters: List<MeterStatus>, uiState: MatchUiState): List<MeterStatus> {
-        return meters.filter { meter ->
-            // Search filter
-            val matchesSearch = uiState.searchQuery.isEmpty() ||
-                    meter.serialNumber.contains(uiState.searchQuery, ignoreCase = true) ||
-                    meter.number.contains(uiState.searchQuery, ignoreCase = true) ||
-                    meter.place.contains(uiState.searchQuery, ignoreCase = true) ||
-                    meter.fromFile.contains(uiState.searchQuery, ignoreCase = true)
-
-            // Place filter
-            val matchesPlaceFilter = uiState.filterState.selectedPlaces.isEmpty() ||
-                    meter.place in uiState.filterState.selectedPlaces
-
-            // File filter
-            val matchesFileFilter = uiState.filterState.selectedFiles.isEmpty() ||
-                    meter.fromFile in uiState.filterState.selectedFiles
-
-            // Registration status filter
-            val matchesRegistrationFilter = uiState.filterState.selectedRegistrationStatus.isEmpty() ||
-                    meter.registered in uiState.filterState.selectedRegistrationStatus
-
-            // Checked status filter
-            val matchesCheckedFilter = when {
-                uiState.filterState.showCheckedOnly -> meter.isChecked
-                uiState.filterState.showUncheckedOnly -> !meter.isChecked
-                else -> true
-            }
-
-            matchesSearch && matchesPlaceFilter && matchesFileFilter && matchesRegistrationFilter && matchesCheckedFilter
-        }.let { filteredList ->
-            // Apply sorting
-            when (uiState.sortOption) {
-                SortOption.SERIAL_NUMBER -> filteredList.sortedBy { it.serialNumber }
-                SortOption.METER_NUMBER -> filteredList.sortedBy { it.number }
-                SortOption.PLACE -> filteredList.sortedBy { it.place }
-                SortOption.SOURCE_FILE -> filteredList.sortedBy { it.fromFile }
-                SortOption.REGISTRATION_STATUS -> filteredList.sortedBy { it.registered }
-            }.let { sorted ->
-                if (uiState.sortAscending) sorted else sorted.reversed()
-            }
-        }
+        Log.d("MeterMatchFragment", "onViewCreated completed")
     }
 
     private fun setupToolbar() {
-        binding.toolbar.title = "Match Meters"
-        // You can add toolbar menu items here if needed
+        binding.toolbar.title = getString(R.string.meter_match_toolbar_title)
     }
 
     private fun setupRecyclerView() {
         meterAdapter = MeterMatchAdapter(
             onItemClick = { meter ->
-                // Handle meter item click - show detail dialog with scan option
                 showMeterDetailDialog(meter)
             }
         )
@@ -174,9 +74,11 @@ class MeterMatchFragment : Fragment() {
         }
     }
 
-
     private fun setupSearchView() {
-        binding.etSearch.addTextChangedListener(object : TextWatcher {
+        // Search is now inside the search_text_input_layout
+        val searchInput = binding.root.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etSearch)
+
+        searchInput?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
@@ -188,6 +90,11 @@ class MeterMatchFragment : Fragment() {
     }
 
     private fun setupFilterButtons() {
+        // Filter buttons are now in the AppBarLayout section
+        binding.btnFilterPlace.text = getString(R.string.meter_match_filter_place)
+        binding.btnFilterFile.text = getString(R.string.meter_match_filter_file)
+        binding.btnSort.text = getString(R.string.meter_match_sort)
+
         binding.btnFilterPlace.setOnClickListener {
             showPlaceFilterDialog()
         }
@@ -201,75 +108,132 @@ class MeterMatchFragment : Fragment() {
         }
 
         binding.btnClearFilters.setOnClickListener {
-            viewModel.clearAllFilters()
-            applyCurrentFilters()
+            clearAllFilters()
         }
     }
 
-    private fun observeUiState() {
+    private fun setupObservers() {
+        // Observe UI state changes
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collect { uiState ->
                 updateUI(uiState)
             }
         }
+
+        // Observe MeterMatch specific data from FilesViewModel
+        filesViewModel.meterMatchMeters.observe(viewLifecycleOwner) { meterMatchMeters ->
+            Log.d("MeterMatchFragment", "Received ${meterMatchMeters.size} meters for matching")
+
+            currentCompleteMeterList = meterMatchMeters
+            viewModel.setMeters(meterMatchMeters)
+            applyCurrentFilters()
+        }
     }
 
-    private fun observeFilesViewModel() {
-        // ONLY observe MeterMatch specific data - this is the ONLY source of data for this fragment
-        filesViewModel.meterMatchMeters.observe(viewLifecycleOwner) { meterMatchMeters ->
-            Log.d("MeterMatchFragment", "🔍 meterMatchMeters observer triggered: ${meterMatchMeters.size} meters")
+    private fun applyCurrentFilters() {
+        val uiState = viewModel.uiState.value
+        currentFilteredList = filterAndSortMeters(currentCompleteMeterList, uiState)
 
-            if (meterMatchMeters.isNotEmpty()) {
-                Log.d("MeterMatchFragment", "✅ Loading ${meterMatchMeters.size} meters for MeterMatch")
-                currentCompleteMeterList = meterMatchMeters
-                viewModel.setMeters(meterMatchMeters)
-                updateStatisticsAndApplyFilter()
-            } else {
-                Log.d("MeterMatchFragment", "❌ No MeterMatch meters, clearing fragment")
-                clearFragmentData()
+        meterAdapter.submitList(currentFilteredList.toList())
+        updateEmptyState()
+        updateStatistics()
+    }
+
+    private fun filterAndSortMeters(meters: List<MeterStatus>, uiState: MatchUiState): List<MeterStatus> {
+        var filteredMeters = meters
+
+        // Apply search filter
+        if (uiState.searchQuery.isNotEmpty()) {
+            val query = uiState.searchQuery.lowercase()
+            filteredMeters = filteredMeters.filter { meter ->
+                meter.serialNumber.lowercase().contains(query) ||
+                        meter.number.lowercase().contains(query) ||
+                        meter.place.lowercase().contains(query) ||
+                        meter.fromFile.lowercase().contains(query)
             }
         }
 
-        // DO NOT observe meterStatusList or selectedMetersForProcessing or fileItems
-        // DO NOT observe anything that could trigger automatic data loading
+        // Apply place filter
+        if (uiState.filterState.selectedPlaces.isNotEmpty()) {
+            filteredMeters = filteredMeters.filter { meter ->
+                meter.place in uiState.filterState.selectedPlaces
+            }
+        }
 
-        Log.d("MeterMatchFragment", "🔧 Observer setup complete - only observing meterMatchMeters")
+        // Apply file filter
+        if (uiState.filterState.selectedFiles.isNotEmpty()) {
+            filteredMeters = filteredMeters.filter { meter ->
+                meter.fromFile in uiState.filterState.selectedFiles
+            }
+        }
+
+        // Apply registration status filter
+        if (uiState.filterState.selectedRegistrationStatus.isNotEmpty()) {
+            filteredMeters = filteredMeters.filter { meter ->
+                meter.registered in uiState.filterState.selectedRegistrationStatus
+            }
+        }
+
+        // Apply checked status filter
+        filteredMeters = when {
+            uiState.filterState.showCheckedOnly -> filteredMeters.filter { it.isChecked }
+            uiState.filterState.showUncheckedOnly -> filteredMeters.filter { !it.isChecked }
+            else -> filteredMeters
+        }
+
+        // Apply sorting
+        return when (uiState.sortOption) {
+            SortOption.SERIAL_NUMBER -> filteredMeters.sortedBy { it.serialNumber }
+            SortOption.METER_NUMBER -> filteredMeters.sortedBy { it.number }
+            SortOption.PLACE -> filteredMeters.sortedBy { it.place }
+            SortOption.SOURCE_FILE -> filteredMeters.sortedBy { it.fromFile }
+            SortOption.REGISTRATION_STATUS -> filteredMeters.sortedBy { it.registered }
+        }.let { sorted ->
+            if (uiState.sortAscending) sorted else sorted.reversed()
+        }
     }
 
     private fun updateUI(uiState: MatchUiState) {
-        // Update loading state
-        binding.layoutLoading.isVisible = uiState.isLoading
+        // Update filter chips
+        updateFilterChips(uiState)
 
-        // Update results count and stats
-        val count = currentFilteredList.size
+        // Update clear filters button visibility
+        binding.btnClearFilters.isVisible = hasActiveFilters(uiState.filterState) ||
+                uiState.searchQuery.isNotEmpty()
+
+        // Update filter button text
+        updateFilterButtonText(uiState)
+    }
+
+    private fun updateStatistics() {
         val total = currentCompleteMeterList.size
+        val filtered = currentFilteredList.size
+        val matched = currentCompleteMeterList.count { it.isChecked }
+        val unmatched = total - matched
 
-        // Update main results count
-        binding.tvResultsCount.text = count.toString()
-
-        // Update stats
-        val matchedCount = currentCompleteMeterList.count { it.isChecked }
-        val unmatchedCount = total - matchedCount
-        binding.matchedCount.text = matchedCount.toString()
-        binding.unmatchedCount.text = unmatchedCount.toString()
+        binding.tvResultsCount.text = filtered.toString()
+        binding.matchedCount.text = matched.toString()
+        binding.unmatchedCount.text = unmatched.toString()
 
         // Update results summary
         binding.tvResultsSummary.text = when {
-            count == total && total > 0 -> getString(R.string.showing_all_meters, count)
-            count < total -> getString(R.string.showing_filtered_meters, count, total)
+            filtered == total && total > 0 -> getString(R.string.showing_all_meters, filtered)
+            filtered < total -> getString(R.string.showing_filtered_meters, filtered, total)
             total == 0 -> getString(R.string.no_meters_loaded)
             else -> getString(R.string.no_results_match_filters)
         }
+    }
 
-        // Update empty state
-        val isEmpty = currentFilteredList.isEmpty() && !uiState.isLoading
+    private fun updateEmptyState() {
+        val isEmpty = currentFilteredList.isEmpty()
         binding.layoutEmptyState.isVisible = isEmpty
-        binding.rvMeters.isVisible = !isEmpty && !uiState.isLoading
+        binding.rvMeters.isVisible = !isEmpty
 
         if (isEmpty) {
+            val uiState = viewModel.uiState.value
             if (uiState.searchQuery.isNotEmpty() || hasActiveFilters(uiState.filterState)) {
-                binding.tvEmptyTitle.text = getString(R.string.no_meters_found_search)
-                binding.tvEmptyMessage.text = getString(R.string.try_adjusting_search)
+                binding.tvEmptyTitle.text = getString(R.string.meter_match_empty_title)
+                binding.tvEmptyMessage.text = getString(R.string.meter_match_empty_subtitle)
             } else if (currentCompleteMeterList.isEmpty()) {
                 binding.tvEmptyTitle.text = getString(R.string.no_meters_available)
                 binding.tvEmptyMessage.text = getString(R.string.process_csv_files_message)
@@ -278,22 +242,6 @@ class MeterMatchFragment : Fragment() {
                 binding.tvEmptyMessage.text = getString(R.string.clear_filters_to_see_all)
             }
         }
-
-        // Update filter chips
-        updateFilterChips(uiState)
-
-        // Update clear filters button
-        binding.btnClearFilters.isVisible = hasActiveFilters(uiState.filterState) ||
-                uiState.searchQuery.isNotEmpty()
-
-        // Update search field
-        if (binding.etSearch.text.toString() != uiState.searchQuery) {
-            binding.etSearch.setText(uiState.searchQuery)
-            binding.etSearch.setSelection(uiState.searchQuery.length)
-        }
-
-        // Update filter button text to show active filters count
-        updateFilterButtonText(uiState)
     }
 
     private fun updateFilterButtonText(uiState: MatchUiState) {
@@ -302,7 +250,7 @@ class MeterMatchFragment : Fragment() {
         binding.btnFilterPlace.text = if (placeCount > 0) {
             getString(R.string.place_filter_count, placeCount)
         } else {
-            getString(R.string.filter_place)
+            getString(R.string.meter_match_filter_place)
         }
 
         // Update file filter button
@@ -310,44 +258,16 @@ class MeterMatchFragment : Fragment() {
         binding.btnFilterFile.text = if (fileCount > 0) {
             getString(R.string.file_filter_count, fileCount)
         } else {
-            getString(R.string.filter_by_source_file) // Use string resource
+            getString(R.string.meter_match_filter_file)
         }
 
-        val sortDisplayName = getString(uiState.sortOption.displayNameRes) // Use displayNameRes
+        // Update sort button
+        val sortDisplayName = getString(uiState.sortOption.displayNameRes)
         val sortText = when {
             uiState.sortAscending -> "$sortDisplayName ↑"
             else -> "$sortDisplayName ↓"
         }
         binding.btnSort.text = sortText
-    }
-
-    private fun updateEmptyState(meters: List<MeterStatus>, searchQuery: String) {
-        val isEmpty = meters.isEmpty()
-        val hasSearchQuery = searchQuery.isNotBlank()
-        val hasAnyMeters = currentCompleteMeterList.isNotEmpty()
-
-        binding.layoutEmptyState.isVisible = isEmpty
-        binding.rvMeters.isVisible = !isEmpty
-
-        if (isEmpty) {
-            if (hasSearchQuery || hasActiveFilters(viewModel.uiState.value.filterState)) {
-                binding.tvEmptyTitle.text = getString(R.string.no_meters_found_search)
-                binding.tvEmptyMessage.text = getString(R.string.try_adjusting_search)
-            } else if (!hasAnyMeters) {
-                binding.tvEmptyTitle.text = getString(R.string.no_meters_available)
-                binding.tvEmptyMessage.text = getString(R.string.process_csv_files_message)
-            } else {
-                binding.tvEmptyTitle.text = getString(R.string.no_meters_available)
-            }
-        }
-    }
-
-    private fun hasActiveFilters(filterState: FilterState): Boolean {
-        return filterState.selectedPlaces.isNotEmpty() ||
-                filterState.selectedFiles.isNotEmpty() ||
-                filterState.selectedRegistrationStatus.isNotEmpty() ||
-                filterState.showCheckedOnly ||
-                filterState.showUncheckedOnly
     }
 
     private fun updateFilterChips(uiState: MatchUiState) {
@@ -358,7 +278,7 @@ class MeterMatchFragment : Fragment() {
 
         // Add search chip
         if (uiState.searchQuery.isNotEmpty()) {
-            addFilterChip("Search: ${uiState.searchQuery}") {
+            addFilterChip("${getString(R.string.search_meters)}: ${uiState.searchQuery}") {
                 viewModel.updateSearchQuery("")
                 applyCurrentFilters()
             }
@@ -382,8 +302,8 @@ class MeterMatchFragment : Fragment() {
 
         // Add registration filter chips
         uiState.filterState.selectedRegistrationStatus.forEach { registered ->
-            val text = if (registered) "✅ Registered" else "❌ Unregistered"
-            addFilterChip(text) {
+            val text = if (registered) getString(R.string.registered) else getString(R.string.unregistered)
+            addFilterChip("✅ $text") {
                 viewModel.toggleRegistrationFilter(registered)
                 applyCurrentFilters()
             }
@@ -392,13 +312,13 @@ class MeterMatchFragment : Fragment() {
         // Add checked status chip
         when {
             uiState.filterState.showCheckedOnly -> {
-                addFilterChip("📷 Scanned Only") {
+                addFilterChip("📷 ${getString(R.string.already_scanned)}") {
                     viewModel.toggleCheckedFilter()
                     applyCurrentFilters()
                 }
             }
             uiState.filterState.showUncheckedOnly -> {
-                addFilterChip("⭕ Not Scanned Only") {
+                addFilterChip("⭕ ${getString(R.string.pending_scan_status)}") {
                     viewModel.toggleCheckedFilter()
                     applyCurrentFilters()
                 }
@@ -431,6 +351,19 @@ class MeterMatchFragment : Fragment() {
         }
     }
 
+    private fun hasActiveFilters(filterState: FilterState): Boolean {
+        return filterState.selectedPlaces.isNotEmpty() ||
+                filterState.selectedFiles.isNotEmpty() ||
+                filterState.selectedRegistrationStatus.isNotEmpty() ||
+                filterState.showCheckedOnly ||
+                filterState.showUncheckedOnly
+    }
+
+    private fun clearAllFilters() {
+        viewModel.clearAllFilters()
+        applyCurrentFilters()
+    }
+
     private fun showPlaceFilterDialog() {
         val availablePlaces = currentCompleteMeterList.map { it.place }.distinct().sorted()
         val uiState = viewModel.uiState.value
@@ -444,8 +377,8 @@ class MeterMatchFragment : Fragment() {
                 viewModel.togglePlaceFilter(place)
                 applyCurrentFilters()
             }
-            .setPositiveButton("Done") { dialog, _ -> dialog.dismiss() }
-            .setNeutralButton("Clear All") { _, _ ->
+            .setPositiveButton(getString(R.string.done)) { dialog, _ -> dialog.dismiss() }
+            .setNeutralButton(getString(R.string.meter_match_clear_all)) { _, _ ->
                 viewModel.clearPlaceFilters()
                 applyCurrentFilters()
             }
@@ -465,8 +398,8 @@ class MeterMatchFragment : Fragment() {
                 viewModel.toggleFileFilter(file)
                 applyCurrentFilters()
             }
-            .setPositiveButton("Done") { dialog, _ -> dialog.dismiss() }
-            .setNeutralButton("Clear All") { _, _ ->
+            .setPositiveButton(getString(R.string.done)) { dialog, _ -> dialog.dismiss() }
+            .setNeutralButton(getString(R.string.meter_match_clear_all)) { _, _ ->
                 viewModel.clearFileFilters()
                 applyCurrentFilters()
             }
@@ -477,7 +410,7 @@ class MeterMatchFragment : Fragment() {
         val uiState = viewModel.uiState.value
         val sortOptions = SortOption.values()
         val optionNames = sortOptions.map {
-            val displayName = getString(it.displayNameRes) // Use displayNameRes instead of displayName
+            val displayName = getString(it.displayNameRes)
             val arrow = if (uiState.sortOption == it) {
                 if (uiState.sortAscending) " ↑" else " ↓"
             } else ""
@@ -498,7 +431,7 @@ class MeterMatchFragment : Fragment() {
     }
 
     private fun showMeterDetailDialog(meter: MeterStatus) {
-        val scanStatusText = if (meter.isChecked) "✅ Scanned & Registered" else "❌ Pending Scan"
+        val scanStatusText = if (meter.isChecked) getString(R.string.already_scanned) else getString(R.string.pending_scan_status)
         val message = getString(R.string.meter_information) + "\n\n" +
                 getString(R.string.meter_number_label, meter.number) + "\n" +
                 getString(R.string.meter_serial_label, meter.serialNumber) + "\n" +
@@ -510,17 +443,16 @@ class MeterMatchFragment : Fragment() {
         val dialogBuilder = MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.meter_details))
             .setMessage(message)
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton(getString(R.string.ok)) { dialog, _ -> dialog.dismiss() }
 
         // Only show scan option if not already scanned
         if (!meter.isChecked) {
-            dialogBuilder.setNeutralButton("Scan Meter") { _, _ ->
-                // Navigate to the scan fragment with meter details
+            dialogBuilder.setNeutralButton(getString(R.string.scan_meter)) { _, _ ->
                 navigateToScanMeter(meter)
             }
         }
 
-        // Option to manually toggle scan status (for testing/correction)
+        // Option to manually toggle scan status
         dialogBuilder.setNegativeButton(
             if (meter.isChecked) getString(R.string.mark_as_unscanned) else getString(R.string.mark_as_scanned)
         ) { _, _ ->
@@ -545,19 +477,6 @@ class MeterMatchFragment : Fragment() {
             Toast.makeText(context, getString(R.string.unable_start_camera), Toast.LENGTH_SHORT).show()
         }
     }
-
-    // Helper method to get current statistics for external use
-    fun getCurrentStats(): Triple<Int, Int, Int> {
-        val total = currentCompleteMeterList.size
-        val registered = currentCompleteMeterList.count { it.isChecked }
-        val unregistered = total - registered
-        return Triple(total, registered, unregistered)
-    }
-
-    // Helper method to get filtered meters count
-    fun getFilteredCount(): Int = currentFilteredList.size
-
-    // Debug method - you can call this from anywhere to check current state
 
     override fun onDestroyView() {
         super.onDestroyView()

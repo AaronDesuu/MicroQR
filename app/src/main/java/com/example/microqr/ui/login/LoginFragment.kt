@@ -19,7 +19,7 @@ import android.view.WindowInsets
 import androidx.navigation.navGraphViewModels
 import com.example.microqr.R
 import com.example.microqr.databinding.FragmentLoginBinding
-import com.example.microqr.util.Event
+import com.example.microqr.utils.Event
 
 
 // If EventObserver is a top-level class in the same package or a different one:

@@ -14,7 +14,6 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Header with icon -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,23 +40,20 @@
 
         </LinearLayout>
 
-        <!-- Stats Grid -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2">
 
-            <!-- Match Section -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center"
+                android:gravity="start"
                 android:padding="8dp">
 
-                <!-- Match Header -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -86,9 +82,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="start">
 
-                    <!-- Matched Count -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -117,11 +112,11 @@
                             android:layout_height="wrap_content"
                             android:text="@string/matched"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:layout_marginStart="4dp"/>
 
                     </LinearLayout>
 
-                    <!-- Unmatched Count -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -149,7 +144,8 @@
                             android:layout_height="wrap_content"
                             android:text="@string/pending"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:layout_marginStart="4dp"/>
 
                     </LinearLayout>
 
@@ -157,23 +153,20 @@
 
             </LinearLayout>
 
-            <!-- Divider -->
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
                 android:background="@color/outline_variant"
                 android:layout_marginVertical="8dp" />
 
-            <!-- Check Section -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center"
+                android:gravity="start"
                 android:padding="8dp">
 
-                <!-- Check Header -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -202,9 +195,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="start">
 
-                    <!-- Scanned Count -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -233,11 +225,11 @@
                             android:layout_height="wrap_content"
                             android:text="@string/scanned"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:layout_marginStart="4dp"/>
 
                     </LinearLayout>
 
-                    <!-- Unscanned Count -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -265,8 +257,8 @@
                             android:layout_height="wrap_content"
                             android:text="@string/pending"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="12sp" />
-
+                            android:textSize="12sp"
+                            android:layout_marginStart="4dp"/>
                     </LinearLayout>
 
                 </LinearLayout>
@@ -275,7 +267,6 @@
 
         </LinearLayout>
 
-        <!-- Total Summary -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -300,7 +291,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/total_meters"
                 android:textColor="@color/secondary_text_color"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:layout_marginEnd="4dp"/>
 
             <TextView
                 android:id="@+id/tv_total_meters"

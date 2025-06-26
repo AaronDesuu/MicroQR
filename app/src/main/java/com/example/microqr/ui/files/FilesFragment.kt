@@ -2,43 +2,53 @@ package com.example.microqr.ui.files
 
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.widget.RadioGroup
+import android.widget.RadioButton
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-// import android.widget.Button // No longer needed directly if using MaterialButton from XML
-// import android.widget.ImageButton // No longer needed directly if using ImageButton from XML
-// import android.widget.LinearLayout // No longer needed directly
-// import android.widget.TextView // No longer needed directly
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-// import androidx.navigation.fragment.findNavController // Not used in this snippet
 import androidx.recyclerview.widget.LinearLayoutManager
-// import androidx.recyclerview.widget.RecyclerView // No longer needed directly
+import androidx.recyclerview.widget.RecyclerView
 import com.example.microqr.R
-import com.example.microqr.databinding.FragmentFilesBinding
-import androidx.core.view.isVisible
-import androidx.transition.TransitionManager // Import for animations
-import androidx.transition.Fade // Import for Fade transition
-import androidx.transition.ChangeBounds // Import for ChangeBounds transition
-import android.view.animation.AccelerateDecelerateInterpolator // For smoother animation timing
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class FilesFragment : Fragment() {
 
     private val filesViewModel: FilesViewModel by activityViewModels()
     private lateinit var filePickerLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var filesAdapter: FilesAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var noFilesContainer: LinearLayout
+    private lateinit var uploadedFilesTitleTextView: TextView
+    private lateinit var uploadButton: Button
+    private lateinit var instructionsTextView: TextView
 
-    private var _binding: FragmentFilesBinding? = null
-    private val binding get() = _binding!!
+    // Dropdown UI elements
+    private lateinit var dropdownHeader: LinearLayout
+    private lateinit var dropdownIcon: ImageView
+    private lateinit var dropdownContent: LinearLayout
+    private var isDropdownExpanded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         filePickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             uri?.let {
+                // Process the file first, then show destination selection
                 showDestinationSelectionDialog(it)
             }
         }
@@ -47,22 +57,238 @@ class FilesFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentFilesBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_files, container, false)
+
+        // Initialize views
+        uploadButton = view.findViewById(R.id.button_upload_csv)
+        recyclerView = view.findViewById(R.id.recyclerView_uploaded_files)
+        noFilesContainer = view.findViewById(R.id.textView_no_files)
+        uploadedFilesTitleTextView = view.findViewById(R.id.textView_uploaded_files_title)
+        instructionsTextView = view.findViewById(R.id.textView_instructions)
+
+        // Initialize dropdown views
+        dropdownHeader = view.findViewById(R.id.dropdown_header)
+        dropdownIcon = view.findViewById(R.id.dropdown_icon)
+        dropdownContent = view.findViewById(R.id.dropdown_content)
+
+        setupClickListeners()
+        setupRecyclerView()
+        setupDropdown()
+
+        return view
+    }
+
+    private fun setupClickListeners() {
+        uploadButton.setOnClickListener {
+            openFilePicker()
+        }
+    }
+
+    private fun setupDropdown() {
+        // Set initial state
+        dropdownContent.isVisible = isDropdownExpanded
+        updateDropdownIcon()
+
+        // Set up click listener for dropdown header with improved animation
+        dropdownHeader.setOnClickListener {
+            toggleDropdownWithAnimation()
+        }
+
+        // Set up the instructions content
+        setupInstructions()
+    }
+
+    private fun toggleDropdownWithAnimation() {
+        isDropdownExpanded = !isDropdownExpanded
+
+        // Animate the dropdown content
+        if (isDropdownExpanded) {
+            // Expand animation
+            dropdownContent.isVisible = true
+            dropdownContent.alpha = 0f
+            dropdownContent.animate()
+                .alpha(1f)
+                .setDuration(250)
+                .start()
+        } else {
+            // Collapse animation
+            dropdownContent.animate()
+                .alpha(0f)
+                .setDuration(200)
+                .withEndAction {
+                    dropdownContent.isVisible = false
+                }
+                .start()
+        }
+
+        // Animate the dropdown icon
+        updateDropdownIcon()
+    }
+
+    private fun updateDropdownIcon() {
+        // Smooth rotation animation for the dropdown arrow
+        val targetRotation = if (isDropdownExpanded) 180f else 0f
+        dropdownIcon.animate()
+            .rotation(targetRotation)
+            .setDuration(250)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
+    }
+
+    private fun setupRecyclerView() {
+        filesAdapter = FilesAdapter(
+            onDeleteClicked = { fileName ->
+                showDeleteConfirmationDialog(fileName)
+            },
+            onProcessForMeterCheck = { fileName ->
+                // Only allow processing if file is processable
+                val fileItem = filesViewModel.fileItems.value?.find { it.fileName == fileName }
+                if (fileItem?.isProcessable() == true) {
+                    filesViewModel.processForMeterCheck(fileName)
+                } else {
+                    val errorMsg = fileItem?.validationError ?: getString(R.string.files_validation_no_data)
+                    Toast.makeText(context, getString(R.string.files_processing_error) + ": $errorMsg", Toast.LENGTH_LONG).show()
+                }
+            },
+            onProcessForMatch = { fileName ->
+                // Only allow processing if file is processable
+                val fileItem = filesViewModel.fileItems.value?.find { it.fileName == fileName }
+                if (fileItem?.isProcessable() == true) {
+                    filesViewModel.processForMatch(fileName)
+                } else {
+                    val errorMsg = fileItem?.validationError ?: getString(R.string.files_validation_no_data)
+                    Toast.makeText(context, getString(R.string.files_processing_error) + ": $errorMsg", Toast.LENGTH_LONG).show()
+                }
+            }
+        )
+        recyclerView.adapter = filesAdapter
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+    }
+
+    private fun setupInstructions() {
+        val instructions = getString(R.string.files_upload_instructions)
+        instructionsTextView.text = instructions
+    }
+
+    private fun showDestinationSelectionDialog(uri: Uri) {
+        // Create a LinearLayout with RadioButtons
+        val linearLayout = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 32, 48, 32)
+        }
+
+        val radioGroup = RadioGroup(requireContext())
+
+        val meterCheckRadio = RadioButton(requireContext()).apply {
+            text = getString(R.string.files_destination_meter_check)
+            id = 1
+            textSize = 16f
+            setPadding(16, 16, 16, 16)
+        }
+
+        val meterMatchRadio = RadioButton(requireContext()).apply {
+            text = getString(R.string.files_destination_meter_match)
+            id = 2
+            textSize = 16f
+            setPadding(16, 16, 16, 16)
+        }
+
+        radioGroup.addView(meterCheckRadio)
+        radioGroup.addView(meterMatchRadio)
+        linearLayout.addView(radioGroup)
+
+        var selectedDestination: ProcessingDestination? = null
+
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            selectedDestination = when (checkedId) {
+                1 -> ProcessingDestination.METER_CHECK
+                2 -> ProcessingDestination.METER_MATCH
+                else -> null
+            }
+        }
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.files_choose_destination))
+            .setMessage(getString(R.string.files_destination_dialog_subtitle))
+            .setView(linearLayout)
+            .setPositiveButton(getString(R.string.files_select_destination)) { _, _ ->
+                selectedDestination?.let { destination ->
+                    Toast.makeText(
+                        context,
+                        getString(R.string.files_processing_file),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    filesViewModel.processCsvFileWithDestination(
+                        uri,
+                        requireActivity().contentResolver,
+                        destination
+                    )
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        val destinationName = when (destination) {
+                            ProcessingDestination.METER_CHECK -> getString(R.string.files_destination_meter_check)
+                            ProcessingDestination.METER_MATCH -> getString(R.string.files_destination_meter_match)
+                        }
+                        Toast.makeText(
+                            context,
+                            getString(R.string.files_processed_success, destinationName),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }, 1000)
+                } ?: run {
+                    Toast.makeText(
+                        context,
+                        getString(R.string.files_select_destination_first),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+                Toast.makeText(
+                    context,
+                    getString(R.string.files_upload_cancelled),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            .create()
+
+        dialog.show()
+
+        // Initially disable the positive button
+        val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        positiveButton?.isEnabled = false
+
+        // Enable button when selection is made
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            selectedDestination = when (checkedId) {
+                1 -> ProcessingDestination.METER_CHECK
+                2 -> ProcessingDestination.METER_MATCH
+                else -> null
+            }
+            positiveButton?.isEnabled = (selectedDestination != null)
+        }
+    }
+
+    private fun showDeleteConfirmationDialog(fileName: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.delete_file))
+            .setMessage(getString(R.string.delete_file_confirmation))
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                filesViewModel.deleteFile(fileName)
+            }
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonUploadCsv.setOnClickListener {
-            openFilePicker()
-        }
-
-        setupRecyclerView()
-        setupInstructionsToggle()
-        setInstructionsText()
-
+        // Observe toast messages
         filesViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
             if (message.isNotEmpty()) {
                 Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
@@ -70,137 +296,23 @@ class FilesFragment : Fragment() {
             }
         }
 
+        // Observe file items
         filesViewModel.fileItems.observe(viewLifecycleOwner) { fileItems ->
-            (binding.recyclerViewUploadedFiles.adapter as FilesAdapter).submitList(fileItems)
-            binding.textViewNoFiles.isVisible = fileItems.isNullOrEmpty()
-            binding.recyclerViewUploadedFiles.isVisible = !fileItems.isNullOrEmpty()
-            binding.textViewUploadedFilesTitle.isVisible = !fileItems.isNullOrEmpty()
-        }
-    }
-
-    private fun setupRecyclerView() {
-        val filesAdapter = FilesAdapter(
-            onDeleteClicked = { fileName ->
-                showDeleteConfirmationDialog(fileName)
-            },
-            onProcessForMeterCheck = { fileName ->
-                val fileItem = filesViewModel.fileItems.value?.find { it.fileName == fileName }
-                if (fileItem?.isProcessable() == true) {
-                    filesViewModel.processForMeterCheck(fileName)
-                } else {
-                    val errorMsg = fileItem?.validationError ?: "File not found"
-                    Toast.makeText(context, "Cannot process file: $errorMsg", Toast.LENGTH_LONG).show()
-                }
-            },
-            onProcessForMatch = { fileName ->
-                val fileItem = filesViewModel.fileItems.value?.find { it.fileName == fileName }
-                if (fileItem?.isProcessable() == true) {
-                    filesViewModel.processForMatch(fileName)
-                } else {
-                    val errorMsg = fileItem?.validationError ?: "File not found"
-                    Toast.makeText(context, "Cannot process file: $errorMsg", Toast.LENGTH_LONG).show()
-                }
-            }
-        )
-        binding.recyclerViewUploadedFiles.adapter = filesAdapter
-        binding.recyclerViewUploadedFiles.layoutManager = LinearLayoutManager(requireContext())
-    }
-
-    private fun setupInstructionsToggle() {
-        // Ensure initial state is collapsed without animation
-        binding.textViewInstructions.visibility = View.GONE
-        binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_down)
-
-        binding.buttonToggleInstructions.setOnClickListener {
-            // Define the scene root for the transition. This is usually the parent layout
-            // that contains the views being animated.
-            val sceneRoot = binding.root.parent as? ViewGroup ?: binding.root as ViewGroup
-
-            // Create a transition set for a smoother effect
-            val transition = androidx.transition.TransitionSet()
-                .addTransition(Fade()) // For fading in/out
-                .addTransition(ChangeBounds()) // For animating layout changes (size, position)
-                .setInterpolator(AccelerateDecelerateInterpolator()) // Smoother timing
-                .setDuration(300) // Animation duration in milliseconds
-
-            TransitionManager.beginDelayedTransition(sceneRoot, transition)
-
-            if (binding.textViewInstructions.isVisible) {
-                binding.textViewInstructions.visibility = View.GONE
-                binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_down)
+            filesAdapter.submitList(fileItems)
+            if (fileItems.isNullOrEmpty()) {
+                noFilesContainer.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+                uploadedFilesTitleTextView.visibility = View.GONE
             } else {
-                binding.textViewInstructions.visibility = View.VISIBLE
-                binding.buttonToggleInstructions.setImageResource(R.drawable.ic_arrow_drop_up)
+                noFilesContainer.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+                uploadedFilesTitleTextView.visibility = View.VISIBLE
             }
         }
-    }
-
-    private fun setInstructionsText() {
-        val instructions = """
-            📋 Instructions:
-            
-            1. Upload a CSV file with the following required columns:
-               • Number - Meter identification number
-               • SerialNumber - Unique serial number
-               • Place - Location/address of the meter
-               • Registered - Boolean (true/false, yes/no, 1/0)
-            
-            2. After upload, choose processing destination:
-               • MeterCheck - For meter verification workflow
-               • Match - For matching operations
-               
-            3. Only valid CSV files can be processed
-            
-            Supported file types: CSV, TXT
-            Maximum file size: 10MB
-        """.trimIndent()
-
-        binding.textViewInstructions.text = instructions
-    }
-
-    private fun showDestinationSelectionDialog(uri: Uri) {
-        DialogHelper.showDestinationDialog(
-            context = requireContext(),
-            onMeterCheck = {
-                filesViewModel.processCsvFileWithDestination(
-                    uri,
-                    requireActivity().contentResolver,
-                    ProcessingDestination.METER_CHECK
-                )
-            },
-            onMeterMatch = {
-                filesViewModel.processCsvFileWithDestination(
-                    uri,
-                    requireActivity().contentResolver,
-                    ProcessingDestination.METER_MATCH
-                )
-            },
-            onCancel = {
-                Toast.makeText(context, "Upload cancelled", Toast.LENGTH_SHORT).show()
-            }
-        )
-    }
-
-    private fun showDeleteConfirmationDialog(fileName: String) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Delete File")
-            .setMessage("Are you sure you want to delete '$fileName'? This action cannot be undone.")
-            .setPositiveButton("Delete") { _, _ ->
-                filesViewModel.deleteFile(fileName)
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
     }
 
     private fun openFilePicker() {
         filePickerLauncher.launch(FileConstants.SUPPORTED_MIME_TYPES)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     companion object {

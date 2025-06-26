@@ -2,117 +2,166 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_margin="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="6dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <!-- File Info Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
 
-            <LinearLayout
-                android:layout_width="0dp"
+            <!-- File Name - Full Width -->
+            <TextView
+                android:id="@+id/textView_file_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:text="filename.csv"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:layout_marginBottom="8dp"
+                tools:text="my_very_long_meters_data_file_2025.csv" />
 
+            <!-- File Details Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <!-- Left side - Date and Count -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView_file_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Jan 15, 2025"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray"
+                        android:gravity="center_vertical"
+                        tools:text="Jan 15, 2025 • 2:30 PM" />
+
+                    <TextView
+                        android:id="@+id/textView_meter_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 meters"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray"
+                        android:layout_marginTop="2dp"
+                        android:gravity="center_vertical"
+                        tools:text="248 meters" />
+
+                </LinearLayout>
+
+                <!-- Right side - Status Badge -->
                 <TextView
-                    android:id="@+id/textView_file_name"
+                    android:id="@+id/textView_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="filename.csv"
-                    android:textSize="16sp"
+                    android:text="Valid"
+                    android:textSize="12sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black" />
-
-                <TextView
-                    android:id="@+id/textView_file_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Jan 15, 2025"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/darker_gray"
-                    android:layout_marginTop="2dp" />
-
-                <TextView
-                    android:id="@+id/textView_meter_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 meters"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/darker_gray"
-                    android:layout_marginTop="2dp" />
+                    android:textColor="@android:color/holo_green_dark"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:layout_marginStart="12dp"
+                    tools:text="Valid" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/textView_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Valid"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:background="@drawable/status_background"
-                android:padding="4dp"
-                android:layout_gravity="top" />
-
         </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginBottom="16dp" />
 
         <!-- Action Buttons Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
+            android:orientation="vertical"
+            android:gravity="center">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_meter_check"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:text="MeterCheck"
-                android:textSize="12sp"
-                android:layout_marginEnd="4dp"
-                app:strokeColor="@color/design_default_color_primary"
-                app:icon="@android:drawable/ic_menu_search"
-                app:iconSize="16dp" />
+            <!-- Primary Action Buttons Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp"
+                android:gravity="center">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_match"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:text="Match"
-                android:textSize="12sp"
-                android:layout_marginEnd="4dp"
-                app:strokeColor="@color/design_default_color_secondary"
-                app:icon="@android:drawable/ic_menu_sort_by_size"
-                app:iconSize="16dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_meter_check"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="MeterCheck"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="8dp"
+                    app:strokeColor="@android:color/holo_blue_dark"
+                    app:strokeWidth="2dp"
+                    app:icon="@android:drawable/ic_menu_search"
+                    app:iconSize="20dp"
+                    app:iconGravity="start"
+                    tools:text="MeterCheck" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_match"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="Match"
+                    android:textSize="14sp"
+                    android:layout_marginStart="8dp"
+                    app:strokeColor="@android:color/holo_orange_dark"
+                    app:strokeWidth="2dp"
+                    app:icon="@android:drawable/ic_menu_sort_by_size"
+                    app:iconSize="20dp"
+                    app:iconGravity="start"
+                    tools:text="Match" />
+
+            </LinearLayout>
+
+            <!-- Secondary Action Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_delete_file"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="48dp"
-                android:layout_height="36dp"
-                android:text=""
-                android:contentDescription="Delete file"
-                app:strokeColor="@android:color/holo_red_dark"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="@string/delete_file"
+                android:textSize="14sp"
+                android:textColor="@android:color/holo_red_dark"
+                android:paddingHorizontal="20dp"
                 app:icon="@android:drawable/ic_menu_delete"
-                app:iconSize="16dp"
-                app:iconTint="@android:color/holo_red_dark" />
+                app:iconSize="18dp"
+                app:iconTint="@android:color/holo_red_dark"
+                app:iconGravity="start"
+                tools:text="Delete File" />
 
         </LinearLayout>
 

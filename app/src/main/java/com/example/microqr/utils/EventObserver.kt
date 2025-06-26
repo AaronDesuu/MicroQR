@@ -1,4 +1,4 @@
-package com.example.microqr.util
+package com.example.microqr.utils
 import androidx.lifecycle.Observer // Make sure this is imported
 
 /**

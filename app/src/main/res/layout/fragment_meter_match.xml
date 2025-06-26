@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light"
+    android:background="@color/design_default_color_background"
     tools:context=".ui.metermatch.MeterMatchFragment">
 
     <!-- App Bar Layout with Collapsing Toolbar -->
@@ -36,7 +36,7 @@
                     android:id="@+id/welcome_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Meter Matching"
+                    android:text="@string/meter_match_welcome"
                     android:textSize="16sp"
                     android:textColor="@android:color/white"
                     android:alpha="0.8" />
@@ -45,7 +45,7 @@
                     android:id="@+id/main_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Match &amp; Verify"
+                    android:text="@string/meter_match_title"
                     android:textSize="28sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"
@@ -55,7 +55,7 @@
                     android:id="@+id/subtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Compare and validate your meter data"
+                    android:text="@string/meter_match_subtitle"
                     android:textSize="14sp"
                     android:textColor="@android:color/white"
                     android:alpha="0.7"
@@ -69,12 +69,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:title="Match Meters" />
+                app:title="@string/meter_match_toolbar_title" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <!-- Fixed Search and Filter Section -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/search_card_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
@@ -93,24 +94,52 @@
                 android:padding="16dp">
 
                 <!-- Search Bar -->
-                <com.google.android.material.textfield.TextInputLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Search meters..."
-                    app:startIconDrawable="@drawable/ic_search_24"
-                    app:endIconMode="clear_text"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etSearch"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/search_text_input_layout"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:maxLines="1" />
+                        android:layout_weight="1"
+                        android:layout_marginEnd="12dp"
+                        app:boxBackgroundMode="outline"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:boxCornerRadiusBottomEnd="8dp"
+                        app:boxCornerRadiusBottomStart="8dp"
+                        app:boxCornerRadiusTopEnd="8dp"
+                        app:boxCornerRadiusTopStart="8dp"
+                        app:startIconDrawable="@drawable/ic_search_24"
+                        app:hintTextColor="@color/md_theme_light_onSurfaceVariant"
+                        app:endIconMode="clear_text"
+                        android:hint="@string/search_meters">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSearch"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textColor="@android:color/black"
+                            android:imeOptions="actionSearch" />
 
-                <!-- Filter and Sort Buttons Row -->
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClearFilters"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/meter_match_clear_all"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+                <!-- Filter Buttons Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -120,73 +149,83 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFilterPlace"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:text="Filter Place"
-                        android:textSize="12sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:icon="@drawable/ic_filter_list"
+                        android:text="@string/meter_match_filter_place"
+                        android:textSize="11sp"
+                        android:layout_marginEnd="4dp"
+                        app:icon="@android:drawable/ic_menu_mylocation"
                         app:iconSize="16dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFilterFile"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:text="Filter File"
-                        android:textSize="12sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:icon="@drawable/ic_file_24"
+                        android:text="@string/meter_match_filter_file"
+                        android:textSize="11sp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        app:icon="@android:drawable/ic_menu_agenda"
                         app:iconSize="16dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSort"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Sort"
-                        android:textSize="12sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:icon="@drawable/ic_sort_24"
+                        android:text="@string/meter_match_sort"
+                        android:textSize="11sp"
+                        android:layout_marginStart="4dp"
+                        app:icon="@android:drawable/ic_menu_sort_alphabetically"
                         app:iconSize="16dp" />
 
                 </LinearLayout>
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupFilters"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:visibility="gone"
-                    app:chipSpacingHorizontal="8dp" />
-
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Main Scrollable Content -->
+    <!-- Main Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Quick Stats Card -->
+            <!-- Active Filters Chips -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupFilters"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="8dp"
+                    app:singleLine="true" />
+
+            </HorizontalScrollView>
+
+            <!-- Statistics Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
@@ -209,7 +248,7 @@
                             android:id="@+id/tvResultsCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/zero"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/md_theme_light_primary" />
@@ -217,7 +256,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Total Found"
+                            android:text="@string/meter_match_total_found"
                             android:textSize="12sp"
                             android:textColor="@color/md_theme_light_onSurfaceVariant"
                             android:layout_marginTop="4dp" />
@@ -238,10 +277,10 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/matched_count"
+                            android:id="@+id/matchedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/zero"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/success_green" />
@@ -249,7 +288,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Matched"
+                            android:text="@string/meter_match_matched"
                             android:textSize="12sp"
                             android:textColor="@color/md_theme_light_onSurfaceVariant"
                             android:layout_marginTop="4dp" />
@@ -270,10 +309,10 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/unmatched_count"
+                            android:id="@+id/unmatchedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/zero"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/warning_orange" />
@@ -281,7 +320,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Unmatched"
+                            android:text="@string/meter_match_unmatched"
                             android:textSize="12sp"
                             android:textColor="@color/md_theme_light_onSurfaceVariant"
                             android:layout_marginTop="4dp" />
@@ -289,34 +328,21 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Results Summary and Clear Filters -->
-            <LinearLayout
+            <!-- Results Summary -->
+            <TextView
+                android:id="@+id/tvResultsSummary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/tvResultsSummary"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="No results to display"
-                    android:textColor="@color/md_theme_light_onSurfaceVariant"
-                    android:textSize="14sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnClearFilters"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Clear All"
-                    android:textSize="12sp"
-                    android:visibility="gone"
-                    style="@style/Widget.MaterialComponents.Button.TextButton" />
-
-            </LinearLayout>
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_horizontal"
+                android:text="@string/meter_match_no_results"
+                android:textColor="@color/md_theme_light_onSurfaceVariant"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="Data from: meter_data_2024.csv, old_meters.csv" />
 
             <!-- Section Header -->
             <LinearLayout
@@ -332,7 +358,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Meter Results"
+                    android:text="@string/meter_match_meter_results"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/md_theme_light_onSurface" />
@@ -352,15 +378,14 @@
                     android:id="@+id/rvMeters"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:nestedScrollingEnabled="false"
                     android:padding="8dp"
+                    android:clipToPadding="false"
                     android:scrollbars="vertical"
-                    tools:itemCount="5"
-                    tools:listitem="@layout/item_match_meter" />
+                    tools:listitem="@layout/item_match_meter"
+                    tools:itemCount="5" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Empty State -->
+            <!-- Empty State (hidden by default) -->
             <LinearLayout
                 android:id="@+id/layoutEmptyState"
                 android:layout_width="match_parent"
@@ -376,13 +401,13 @@
                     android:layout_height="120dp"
                     android:src="@drawable/ic_meter_empty"
                     android:alpha="0.3"
-                    android:contentDescription="No meters found" />
+                    android:contentDescription="@string/meter_match_empty_state_description" />
 
                 <TextView
                     android:id="@+id/tvEmptyTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No meters found"
+                    android:text="@string/meter_match_empty_title"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="@color/md_theme_light_onSurface"
@@ -392,28 +417,38 @@
                     android:id="@+id/tvEmptyMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Try adjusting your search or filters"
+                    android:text="@string/meter_match_empty_subtitle"
                     android:textSize="14sp"
                     android:textColor="@color/md_theme_light_onSurfaceVariant"
                     android:layout_marginTop="8dp"
                     android:gravity="center" />
             </LinearLayout>
 
-            <!-- Loading State -->
-            <FrameLayout
+            <!-- Loading Indicator -->
+            <LinearLayout
                 android:id="@+id/layoutLoading"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
+                android:orientation="vertical"
+                android:gravity="center"
                 android:visibility="gone"
-                android:background="@color/background_light">
+                tools:visibility="gone">
 
                 <ProgressBar
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:indeterminateTint="@color/md_theme_light_primary" />
-            </FrameLayout>
+                    android:indeterminate="true" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/loading"
+                    android:textColor="@color/md_theme_light_onSurfaceVariant"
+                    android:layout_marginTop="16dp" />
+
+            </LinearLayout>
         </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

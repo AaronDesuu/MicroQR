@@ -69,19 +69,19 @@ class MeterMatchAdapter(
             tvSourceFile.text = "From: ${getShortFileName(meter.fromFile)}"
 
             // Determine status and colors based on scan status
-            val (statusText, statusColor, badgeColor, registrationIcon) = when {
+            val (statusTextResId, statusColor, badgeColor, registrationIcon) = when {
                 meter.isChecked -> {
                     // Scanned: Green badge, success status
-                    Tuple4("Scanned ✓", R.color.success_green, R.color.success_green, R.drawable.ic_check_circle)
+                    Tuple4(R.string.status_scanned, R.color.success_green, R.color.success_green, R.drawable.ic_check_circle)
                 }
                 else -> {
                     // Pending: Default badge, pending status
-                    Tuple4("Pending Scan", R.color.md_theme_light_onSurface, R.color.md_theme_light_primary, R.drawable.ic_pending_24)
+                    Tuple4(R.string.status_pending_scan, R.color.md_theme_light_onSurface, R.color.md_theme_light_primary, R.drawable.ic_pending_24)
                 }
             }
 
             // Set status text and color
-            tvMatchStatus.text = statusText
+            tvMatchStatus.text = itemView.context.getString(statusTextResId)
             tvMatchStatus.setTextColor(ContextCompat.getColor(itemView.context, statusColor))
 
             // Set status indicator color (small dot)

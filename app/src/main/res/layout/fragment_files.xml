@@ -6,73 +6,108 @@
     android:orientation="vertical"
     android:background="@color/design_default_color_background">
 
-    <!-- Header Section -->
+    <!-- Header Section with Dropdown -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="2dp">
+        app:cardCornerRadius="12dp"
+        app:cardElevation="3dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <RelativeLayout
+            <!-- File Management Header with Dropdown -->
+            <LinearLayout
+                android:id="@+id/dropdown_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="20dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
-                    android:id="@+id/textView_file_management_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="File Management"
+                    android:layout_weight="1"
+                    android:text="@string/files_manage_title"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentStart="true"/>
+                    android:textColor="@android:color/black" />
 
-                <ImageButton
-                    android:id="@+id/button_toggle_instructions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/dropdown_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:src="@drawable/ic_arrow_drop_down"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Toggle Instructions"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"/>
-            </RelativeLayout>
+                    android:contentDescription="@string/files_dropdown_toggle"
+                    android:layout_marginStart="8dp"
+                    android:background="@android:color/transparent" />
 
-            <TextView
-                android:id="@+id/textView_instructions"
+            </LinearLayout>
+
+            <!-- Thin Divider Line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:alpha="0.2"
+                android:layout_marginHorizontal="20dp" />
+
+            <!-- Dropdown Content (Instructions) -->
+            <LinearLayout
+                android:id="@+id/dropdown_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@android:color/darker_gray"
-                android:lineSpacingExtra="2dp"
-                android:layout_marginBottom="12dp"
+                android:orientation="vertical"
                 android:visibility="gone"
-            android:text="Show Information" />
+                android:background="@android:color/transparent"
+                android:animateLayoutChanges="true">
 
+                <TextView
+                    android:id="@+id/textView_instructions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/files_upload_instructions"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:lineSpacingExtra="4dp"
+                    android:padding="20dp"
+                    android:background="@android:color/transparent" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_upload_csv"
+            </LinearLayout>
+
+            <!-- Upload Button Container -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="Upload CSV File"
-                android:textStyle="bold"
-                app:icon="@android:drawable/ic_input_add"
-                app:iconGravity="start" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:paddingTop="16dp">
+
+                <!-- Upload Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_upload_csv"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="@string/files_upload_button"
+                    android:textStyle="bold"
+                    app:icon="@android:drawable/ic_input_add"
+                    app:iconGravity="start"
+                    app:cornerRadius="8dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Files List Section (Keep as is) -->
+    <!-- Files List Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -84,7 +119,7 @@
             android:id="@+id/textView_uploaded_files_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Uploaded Files"
+            android:text="@string/uploaded_files"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
@@ -111,12 +146,13 @@
                 android:layout_height="64dp"
                 android:src="@android:drawable/ic_menu_upload"
                 android:alpha="0.3"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                android:contentDescription="@string/files_no_files_icon" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No files uploaded yet"
+                android:text="@string/no_files_uploaded_yet"
                 android:textSize="16sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginBottom="8dp" />
@@ -124,10 +160,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Upload a CSV file to get started"
+                android:text="@string/files_upload_to_start"
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray" />
 
         </LinearLayout>
+
     </LinearLayout>
+
 </LinearLayout>

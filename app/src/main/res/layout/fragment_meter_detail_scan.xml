@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black"
+    android:background="@drawable/camera_gradient_background"
     tools:context=".ui.metermatch.MeterDetailScanFragment">
 
     <!-- Camera Preview -->
@@ -14,74 +14,127 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/meter_info_card"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_sheet_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:scaleType="fillCenter" />
 
-    <!-- Top Controls -->
+    <!-- Top Controls with Gradient Background -->
     <LinearLayout
         android:id="@+id/top_controls"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:padding="20dp"
         android:gravity="center_vertical"
+        android:background="@drawable/top_controls_gradient"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/circular_button_background"
-            android:src="@drawable/ic_arrow_back_24"
-            android:contentDescription="Back"
-            app:tint="@android:color/white" />
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:backgroundTint="@color/semi_transparent_dark"
+            app:icon="@drawable/ic_arrow_back_24"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp"
+            app:cornerRadius="28dp"
+            android:contentDescription="@string/back"
+            app:rippleColor="@color/white_ripple" />
 
-        <View
+        <TextView
             android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/scan_meter"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginHorizontal="16dp"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="3" />
 
-        <ImageButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_toggle_flash"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/circular_button_background"
-            android:src="@drawable/ic_flash_off"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:backgroundTint="@color/semi_transparent_dark"
+            app:icon="@drawable/ic_flash_off"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp"
+            app:cornerRadius="28dp"
             android:contentDescription="@string/toggle_flash"
-            app:tint="@android:color/white" />
+            app:rippleColor="@color/white_ripple" />
 
     </LinearLayout>
 
-    <!-- QR Scan Frame -->
+    <!-- QR Scan Frame with Enhanced Design -->
     <FrameLayout
         android:id="@+id/scan_frame_container"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/meter_info_card"
+        android:layout_width="320dp"
+        android:layout_height="320dp"
+        app:layout_constraintTop_toBottomOf="@+id/top_controls"
+        app:layout_constraintBottom_toTopOf="@+id/instruction_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.4">
+        app:layout_constraintVertical_bias="0.3">
 
+        <!-- Scanning Frame -->
         <View
             android:id="@+id/scan_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/qr_scan_frame" />
+            android:background="@drawable/enhanced_qr_scan_frame" />
 
-        <!-- Scanning animation line -->
+        <!-- Animated Scanning Line -->
         <View
             android:id="@+id/scan_line"
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/scan_line_gradient"
+            android:layout_height="3dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/enhanced_scan_line_gradient"
             android:visibility="visible" />
+
+        <!-- Corner Indicators -->
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="8dp"
+            android:src="@drawable/corner_top_left"
+            app:tint="@color/scan_frame_accent" />
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:src="@drawable/corner_top_right"
+            app:tint="@color/scan_frame_accent" />
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="8dp"
+            android:src="@drawable/corner_bottom_left"
+            app:tint="@color/scan_frame_accent" />
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="8dp"
+            android:src="@drawable/corner_bottom_right"
+            app:tint="@color/scan_frame_accent" />
 
     </FrameLayout>
 
@@ -92,8 +145,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginTop="16dp"
-        android:text="Scan the QR code on the target meter"
+        android:layout_marginBottom="8dp"
+        android:text="@string/scan_meter_qr"
         android:textAppearance="?attr/textAppearanceBodyLarge"
         android:textColor="@android:color/white"
         android:gravity="center"
@@ -103,7 +156,7 @@
         android:shadowDy="1"
         android:shadowRadius="3"
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@+id/scan_frame_container"
+        app:layout_constraintBottom_toTopOf="@+id/status_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -114,134 +167,233 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginTop="8dp"
-        android:text="Position QR code within the frame"
+        android:layout_marginBottom="16dp"
+        android:text="@string/position_qr_within_frame"
         android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="@android:color/white"
+        android:textColor="@color/white_80"
         android:gravity="center"
         android:shadowColor="@android:color/black"
         android:shadowDx="1"
         android:shadowDy="1"
         android:shadowRadius="3"
         android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@+id/instruction_text"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_sheet_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Meter Information Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/meter_info_card"
+    <!-- Bottom Sheet Container with Modal Style -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_sheet_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="?attr/colorSurface"
+        android:background="@drawable/bottom_sheet_background"
+        android:elevation="16dp"
+        android:paddingTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- Handle Bar -->
+        <View
+            android:id="@+id/handle_bar"
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bottom_sheet_handle"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Target Meter Information Card - Made Bigger -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/meter_info_card"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:layout_margin="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="12dp"
+            app:cardBackgroundColor="@color/surface_color"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/outline_variant"
+            app:layout_constraintTop_toBottomOf="@+id/handle_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Target Meter Information"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="?attr/colorOnSurface"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"
-                android:gravity="center" />
-
-            <!-- Meter Number -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
+                android:orientation="vertical"
+                android:padding="28dp">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_meter_24"
-                    android:layout_marginEnd="8dp"
-                    app:tint="?attr/colorPrimary" />
-
-                <TextView
-                    android:id="@+id/meter_number_text"
-                    android:layout_width="0dp"
+                <!-- Header with Icon -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Meter: M001"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold"
-                    tools:text="Meter: M001" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="24dp">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_qr_code_scanner_24"
+                        app:tint="@color/primary_color"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/target_meter_info"
+                        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                        android:textColor="@color/on_surface"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- Meter Number -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:padding="16dp"
+                    android:background="@drawable/info_item_background"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_numbers_24"
+                        android:layout_marginEnd="16dp"
+                        app:tint="@color/primary_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/meter_number_header"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            android:textColor="@color/on_surface_variant"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/meter_number_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="M-001"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="@color/on_surface"
+                            android:textStyle="bold"
+                            android:layout_marginTop="4dp"
+                            tools:text="M-001" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Serial Number -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:padding="16dp"
+                    android:background="@drawable/info_item_background"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_tag_24"
+                        android:layout_marginEnd="16dp"
+                        app:tint="@color/secondary_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/serial_number_header"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            android:textColor="@color/on_surface_variant"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/meter_serial_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SN123456789"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="@color/on_surface"
+                            android:textStyle="bold"
+                            android:layout_marginTop="4dp"
+                            android:fontFamily="monospace"
+                            tools:text="SN123456789" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Location -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:background="@drawable/info_item_background"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_location_24"
+                        android:layout_marginEnd="16dp"
+                        app:tint="@color/tertiary_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/location_header"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            android:textColor="@color/on_surface_variant"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/meter_place_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Main Building - Floor 1"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="@color/on_surface"
+                            android:layout_marginTop="4dp"
+                            tools:text="Main Building - Floor 1" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Target Serial Number -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
+        </com.google.android.material.card.MaterialCardView>
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_qr_code_scanner_24"
-                    android:layout_marginEnd="8dp"
-                    app:tint="?attr/colorPrimary" />
-
-                <TextView
-                    android:id="@+id/target_serial_text"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Target S/N: ABC123456"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:textColor="?attr/colorOnSurface"
-                    android:fontFamily="monospace"
-                    tools:text="Target S/N: ABC123456" />
-
-            </LinearLayout>
-
-            <!-- Place -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_location_24"
-                    android:layout_marginEnd="8dp"
-                    app:tint="?attr/colorPrimary" />
-
-                <TextView
-                    android:id="@+id/meter_place_text"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Location: Main Building - Floor 1"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    tools:text="Location: Main Building - Floor 1" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Progress indicator for scanning -->
     <ProgressBar
@@ -250,7 +402,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         style="?android:attr/progressBarStyle"
-        android:indeterminateTint="@android:color/white"
+        android:indeterminateTint="@color/scan_frame_accent"
         app:layout_constraintTop_toTopOf="@+id/scan_frame_container"
         app:layout_constraintBottom_toBottomOf="@+id/scan_frame_container"
         app:layout_constraintStart_toStartOf="@+id/scan_frame_container"
@@ -260,11 +412,12 @@
     <!-- Success Animation -->
     <ImageView
         android:id="@+id/success_animation"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:src="@drawable/ic_check_circle"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_check_circle_animated"
         android:visibility="gone"
         app:tint="@color/success_green"
+        android:background="@drawable/success_animation_background"
         app:layout_constraintTop_toTopOf="@+id/scan_frame_container"
         app:layout_constraintBottom_toBottomOf="@+id/scan_frame_container"
         app:layout_constraintStart_toStartOf="@+id/scan_frame_container"

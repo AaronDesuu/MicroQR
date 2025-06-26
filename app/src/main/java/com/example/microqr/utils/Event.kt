@@ -1,4 +1,4 @@
-package com.example.microqr.util // Or the package where you created it
+package com.example.microqr.utils // Or the package where you created it
 
 /**
  * Used as a wrapper for data that is exposed via a LiveData that represents an event.

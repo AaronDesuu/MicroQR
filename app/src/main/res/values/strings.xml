@@ -154,9 +154,9 @@
     <string name="quick_statistics">Quick Statistics</string>
     <string name="match_meters">Match Meters</string>
     <string name="check_meters">Check Meters</string>
-    <string name="matched">matched</string>
-    <string name="pending">pending</string>
-    <string name="scanned">scanned</string>
+    <string name="matched"> matched</string>
+    <string name="pending"> pending</string>
+    <string name="scanned"> scanned</string>
     <string name="total_meters_label">Total Meters: </string>
 
     <!-- NEW: Time-based Greetings -->
@@ -302,9 +302,6 @@
     <string name="loaded_meters_for_matching">Loaded %d meters for matching</string>
 
     <!-- Logging/Debug Messages (optional - you may not want to localize these) -->
-    <string name="starting_micro_qr_detection">Starting Micro QR detection attempts.</string>
-    <string name="micro_qr_detection_skipped">Skipping Micro QR detection: Fragment not ready, or already navigating.</string>
-    <string name="fallback_micro_qr_start">Fallback: Starting MicroQR detection as no regular QR found yet.</string>
 
     <!-- User Welcome -->
     <string name="welcome_user_format" translatable="false">%s %s</string>
@@ -314,4 +311,206 @@
     <string name="no_qr_data">No QR Data received</string>
     <string name="quick_stats_icon">Quick Stats Icon</string>
 
+<!--    meter check-->
+    <string name="verify_meter">Verify Meters</string>
+
+    <!-- Strings for fragment_meter_match.xml -->
+    <string name="meter_check_welcome">Meter Checking</string>
+    <string name="meter_match_welcome">Meter Matching</string>
+    <string name="meter_match_title">Match &amp; Verify</string>
+    <string name="meter_match_subtitle">Compare and validate your meter data</string>
+    <string name="meter_match_toolbar_title">Match Meters</string>
+    <string name="meter_match_search_hint">Search meters...</string>
+    <string name="meter_match_filter_place">Filter Place</string>
+    <string name="meter_match_filter_file">Filter File</string>
+    <string name="meter_match_sort">Sort</string>
+    <string name="meter_match_total_found">Total Found</string>
+    <string name="meter_match_matched">Matched</string>
+    <string name="meter_match_unmatched">Unmatched</string>
+    <string name="meter_match_no_results">No results to display</string>
+    <string name="meter_match_clear_all">Clear All</string>
+    <string name="meter_match_meter_results">Meter Results</string>
+    <string name="meter_match_empty_state_description">No meters found</string>
+    <string name="meter_match_empty_title">No meters found</string>
+    <string name="meter_match_empty_subtitle">Try adjusting your search or filter criteria.</string>
+    <!-- For the search chip display -->
+    <string name="search_label">Search</string>
+
+    <!-- For filter chip prefixes -->
+    <string name="location_prefix">📍</string>
+    <string name="file_prefix">📁</string>
+
+    <!-- For scanned status in chips -->
+    <string name="scanned_only">Scanned Only</string>
+    <string name="not_scanned_only">Not Scanned Only</string>
+    <string name="loading">Loading...</string>
+
+<!--    Files fragment-->
+    <string name="csv_file_icon">CSV file icon</string>
+    <string name="status_valid">Valid</string>
+
+    <!-- NEW: FilesAdapter String Resources -->
+
+    <!-- File Status Messages -->
+    <string name="files_meter_count">%d meters</string>
+    <string name="files_status_meter_check">✅ MeterCheck</string>
+    <string name="files_status_meter_match">✅ MeterMatch</string>
+    <string name="files_status_valid_ready">Valid • Ready to process</string>
+    <string name="files_status_valid_empty">Valid but empty</string>
+    <string name="files_status_invalid">❌ Invalid: %s</string>
+
+    <!-- File Action Buttons -->
+    <string name="files_button_meter_check">MeterCheck</string>
+    <string name="files_button_match">Match</string>
+    <string name="files_button_reprocess">Reprocess</string>
+    <string name="files_button_switch_to_match">Switch to Match</string>
+    <string name="files_button_switch_to_check">Switch to Check</string>
+
+    <!-- File UI Labels -->
+    <string name="files_from_label">From: %s</string>
+
+    <!-- File Processing Messages -->
+    <string name="files_processing_success">File processed successfully</string>
+    <string name="files_upload_success">File uploaded successfully</string>
+    <string name="files_upload_error">Error uploading file</string>
+
+    <!-- File Validation Messages -->
+    <string name="files_validation_invalid_format">Invalid file format</string>
+    <string name="files_validation_missing_columns">Missing required columns</string>
+    <string name="files_validation_empty_file">File is empty</string>
+    <string name="files_validation_too_large">File is too large</string>
+    <!-- NEW: Additional FilesFragment String Resources - ADD THESE TO YOUR EXISTING strings.xml -->
+
+    <!-- File Processing Status -->
+    <string name="files_processing_started">Processing file...</string>
+    <string name="files_processing_complete">File processed successfully</string>
+    <string name="files_processing_failed">Failed to process file</string>
+
+    <!-- File Upload Status -->
+    <string name="files_upload_started">Uploading file...</string>
+    <string name="files_upload_complete">File uploaded successfully</string>
+    <string name="files_upload_failed">Failed to upload file</string>
+
+    <!-- File Validation Error Messages -->
+    <string name="files_error_file_too_large">File is too large (max 10MB)</string>
+    <string name="files_error_invalid_type">Invalid file type. Please select a CSV file.</string>
+    <string name="files_error_no_permission">Permission denied to read file</string>
+    <string name="files_error_corrupted">File appears to be corrupted or unreadable</string>
+
+    <!-- File Operations -->
+    <string name="files_operation_success">Operation completed successfully</string>
+    <string name="files_operation_failed">Operation failed</string>
+    <string name="files_file_exists">A file with this name already exists</string>
+    <string name="files_replace_existing">Replace existing file?</string>
+
+    <!-- Loading States -->
+    <string name="files_loading">Loading files...</string>
+    <string name="files_scanning">Scanning file contents...</string>
+    <string name="files_validating">Validating file format...</string>
+
+    <!-- NEW: Dropdown and File Management String Resources - ADD THESE TO YOUR EXISTING strings.xml -->
+
+    <!-- File Management Header -->
+    <string name="files_manage_title">File Management</string>
+    <string name="files_dropdown_toggle">Toggle information dropdown</string>
+    <string name="files_upload_button">Upload CSV File</string>
+    <string name="files_no_files_icon">No files uploaded icon</string>
+    <string name="files_upload_to_start">Upload a CSV file to get started</string>
+
+    <!-- Dropdown Content -->
+    <string name="files_show_instructions">Show Instructions</string>
+    <string name="files_hide_instructions">Hide Instructions</string>
+
+    <!-- File Management Instructions (Detailed) -->
+    <string name="files_upload_instructions">📋 Instructions:\n\n1. Upload a CSV file with the following required columns:\n   • Number - Meter identification number\n   • SerialNumber - Unique serial number\n   • Place - Location/address of the meter\n   • Registered - Boolean (true/false, yes/no, 1/0)\n\n2. After upload, choose processing destination:\n   • MeterCheck - For meter verification workflow\n   • Match - For matching operations\n\n3. Only valid CSV files can be processed\n\nSupported file types: CSV, TXT\nMaximum file size: 10MB</string>
+
+    <!-- Date Format Strings (English) -->
+    <string name="date_format_short">MMM dd, yyyy</string>
+    <string name="date_format_with_time">MMM dd, yyyy • h:mm a</string>
+    <string name="time_format_12h">h:mm a</string>
+    <string name="time_format_24h">HH:mm</string>
+
+    <!-- Date/Time Labels -->
+    <string name="uploaded_on">Uploaded on</string>
+    <string name="created_on">Created on</string>
+    <string name="modified_on">Modified on</string>
+
+    <!-- File Date Examples for Testing -->
+    <string name="date_today">Today</string>
+    <string name="date_yesterday">Yesterday</string>
+
+<!--    Meter Check-->
+    <!-- Screen Titles -->
+    <string name="meter_check_default_title">MeterCheck</string>
+    <string name="meter_check_screen_title">MeterCheck - %1$d meters</string> <!-- Already added -->
+
+    <!-- Toasts -->
+    <string name="refreshing_meter_data">Refreshing meter data...</string>
+    <string name="meter_data_refreshed">Meter data refreshed</string>
+    <string name="meter_marked_as_scanned">Meter %1$s marked as scanned ✅</string>
+    <string name="meter_marked_as_not_scanned">Meter %1$s marked as not scanned ❌</string>
+
+
+    <!-- Button Texts -->
+    <string name="refresh_button_refreshing">Refreshing...</string>
+    <string name="refresh_button_refresh">Refresh</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_meter_not_found_title">Meter Not Found</string>
+    <string name="dialog_meter_not_found_message">Serial number \'%1$s\' was not found in the loaded meter data.\n\nThis could mean:\n• The meter is from a different batch\n• The serial number was misread\n• The meter data hasn\'t been loaded</string>
+    <string name="dialog_button_ok">OK</string>
+    <string name="dialog_button_show_all_meters">Show All Meters</string>
+
+    <!-- Empty States (already added previously based on your specific request) -->
+    <string name="meter_check_no_meters_available">No meters available\nProcess CSV files for MeterCheck to see meters here</string>
+    <string name="meter_check_no_meters_found_search">No meters found\nTry adjusting your search query</string>
+    <string name="meter_check_no_meter_data">No meter data available</string>
+
+    <!-- Current Files Display (already added previously) -->
+    <string name="meter_check_data_from">MeterCheck data from: %1$s</string>
+    <string name="no_meter_check_data_loaded">No MeterCheck data loaded</string>
+
+    <!-- File Processing Dialog Strings - FIXED -->
+    <string name="files_choose_destination">Choose Processing Destination</string>
+    <string name="files_destination_dialog_subtitle">Select the appropriate workflow for your CSV file</string>
+    <string name="files_destination_meter_check">MeterCheck - Verification Workflow</string>
+    <string name="files_destination_meter_match">MeterMatch - Matching Operations</string>
+    <string name="files_meter_check_description">For verifying and checking off meters from your list</string>
+    <string name="files_meter_match_description">For matching scanned QR codes against your meter database</string>
+    <string name="files_select_destination">Select Destination</string>
+    <string name="files_processing_file">Processing file...</string>
+    <string name="files_processed_success">✅ File processed for %s</string>
+    <string name="files_select_destination_first">Please select a destination first</string>
+    <string name="files_upload_cancelled">Upload cancelled</string>
+
+    <!-- File Processing Error Strings -->
+    <string name="files_validation_no_data">No valid data found</string>
+    <string name="files_processing_error">Processing error</string>
+    <string name="status_scanned">Scanned ✓</string>
+    <string name="status_pending_scan">pending scan</string>
+
+    <!-- Meter Detail Scan Fragment -->
+    <string name="meter_number_header">Meter Number</string>
+    <string name="serial_number_header">Serial Number</string>
+    <string name="location_header">Location</string>
+    <string name="scan_status_header">Scan Status</string>
+    <string name="scanning_for_meter">Scanning for meter: %s</string>
+    <string name="scan_complete">Scan Complete!</string>
+    <string name="scan_failed">Scan Failed</string>
+    <string name="meter_scan_success">Meter verified successfully!</string>
+    <string name="meter_scan_mismatch">QR code does not match target meter</string>
+    <string name="camera_permission_denied">Camera permission is required for scanning</string>
+    <string name="camera_initialization_failed">Failed to initialize camera</string>
+
+    <!-- Scanner UI -->
+    <string name="aim_camera_at_qr">Aim camera at QR code</string>
+    <string name="scanning_in_progress">Scanning in progress...</string>
+    <string name="hold_steady">Hold device steady</string>
+    <string name="flash_on">Flash On</string>
+    <string name="flash_off">Flash Off</string>
+
+    <!-- Meter Information Labels -->
+    <string name="target_meter_information">Target Meter Information</string>
+    <string name="meter_details_card">Meter Details</string>
+    <string name="scan_to_verify">Scan QR code to verify this meter</string>
 </resources>
