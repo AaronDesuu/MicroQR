@@ -1,7 +1,9 @@
 package com.example.microqr.ui.metermatch
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.microqr.R
 import com.example.microqr.ui.files.MeterStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,12 +19,12 @@ data class FilterState(
     val showUncheckedOnly: Boolean = false
 )
 
-enum class SortOption(val displayName: String) {
-    SERIAL_NUMBER("Serial Number"),
-    METER_NUMBER("Meter Number"),
-    PLACE("Place"),
-    SOURCE_FILE("Source File"),
-    REGISTRATION_STATUS("Registration Status")
+enum class SortOption(@StringRes val displayNameRes: Int) {
+    SERIAL_NUMBER(R.string.sort_serial_number),
+    METER_NUMBER(R.string.sort_meter_number),
+    PLACE(R.string.sort_place),
+    SOURCE_FILE(R.string.sort_source_file),
+    REGISTRATION_STATUS(R.string.sort_registration_status)
 }
 
 data class MatchUiState(

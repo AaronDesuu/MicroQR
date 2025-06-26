@@ -48,8 +48,8 @@ class DetectedFragment : Fragment() {
             parseRawQrValue(rawQrValue) // Call the simplified parsing function
 
             if (extractedSerialNumber != null) {
-                binding.serialNumberText.text = "S/N: $extractedSerialNumber"
-                binding.detectedInfoText.text = "(Raw: $rawQrValue)"
+                binding.serialNumberText.text = getString(R.string.serial_number_format, extractedSerialNumber)
+                binding.detectedInfoText.text = getString(R.string.raw_qr_format, rawQrValue)
                 binding.nextButton.text = getString(R.string.check_serial)
                 binding.nextButton.visibility = View.VISIBLE
                 binding.nextButton.isEnabled = true
@@ -58,15 +58,15 @@ class DetectedFragment : Fragment() {
                 }
             } else {
                 // Parsing failed or rawQrValue was empty
-                binding.serialNumberText.text = "Error Parsing QR"
-                binding.detectedInfoText.text = "Could not parse valid Serial Number from QR data.\n\nRaw: $rawQrValue"
+                binding.serialNumberText.text = getString(R.string.error_parsing_qr)
+                binding.detectedInfoText.text = getString(R.string.could_not_parse_serial, rawQrValue)
                 binding.nextButton.visibility = View.GONE
                 Log.w(TAG, "Could not parse serial number from raw QR value: $rawQrValue")
             }
         } else {
             Log.w(TAG, "No rawQrValue found in arguments.")
             binding.serialNumberText.text = "N/A"
-            binding.detectedInfoText.text = "No QR Code data was received."
+            binding.detectedInfoText.text = getString(R.string.no_qr_data)
             binding.nextButton.visibility = View.GONE
         }
 

@@ -177,16 +177,35 @@
     <string name="meter_already_checked_toast">\'%1$s\' (ファイル %2$s) は既にチェック済みでした。</string>
     <string name="meter_status_updated_toast">\'%s\' のステータスが更新されました（ファイル未指定）。</string>
     <string name="loaded_meters_for_checking">チェック用に %d 個のメーターを読み込みました</string>
+    <string name="scan_qr_for_meter">%s メーターのQRを読み取ってください</string>
     <string name="loaded_meters_for_matching">マッチング用に %d 個のメーターを読み込みました</string>
 
     <!-- ダイアログメッセージ -->
     <string name="meter_not_found_dialog_title">メーターが見つかりません</string>
     <string name="meter_not_found_dialog_message">シリアル番号 \'%s\' は読み込まれたメーターデータに見つかりませんでした。\n\n考えられる原因:\n• メーターが別のバッチからのもの\n• シリアル番号が誤読された\n• メーターデータが読み込まれていない</string>
+    <string name="meter_details">メーター詳細</string>
+    <string name="mark_as_unscanned">未スキャンとする</string>
+    <string name="mark_as_scanned">スキャン済みとする</string>
+    <string name="meter_not_found">見つかりませんでした</string>
+    <string name="meter_not_found_message">シリアル番号 『%s』 がロードされたメータ・データに見つかりませんでした。  これは次のことを意味します： - メータが別のバッチである。 - シリアル番号が読み違えられた。 - メータ・データがロードされていない。</string>
     <string name="show_all_meters">すべてのメーターを表示</string>
+    <string name="delete_file_confirmation">本当にこのファイルを削除しますか？この操作は元に戻せません。</string>
+    <string name="delete">削除</string>
+    <string name="cancel">キャンセル</string>
     <string name="ok">OK</string>
 
     <!-- 空状態メッセージ -->
+    <string name="file_filter_count">ファイル (%d)</string>
+    <string name="showing_all_meters">" %d メーターを全体表示"</string>
+    <string name="showing_filtered_meters">%d メーターの %d を表示</string>
+    <string name="no_meters_loaded">メーターデータがありません</string>
+    <string name="no_results_match_filters">フィルタに一致する結果がありません</string>
     <string name="no_meters_found_search">メーターが見つかりません\n検索条件を調整してください</string>
+    <string name="try_adjusting_search">検索またはフィルタを調整する</string>
+    <string name="no_meters_available">メーターデータがありません</string>
+    <string name="process_csv_files_message">MeterMatchのCSVファイルを処理し、ここでメーターを確認する</string>
+    <string name="all_meters_filtered_out">全メーターフィルターされます</string>
+    <string name="clear_filters_to_see_all">フィルターを削除してください</string>
     <string name="no_meter_data_available">利用可能なメーターデータがありません</string>
     <string name="no_metercheck_data_loaded">MeterCheckデータが読み込まれていません</string>
     <string name="metercheck_data_from">MeterCheckデータの元: %s</string>
@@ -215,5 +234,37 @@
     <string name="ready_to_manage_your_meters">メーターを管理する準備はできましたか？</string>
     <string name="check_and_scan_qr_codes_on_meters">メーターのQRコードを確認してスキャンします</string>
     <string name="upload_and_manage_meter_data_files">メーターデータファイルのアップロードと管理</string>
+    <string name="binding_null_camera">カメラエラー</string>
+    <string name="no_qr_data">QRデータがありません</string>
+    <string name="meter_marked_scanned_toast">✅ メーター %s がスキャンされました！</string>
+    <string name="sort_serial_number">シリアル番号</string>
+    <string name="sort_meter_number">メーター順番</string>
+    <string name="sort_place">場所</string>
+    <string name="sort_source_file">ソースファイル</string>
+    <string name="sort_registration_status">登録状況</string>
+    <string name="no_match_dialog_title">一致するメーターがありません</string>
+    <string name="no_match_dialog_message">期待される: %1$s スキャンされた: %2$s スキャンされた QR コードは期待されるメーターのシリアル番号と一致しません。 正しいメーターをスキャンしていることを確認してください。</string>
+    <string name="mismatch_dialog_message">期待されたメーター： %1$s スキャンされたメーター： %2$s スキャンされた QR コードは期待されたメーターと一致しませんが、このシリアル番号を持つ他のメーターが見つかりました。</string>
+    <string name="try_adjusting_search_query">メーターが見つかりません。 検索クエリを調整してください。</string>
+    <string name="already_scanned">✅ スキャン済み</string>
+    <string name="pending_scan_status">❌ 未スキャン</string>
+    <string name="meter_information">📊 メーター情報</string>
+    <string name="meter_number_label">🔢 順番: %s</string>
+    <string name="meter_serial_label">🏷️ シリアル番号: %s</string>
+    <string name="meter_location_label">📍 場所: %s</string>
+    <string name="meter_source_label">📁 ソースファイル: %s</string>
+    <string name="status_summary">📋 詳細情報:</string>
+    <string name="registration_status">• 登録状況: %s</string>
+    <string name="filter_by_place">場所フィルター</string>
+    <string name="filter_by_source_file">ソースフィルター</string>
+    <string name="filter_place">場所フィルター</string>
+    <string name="sort_by">ソート</string>
+    <string name="place_filter_count">場所 (%d)</string>
+    <string name="done">完了</string>
+    <string name="clear_all">全クリア</string>
+    <string name="scan_again_button">もう一度読み取ってください</string>
+    <string name="error_parsing_qr">QRパースエラー</string>
+    <string name="could_not_parse_serial">"QR データから有効なシリアル番号を解析できませんでした。 "</string>
+    <string name="quick_stats_icon">クイック統計</string>
 
 </resources>

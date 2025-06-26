@@ -176,19 +176,16 @@
     <string name="unknown_destination">Unknown destination: %s</string>
 
     <!-- NEW: Toast Messages -->
-    <string name="meter_scanned_successfully">✅ Meter scanned successfully!\nSerial: %1$s\nFile: %2$s</string>
     <string name="meter_not_found_toast">\'%s\' NOT FOUND in any loaded meter list.</string>
     <string name="meter_marked_checked_toast">\'%1$s\' (from %2$s) is now marked as CHECKED!</string>
     <string name="meter_already_checked_toast">\'%1$s\' (from %2$s) was ALREADY CHECKED.</string>
     <string name="meter_status_updated_toast">\'%s\' status updated (file not specified).</string>
     <string name="loaded_meters_for_checking">Loaded %d meters for checking</string>
-    <string name="loaded_meters_for_matching">Loaded %d meters for matching</string>
 
     <!-- NEW: Dialog Messages -->
     <string name="meter_not_found_dialog_title">Meter Not Found</string>
     <string name="meter_not_found_dialog_message">Serial number \'%s\' was not found in the loaded meter data.\n\nThis could mean:\n• The meter is from a different batch\n• The serial number was misread\n• The meter data hasn\'t been loaded</string>
     <string name="show_all_meters">Show All Meters</string>
-    <string name="ok">OK</string>
 
     <!-- NEW: Empty State Messages -->
     <string name="no_meters_found_search">No meters found\nTry adjusting your search query</string>
@@ -233,9 +230,9 @@
 
     <!-- Parsing and QR Detection -->
     <string name="error_parsing_qr">Error Parsing QR</string>
-    <string name="could_not_parse_serial">Could not parse valid Serial Number from QR data.\n\nRaw: %s</string>
-    <string name="serial_number_format">S/N: %s</string>
-    <string name="raw_qr_format">(Raw: %s)</string>
+    <string name="could_not_parse_serial">Could not parse valid Serial Number from QR data.  Raw: %s</string>
+    <string name="serial_number_format" translatable="false">S/N: %s</string>
+    <string name="raw_qr_format" translatable="false">(Raw: %s)</string>
 
     <!-- Filter and Search -->
     <string name="filter_by_place">Filter by Place</string>
@@ -252,22 +249,16 @@
     <string name="no_results_match_filters">No results match your filters</string>
 
     <!-- Empty State Messages -->
-    <string name="no_meters_found_search">No meters found</string>
     <string name="try_adjusting_search">Try adjusting your search or filters</string>
     <string name="no_meters_available">No meters available</string>
     <string name="process_csv_files_message">Process CSV files for MeterMatch to see meters here</string>
     <string name="all_meters_filtered_out">All meters filtered out</string>
     <string name="clear_filters_to_see_all">Clear filters to see all meters</string>
-    <string name="no_meter_data_available">No meter data available</string>
     <string name="try_adjusting_search_query">No meters found\nTry adjusting your search query</string>
 
     <!-- Meter Status -->
     <string name="already_scanned">✅ Already Scanned</string>
     <string name="pending_scan_status">❌ Pending Scan</string>
-    <string name="meter_registered">✅ Registered</string>
-    <string name="meter_not_registered">❌ Not Registered</string>
-    <string name="marked_as_scanned">Marked as scanned ✅</string>
-    <string name="marked_as_not_scanned">Marked as not scanned ❌</string>
 
     <!-- Meter Detail Dialog -->
     <string name="meter_information">📊 Meter Information</string>
@@ -277,7 +268,7 @@
     <string name="meter_source_label">📁 Source: %s</string>
     <string name="status_summary">📋 Status Summary:</string>
     <string name="registration_status">• Registration: %s</string>
-    <string name="qr_scan_status">• QR Scan: %s</string>
+    <string name="qr_scan_status" translatable="false">• QR Scan: %s</string>
     <string name="meter_details">Meter Details</string>
     <string name="mark_as_unscanned">Mark as Unscanned</string>
     <string name="mark_as_scanned">Mark as Scanned</string>
@@ -285,7 +276,6 @@
     <!-- Meter Not Found Dialog -->
     <string name="meter_not_found">Meter Not Found</string>
     <string name="meter_not_found_message">Serial number \'%s\' was not found in the loaded meter data.\n\nThis could mean:\n• The meter is from a different batch\n• The serial number was misread\n• The meter data hasn\'t been loaded</string>
-    <string name="show_all_meters">Show All Meters</string>
 
     <!-- Meter Scan Success -->
     <string name="meter_scanned_successfully">✅ Meter scanned successfully!\nSerial: %s\nFile: %s</string>
@@ -300,10 +290,10 @@
 
     <!-- No Match Dialog Content -->
     <string name="no_match_dialog_title">❌ No Match Found</string>
-    <string name="no_match_dialog_message">Expected: %1$s\nScanned: %2$s\n\nThe scanned QR code doesn\'t match the expected meter serial number, and no other meters with this serial number were found in the system.\n\nPlease verify you\'re scanning the correct meter.</string>
+    <string name="no_match_dialog_message">Expected: %1$s Scanned: %2$s  The scanned QR code doesn\'t match the expected meter serial number, and no other meters with this serial number were found in the system.  Please verify you\'re scanning the correct meter.</string>
 
     <!-- Mismatch Dialog Content -->
-    <string name="mismatch_dialog_message">Expected: %1$s\nScanned: %2$s\n\nThe scanned QR code doesn\'t match the expected meter, but we found other meters with this serial number.</string>
+    <string name="mismatch_dialog_message">Expected: %1$s Scanned: %2$s  The scanned QR code doesn\'t match the expected meter, but we found other meters with this serial number.</string>
 
     <!-- Scan Instructions -->
     <string name="scan_qr_for_meter">Scan QR code for meter: %s</string>
@@ -317,9 +307,11 @@
     <string name="fallback_micro_qr_start">Fallback: Starting MicroQR detection as no regular QR found yet.</string>
 
     <!-- User Welcome -->
-    <string name="welcome_user_format">%s %s</string>
+    <string name="welcome_user_format" translatable="false">%s %s</string>
 
     <!-- Camera Controller -->
-    <string name="binding_null_camera">Binding was null when trying to bind camera controller.</string>]
+    <string name="binding_null_camera">Binding was null when trying to bind camera controller.</string>
+    <string name="no_qr_data">No QR Data received</string>
+    <string name="quick_stats_icon">Quick Stats Icon</string>
 
 </resources>

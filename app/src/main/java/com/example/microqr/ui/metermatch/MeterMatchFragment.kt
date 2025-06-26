@@ -310,13 +310,13 @@ class MeterMatchFragment : Fragment() {
         binding.btnFilterFile.text = if (fileCount > 0) {
             getString(R.string.file_filter_count, fileCount)
         } else {
-            "Filter File"
+            getString(R.string.filter_by_source_file) // Use string resource
         }
 
-        // Update sort button to show current sort
+        val sortDisplayName = getString(uiState.sortOption.displayNameRes) // Use displayNameRes
         val sortText = when {
-            uiState.sortAscending -> "${uiState.sortOption.displayName} ↑"
-            else -> "${uiState.sortOption.displayName} ↓"
+            uiState.sortAscending -> "$sortDisplayName ↑"
+            else -> "$sortDisplayName ↓"
         }
         binding.btnSort.text = sortText
     }
@@ -477,10 +477,11 @@ class MeterMatchFragment : Fragment() {
         val uiState = viewModel.uiState.value
         val sortOptions = SortOption.values()
         val optionNames = sortOptions.map {
+            val displayName = getString(it.displayNameRes) // Use displayNameRes instead of displayName
             val arrow = if (uiState.sortOption == it) {
                 if (uiState.sortAscending) " ↑" else " ↓"
             } else ""
-            it.displayName + arrow
+            displayName + arrow
         }.toTypedArray()
 
         val selectedIndex = sortOptions.indexOf(uiState.sortOption)
@@ -492,7 +493,7 @@ class MeterMatchFragment : Fragment() {
                 applyCurrentFilters()
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }
             .show()
     }
 
@@ -521,11 +522,11 @@ class MeterMatchFragment : Fragment() {
 
         // Option to manually toggle scan status (for testing/correction)
         dialogBuilder.setNegativeButton(
-            if (meter.isChecked) getString(R.string.marked_as_not_scanned) else getString(R.string.marked_as_scanned)
+            if (meter.isChecked) getString(R.string.mark_as_unscanned) else getString(R.string.mark_as_scanned)
         ) { _, _ ->
             filesViewModel.updateMeterCheckedStatus(meter.serialNumber, !meter.isChecked, meter.fromFile)
             Toast.makeText(context,
-                if (!meter.isChecked) getString(R.string.marked_as_scanned) else getString(R.string.marked_as_not_scanned),
+                if (!meter.isChecked) getString(R.string.mark_as_scanned) else getString(R.string.mark_as_unscanned),
                 Toast.LENGTH_SHORT).show()
         }
 
