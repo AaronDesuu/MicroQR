@@ -9,6 +9,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import com.example.microqr.R
 import com.example.microqr.databinding.FragmentDetectedBinding
 import com.example.microqr.ui.files.FilesViewModel
@@ -54,7 +57,7 @@ class DetectedFragment : Fragment() {
                 binding.nextButton.visibility = View.VISIBLE
                 binding.nextButton.isEnabled = true
                 binding.nextButton.setOnClickListener {
-                    checkSerialNumberInTable(extractedSerialNumber!!)
+                    checkSerialNumberInTableAsync(extractedSerialNumber!!)
                 }
             } else {
                 // Parsing failed or rawQrValue was empty
@@ -65,7 +68,7 @@ class DetectedFragment : Fragment() {
             }
         } else {
             Log.w(TAG, "No rawQrValue found in arguments.")
-            binding.serialNumberText.text = "N/A"
+            binding.serialNumberText.text = getString(R.string.no_data_available)
             binding.detectedInfoText.text = getString(R.string.no_qr_data)
             binding.nextButton.visibility = View.GONE
         }
@@ -93,80 +96,136 @@ class DetectedFragment : Fragment() {
         }
     }
 
-    private fun checkSerialNumberInTable(serialNumberToCheck: String) {
-        Log.d(TAG, "Checking serial number: $serialNumberToCheck")
+    private fun checkSerialNumberInTableAsync(serialNumberToCheck: String) {
+        Log.d(TAG, "=== STARTING ASYNC SERIAL NUMBER CHECK ===")
+        Log.d(TAG, "Checking serial number: '$serialNumberToCheck'")
 
-        // ✅ FIXED: Use the new method that works with MeterCheck specific data
-        val (success, foundItemFile) = filesViewModel.updateMeterCheckedStatusBySerial(serialNumberToCheck)
+        // Disable button to prevent double-clicks
+        binding.nextButton.isEnabled = false
+        binding.nextButton.text = getString(R.string.checking_serial)
 
-        if (success) {
-            val toastMessage: String
-            val statusMessage: String
+        // 🔍 DEBUG: Check current data state
+        val meterCheckCount = filesViewModel.meterCheckMeters.value?.size ?: 0
+        val generalMeterCount = filesViewModel.meterStatusList.value?.size ?: 0
 
-            // ✅ UPDATED: Check against the correct data source that MeterCheck uses
-            if (foundItemFile != null) {
-                // Check the actual status from the MeterCheck specific data
-                val isActuallyChecked = filesViewModel.meterCheckMeters.value
-                    ?.find { it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile }
-                    ?.isChecked ?: false
+        Log.d(TAG, "📊 Data Status:")
+        Log.d(TAG, "  - MeterCheck data: $meterCheckCount meters")
+        Log.d(TAG, "  - General meter data: $generalMeterCount meters")
 
-                // ✅ FALLBACK: If not found in meterCheckMeters, check the general meterStatusList
-                val isCheckedInGeneral = if (!isActuallyChecked) {
-                    filesViewModel.meterStatusList.value
-                        ?.find { it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile }
-                        ?.isChecked ?: false
+        // Use coroutine to handle async database operation
+        lifecycleScope.launch {
+            try {
+                // ✅ NEW: Use the async method for proper database handling
+                val (success, foundItemFile) = filesViewModel.updateMeterCheckedStatusBySerialAsync(serialNumberToCheck)
+
+                Log.d(TAG, "📝 Async update result: success=$success, foundFile=$foundItemFile")
+
+                if (success) {
+                    // 🎉 SUCCESS CASE - Serial number was found and updated
+                    Log.d(TAG, "✅ SUCCESS: Serial number found and processed!")
+
+                    // Wait a bit for the LiveData to refresh
+                    delay(1000)
+
+                    // Check the updated status in LiveData
+                    val updatedMeter = if (foundItemFile != null) {
+                        filesViewModel.meterCheckMeters.value?.find {
+                            it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile
+                        } ?: filesViewModel.meterStatusList.value?.find {
+                            it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile
+                        }
+                    } else {
+                        filesViewModel.meterStatusList.value?.find { it.serialNumber == serialNumberToCheck }
+                    }
+
+                    Log.d(TAG, "🔍 After update - found meter: ${updatedMeter != null}, checked: ${updatedMeter?.isChecked}")
+
+                    // Show success regardless of LiveData state since database operation succeeded
+                    showSuccessResult(serialNumberToCheck, foundItemFile ?: getString(R.string.no_data_available), true)
+
                 } else {
-                    isActuallyChecked
+                    // ❌ FAILURE CASE - Serial number was NOT found
+                    Log.w(TAG, "❌ FAILURE: Serial number NOT FOUND in database")
+                    showNotFoundResult(serialNumberToCheck, meterCheckCount, generalMeterCount)
                 }
 
-                if (isCheckedInGeneral) {
-                    toastMessage = "'$serialNumberToCheck' (from $foundItemFile) is now marked as CHECKED!"
-                    statusMessage = "\n\nStatus: VERIFIED CHECKED (from $foundItemFile)"
-                } else {
-                    // This means 'success' was true (item found), but it wasn't updated to 'isChecked = true'.
-                    // This implies it was already checked.
-                    toastMessage = "'$serialNumberToCheck' (from $foundItemFile) was ALREADY CHECKED."
-                    statusMessage = "\n\nStatus: VERIFIED ALREADY CHECKED (from $foundItemFile)"
-                }
-            } else {
-                // This case should ideally not happen if success is true,
-                // but as a fallback if foundItemFile wasn't returned by the VM method.
-                toastMessage = "'$serialNumberToCheck' status updated (file not specified)."
-                statusMessage = "\n\nStatus: CHECKED (file not specified)"
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Exception during async check: ${e.message}", e)
+                showErrorResult(serialNumberToCheck, e.message)
             }
+        }
+    }
 
-            Toast.makeText(requireContext(), toastMessage, Toast.LENGTH_LONG).show()
-            binding.detectedInfoText.append(statusMessage)
+    private fun showSuccessResult(serialNumber: String, fromFile: String, isChecked: Boolean) {
+        Log.d(TAG, "🎉 Showing SUCCESS result for $serialNumber")
 
-            binding.nextButton.text = getString(R.string.serial_checked)
-            binding.nextButton.isEnabled = true // Ensure it's enabled if it wasn't
-            binding.nextButton.setOnClickListener {
-                findNavController().navigate(R.id.action_detectedFragment_to_meterCheckFragment)
-            }
+        val toastMessage = getString(R.string.meter_marked_as_checked, serialNumber, fromFile)
+        val statusMessage = "\n\n" + getString(R.string.status_verified_checked, fromFile)
 
-        } else {
-            // ✅ IMPROVED: Provide more helpful error message based on available data sources
-            val meterCheckCount = filesViewModel.meterCheckMeters.value?.size ?: 0
-            val generalMeterCount = filesViewModel.meterStatusList.value?.size ?: 0
+        Toast.makeText(requireContext(), toastMessage, Toast.LENGTH_LONG).show()
 
-            val errorMessage = when {
-                meterCheckCount > 0 -> "'$serialNumberToCheck' NOT FOUND in the loaded MeterCheck data ($meterCheckCount meters)."
-                generalMeterCount > 0 -> "'$serialNumberToCheck' NOT FOUND in any meter data. Try processing your files for MeterCheck first."
-                else -> "'$serialNumberToCheck' NOT FOUND. No meter data is currently loaded."
-            }
+        // Clear any "見つかりません" text and add success message
+        val currentText = binding.detectedInfoText.text.toString()
+        val cleanedText = currentText.replace("見つかりません", "").replace("Not Found", "")
+        binding.detectedInfoText.text = cleanedText + statusMessage
 
-            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
-            binding.detectedInfoText.append("\n\nStatus: NOT FOUND")
+        // ✅ SUCCESS: Navigate to MeterCheck to see the updated status
+        binding.nextButton.text = getString(R.string.view_in_metercheck)
+        binding.nextButton.isEnabled = true
+        binding.nextButton.setOnClickListener {
+            findNavController().navigate(R.id.action_detectedFragment_to_meterCheckFragment)
+        }
+    }
 
-            // ✅ HELPFUL: Add suggestion button if no MeterCheck data is loaded
-            if (meterCheckCount == 0 && generalMeterCount > 0) {
-                binding.nextButton.text = "Go to Files"
-                binding.nextButton.visibility = View.VISIBLE
+    private fun showNotFoundResult(serialNumber: String, meterCheckCount: Int, generalMeterCount: Int) {
+        Log.w(TAG, "❌ Showing NOT FOUND result for $serialNumber")
+
+        val errorMessage = when {
+            meterCheckCount > 0 -> getString(R.string.serial_not_found_in_metercheck, serialNumber, meterCheckCount)
+            generalMeterCount > 0 -> getString(R.string.serial_not_found_process_first, serialNumber)
+            else -> getString(R.string.serial_not_found_no_data, serialNumber)
+        }
+
+        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
+        binding.detectedInfoText.text = binding.detectedInfoText.text.toString() + "\n\n" + getString(R.string.status_not_found)
+
+        // ✅ HELPFUL: Add suggestion button based on the situation
+        when {
+            meterCheckCount == 0 && generalMeterCount > 0 -> {
+                binding.nextButton.text = getString(R.string.go_to_files)
                 binding.nextButton.isEnabled = true
                 binding.nextButton.setOnClickListener {
                     findNavController().navigate(R.id.navigation_files)
                 }
             }
+            meterCheckCount == 0 && generalMeterCount == 0 -> {
+                binding.nextButton.text = getString(R.string.upload_csv_files)
+                binding.nextButton.isEnabled = true
+                binding.nextButton.setOnClickListener {
+                    findNavController().navigate(R.id.navigation_files)
+                }
+            }
+            else -> {
+                binding.nextButton.text = getString(R.string.scan_again_button)
+                binding.nextButton.isEnabled = true
+                binding.nextButton.setOnClickListener {
+                    findNavController().popBackStack()
+                }
+            }
+        }
+    }
+
+    private fun showErrorResult(serialNumber: String, errorMessage: String?) {
+        Log.e(TAG, "💥 Showing ERROR result for $serialNumber: $errorMessage")
+
+        val displayMessage = getString(R.string.failed_to_load_statistics, errorMessage ?: getString(R.string.no_data_available))
+        Toast.makeText(requireContext(), displayMessage, Toast.LENGTH_LONG).show()
+        binding.detectedInfoText.text = binding.detectedInfoText.text.toString() + "\n\n❌ " + getString(R.string.status_not_found)
+
+        binding.nextButton.text = getString(R.string.scan_again_button)
+        binding.nextButton.isEnabled = true
+        binding.nextButton.setOnClickListener {
+            findNavController().popBackStack()
         }
     }
 

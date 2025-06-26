@@ -20,6 +20,9 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
 
+    // Placeholder for when data is not yet loaded
+    private val DATA_LOADING_PLACEHOLDER = "-" // Or "Loading..."
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,9 +38,20 @@ class HomeFragment : Fragment() {
         setupObservers()
         setupClickListeners()
 
+        // Initialize stats with a loading placeholder
+        setStatsToLoadingState()
+
         // Load initial data
         viewModel.loadUserData()
-        viewModel.loadQuickStats()
+        viewModel.loadQuickStats() // This should trigger the LiveData updates
+    }
+
+    private fun setStatsToLoadingState() {
+        binding.includeQuickStats.tvTotalMeters.text = DATA_LOADING_PLACEHOLDER
+        binding.includeQuickStats.tvMatchedMeters.text = DATA_LOADING_PLACEHOLDER
+        binding.includeQuickStats.tvUnmatchedMeters.text = DATA_LOADING_PLACEHOLDER
+        binding.includeQuickStats.tvScannedMeters.text = DATA_LOADING_PLACEHOLDER
+        binding.includeQuickStats.tvUnscannedMeters.text = DATA_LOADING_PLACEHOLDER
     }
 
     private fun setupObservers() {
@@ -83,6 +97,9 @@ class HomeFragment : Fragment() {
             binding.cardFileUpload.isEnabled = !isLoading
             binding.btnLogout.isEnabled = !isLoading
 
+            if (isLoading) {
+                setStatsToLoadingState() // Optionally reset stats to loading when a global load starts
+            }
             // You can add a loading indicator here if needed
             // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         })
@@ -94,29 +111,51 @@ class HomeFragment : Fragment() {
     private fun setupStatsObservers() {
         // Total meters count
         viewModel.totalMeters.observe(viewLifecycleOwner, Observer { count ->
-            binding.includeQuickStats.tvTotalMeters.text = count.toString()
+            // Only update if data is meaningful (e.g., not the initial 0 if that's not valid)
+            // Or rely on isLoading state if your initial LiveData value is valid but not yet "loaded"
+            if (!viewModel.isLoading.value!! && count != null) { // Check isLoading if it's reliable for this
+                binding.includeQuickStats.tvTotalMeters.text = count.toString()
+            } else if (viewModel.isLoading.value == false && count == null) {
+                binding.includeQuickStats.tvTotalMeters.text = "0" // Or appropriate default
+            }
             Log.d("HomeFragment", "Total meters updated: $count")
         })
 
         // Match-specific stats
         viewModel.matchedMeters.observe(viewLifecycleOwner, Observer { count ->
-            binding.includeQuickStats.tvMatchedMeters.text = count.toString()
+            if (!viewModel.isLoading.value!! && count != null) {
+                binding.includeQuickStats.tvMatchedMeters.text = count.toString()
+            } else if (viewModel.isLoading.value == false && count == null) {
+                binding.includeQuickStats.tvMatchedMeters.text = "0"
+            }
             Log.d("HomeFragment", "Matched meters updated: $count")
         })
 
         viewModel.unmatchedMeters.observe(viewLifecycleOwner, Observer { count ->
-            binding.includeQuickStats.tvUnmatchedMeters.text = count.toString()
+            if (!viewModel.isLoading.value!! && count != null) {
+                binding.includeQuickStats.tvUnmatchedMeters.text = count.toString()
+            } else if (viewModel.isLoading.value == false && count == null) {
+                binding.includeQuickStats.tvUnmatchedMeters.text = "0"
+            }
             Log.d("HomeFragment", "Unmatched meters updated: $count")
         })
 
         // Check-specific stats
         viewModel.scannedMeters.observe(viewLifecycleOwner, Observer { count ->
-            binding.includeQuickStats.tvScannedMeters.text = count.toString()
+            if (!viewModel.isLoading.value!! && count != null) {
+                binding.includeQuickStats.tvScannedMeters.text = count.toString()
+            } else if (viewModel.isLoading.value == false && count == null) {
+                binding.includeQuickStats.tvScannedMeters.text = "0"
+            }
             Log.d("HomeFragment", "Scanned meters updated: $count")
         })
 
         viewModel.unscannedMeters.observe(viewLifecycleOwner, Observer { count ->
-            binding.includeQuickStats.tvUnscannedMeters.text = count.toString()
+            if (!viewModel.isLoading.value!! && count != null) {
+                binding.includeQuickStats.tvUnscannedMeters.text = count.toString()
+            } else if (viewModel.isLoading.value == false && count == null) {
+                binding.includeQuickStats.tvUnscannedMeters.text = "0"
+            }
             Log.d("HomeFragment", "Unscanned meters updated: $count")
         })
     }
@@ -124,35 +163,50 @@ class HomeFragment : Fragment() {
     private fun observeRealtimeData() {
         // Observe MeterCheck data directly for immediate updates
         viewModel.meterCheckMeters.observe(viewLifecycleOwner) { checkMeters ->
+            if (viewModel.isLoading.value == true) { // If globally loading, wait
+                binding.includeQuickStats.tvScannedMeters.text = DATA_LOADING_PLACEHOLDER
+                binding.includeQuickStats.tvUnscannedMeters.text = DATA_LOADING_PLACEHOLDER
+                return@observe
+            }
             checkMeters?.let {
                 val scanned = it.count { meter -> meter.isChecked }
                 val unscanned = it.size - scanned
 
-                // Update UI immediately
                 binding.includeQuickStats.tvScannedMeters.text = scanned.toString()
                 binding.includeQuickStats.tvUnscannedMeters.text = unscanned.toString()
 
                 Log.d("HomeFragment", "MeterCheck data updated: ${it.size} total, $scanned scanned, $unscanned unscanned")
-
-                // Show work priority suggestion if needed
                 showWorkSuggestion()
+            } ?: run {
+                // Handle null case if data is not yet available but not loading
+                if (viewModel.isLoading.value == false) {
+                    binding.includeQuickStats.tvScannedMeters.text = "0"
+                    binding.includeQuickStats.tvUnscannedMeters.text = "0"
+                }
             }
         }
 
         // Observe MeterMatch data directly for immediate updates
         viewModel.meterMatchMeters.observe(viewLifecycleOwner) { matchMeters ->
+            if (viewModel.isLoading.value == true) { // If globally loading, wait
+                binding.includeQuickStats.tvMatchedMeters.text = DATA_LOADING_PLACEHOLDER
+                binding.includeQuickStats.tvUnmatchedMeters.text = DATA_LOADING_PLACEHOLDER
+                return@observe
+            }
             matchMeters?.let {
                 val matched = it.count { meter -> meter.isChecked }
                 val unmatched = it.size - matched
 
-                // Update UI immediately
                 binding.includeQuickStats.tvMatchedMeters.text = matched.toString()
                 binding.includeQuickStats.tvUnmatchedMeters.text = unmatched.toString()
 
                 Log.d("HomeFragment", "MeterMatch data updated: ${it.size} total, $matched matched, $unmatched unmatched")
-
-                // Show work priority suggestion if needed
                 showWorkSuggestion()
+            } ?: run {
+                if (viewModel.isLoading.value == false) {
+                    binding.includeQuickStats.tvMatchedMeters.text = "0"
+                    binding.includeQuickStats.tvUnmatchedMeters.text = "0"
+                }
             }
         }
     }
@@ -160,38 +214,23 @@ class HomeFragment : Fragment() {
     private fun showWorkSuggestion() {
         val suggestion = viewModel.getWorkPrioritySuggestion()
         suggestion?.let {
-            // You can show this as a subtle notification or badge
-            // For now, just log it
             Log.d("HomeFragment", "Work suggestion: $it")
-
-            // Optionally show as a snackbar for important suggestions
-            if (viewModel.hasPendingWork()) {
-                // Only show once per session to avoid spam
-                // You could use SharedPreferences to track this
-            }
         }
     }
 
     private fun setupClickListeners() {
-        // Match Meter card click
         binding.cardMatchMeter.setOnClickListener {
             Log.d("HomeFragment", "Match Meter clicked")
             viewModel.onMatchMeterClicked()
         }
-
-        // Meter Check card click
         binding.cardMeterCheck.setOnClickListener {
             Log.d("HomeFragment", "Meter Check clicked")
             viewModel.onMeterCheckClicked()
         }
-
-        // File Upload card click
         binding.cardFileUpload.setOnClickListener {
             Log.d("HomeFragment", "File Upload clicked")
             viewModel.onFileUploadClicked()
         }
-
-        // Logout button click
         binding.btnLogout.setOnClickListener {
             Log.d("HomeFragment", "Logout clicked")
             viewModel.onLogoutClicked()
@@ -201,12 +240,10 @@ class HomeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         Log.d("HomeFragment", "Fragment resumed - refreshing stats")
-
-        // Refresh stats when returning to home (e.g., from other fragments)
-        viewModel.refreshStats()
-
-        // Force refresh data to ensure we have the latest from repository
-        viewModel.forceRefreshData()
+        // No need to call loadQuickStats or forceRefreshData here if onViewCreated handles initial load
+        // and LiveData handles subsequent updates.
+        // viewModel.refreshStats() // Keep if this has a specific purpose beyond just reloading
+        // viewModel.forceRefreshData() // Consider if this is always needed onResume
     }
 
     override fun onPause() {
@@ -220,17 +257,14 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    // Public method for external navigation (e.g., from notifications)
     fun navigateToSection(destination: String) {
         viewModel.handleDeepLink(destination)
     }
 
-    // Public method to get current stats (useful for debugging)
     fun getCurrentStats(): HomeViewModel.DetailedStats {
         return viewModel.getDetailedStats()
     }
 
-    // Public method to force refresh (useful when data changes elsewhere)
     fun forceRefresh() {
         viewModel.forceRefreshData()
     }
