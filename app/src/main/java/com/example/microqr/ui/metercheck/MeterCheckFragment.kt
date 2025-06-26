@@ -179,12 +179,12 @@ class MeterCheckFragment : Fragment() {
                 updateStatisticsAndApplyFilter()
                 updateCurrentFilesDisplay()
 
-                val toastMessage = getString(R.string.loaded_meters_for_checking, meterCheckMeters.size)
-                Toast.makeText(
-                    context,
-                    toastMessage,
-                    Toast.LENGTH_SHORT
-                ).show()
+//                val toastMessage = getString(R.string.loaded_meters_for_checking, meterCheckMeters.size)
+//                Toast.makeText(
+//                    context,
+//                    toastMessage,
+//                    Toast.LENGTH_SHORT
+//                ).show()
             } else {
                 // No MeterCheck specific data, clear display
                 clearFragmentData()

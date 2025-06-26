@@ -97,11 +97,11 @@
     <string name="checking_serial">確認中...</string>
     <string name="serial_checked">ホームに戻る</string>
     <string name="scan_again_button">再スキャン</string>
-    <string name="view_in_metercheck">MeterCheckで表示</string>
+    <string name="view_in_metercheck">表示</string>
     <string name="error_parsing_qr">QR解析エラー</string>
-    <string name="could_not_parse_serial">QRデータから有効なシリアル番号を解析できませんでした。生データ: %s</string>
+    <string name="could_not_parse_serial">QRデータから有効なシリアル番号を解析できませんでした。RAW: %s</string>
     <string name="serial_number_format" translatable="false">S/N: %s</string>
-    <string name="raw_qr_format" translatable="false">(生データ: %s)</string>
+    <string name="raw_qr_format" translatable="false">(RAW: %s)</string>
     <string name="no_data_available">N/A</string>
     <string name="no_qr_data">QRデータが受信されませんでした</string>
 
@@ -166,8 +166,8 @@
     <string name="files_button_meter_check">MeterCheck</string>
     <string name="files_button_match">照合</string>
     <string name="files_button_reprocess">再処理</string>
-    <string name="files_button_switch_to_match">照合に切り替え</string>
-    <string name="files_button_switch_to_check">チェックに切り替え</string>
+    <string name="files_button_switch_to_match">マッチ切替</string>
+    <string name="files_button_switch_to_check">チェック切替</string>
     <string name="files_from_label">From: %s</string>
 
     <!-- File Processing Messages -->
