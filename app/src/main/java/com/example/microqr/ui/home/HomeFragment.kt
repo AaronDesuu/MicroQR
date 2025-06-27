@@ -75,92 +75,35 @@ class HomeFragment : Fragment() {
                 HomeViewModel.NavigationEvent.NAVIGATE_TO_LOGIN -> {
                     findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
                 }
+                // Clear the event after handling
+                null -> { /* Event already handled */ }
             }
         })
 
-        // Observe real-time statistics from repository
-        setupStatsObservers()
-
-        // Observe error messages
-        viewModel.errorMessage.observe(viewLifecycleOwner, Observer { message ->
-            message?.let {
-                Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
-                viewModel.clearErrorMessage()
-            }
-        })
+        // Observe snackbar messages
+//        viewModel.snackbarMessage.observe(viewLifecycleOwner, Observer { message ->
+//            message?.let {
+//                Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
+//                viewModel.onSnackbarShown() // Clear the message
+//            }
+//        })
 
         // Observe loading state
         viewModel.isLoading.observe(viewLifecycleOwner, Observer { isLoading ->
-            // Update UI elements based on loading state
-            binding.cardMatchMeter.isEnabled = !isLoading
-            binding.cardMeterCheck.isEnabled = !isLoading
-            binding.cardFileUpload.isEnabled = !isLoading
-            binding.btnLogout.isEnabled = !isLoading
-
             if (isLoading) {
-                setStatsToLoadingState() // Optionally reset stats to loading when a global load starts
+                setStatsToLoadingState()
             }
-            // You can add a loading indicator here if needed
-            // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         })
 
-        // Observe real-time data changes for immediate updates
-        observeRealtimeData()
-    }
-
-    private fun setupStatsObservers() {
-        // Total meters count
-        viewModel.totalMeters.observe(viewLifecycleOwner, Observer { count ->
-            // Only update if data is meaningful (e.g., not the initial 0 if that's not valid)
-            // Or rely on isLoading state if your initial LiveData value is valid but not yet "loaded"
-            if (!viewModel.isLoading.value!! && count != null) { // Check isLoading if it's reliable for this
-                binding.includeQuickStats.tvTotalMeters.text = count.toString()
-            } else if (viewModel.isLoading.value == false && count == null) {
-                binding.includeQuickStats.tvTotalMeters.text = "0" // Or appropriate default
+        // Observe total meters count
+        viewModel.totalMeters.observe(viewLifecycleOwner, Observer { total ->
+            if (viewModel.isLoading.value == true) {
+                binding.includeQuickStats.tvTotalMeters.text = DATA_LOADING_PLACEHOLDER
+                return@Observer
             }
-            Log.d("HomeFragment", "Total meters updated: $count")
+            binding.includeQuickStats.tvTotalMeters.text = total.toString()
         })
 
-        // Match-specific stats
-        viewModel.matchedMeters.observe(viewLifecycleOwner, Observer { count ->
-            if (!viewModel.isLoading.value!! && count != null) {
-                binding.includeQuickStats.tvMatchedMeters.text = count.toString()
-            } else if (viewModel.isLoading.value == false && count == null) {
-                binding.includeQuickStats.tvMatchedMeters.text = "0"
-            }
-            Log.d("HomeFragment", "Matched meters updated: $count")
-        })
-
-        viewModel.unmatchedMeters.observe(viewLifecycleOwner, Observer { count ->
-            if (!viewModel.isLoading.value!! && count != null) {
-                binding.includeQuickStats.tvUnmatchedMeters.text = count.toString()
-            } else if (viewModel.isLoading.value == false && count == null) {
-                binding.includeQuickStats.tvUnmatchedMeters.text = "0"
-            }
-            Log.d("HomeFragment", "Unmatched meters updated: $count")
-        })
-
-        // Check-specific stats
-        viewModel.scannedMeters.observe(viewLifecycleOwner, Observer { count ->
-            if (!viewModel.isLoading.value!! && count != null) {
-                binding.includeQuickStats.tvScannedMeters.text = count.toString()
-            } else if (viewModel.isLoading.value == false && count == null) {
-                binding.includeQuickStats.tvScannedMeters.text = "0"
-            }
-            Log.d("HomeFragment", "Scanned meters updated: $count")
-        })
-
-        viewModel.unscannedMeters.observe(viewLifecycleOwner, Observer { count ->
-            if (!viewModel.isLoading.value!! && count != null) {
-                binding.includeQuickStats.tvUnscannedMeters.text = count.toString()
-            } else if (viewModel.isLoading.value == false && count == null) {
-                binding.includeQuickStats.tvUnscannedMeters.text = "0"
-            }
-            Log.d("HomeFragment", "Unscanned meters updated: $count")
-        })
-    }
-
-    private fun observeRealtimeData() {
         // Observe MeterCheck data directly for immediate updates
         viewModel.meterCheckMeters.observe(viewLifecycleOwner) { checkMeters ->
             if (viewModel.isLoading.value == true) { // If globally loading, wait
@@ -231,6 +174,18 @@ class HomeFragment : Fragment() {
             Log.d("HomeFragment", "File Upload clicked")
             viewModel.onFileUploadClicked()
         }
+
+        // NEW: Export button click listener
+        binding.cardExportData.setOnClickListener {
+            Log.d("HomeFragment", "Export Data clicked")
+            try {
+                findNavController().navigate(R.id.action_homeFragment_to_exportFragment)
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "Failed to navigate to export", e)
+                Snackbar.make(binding.root, "Export feature temporarily unavailable", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
         binding.btnLogout.setOnClickListener {
             Log.d("HomeFragment", "Logout clicked")
             viewModel.onLogoutClicked()

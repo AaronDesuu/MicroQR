@@ -554,4 +554,135 @@
     <string name="serial_found_success">✅ シリアル番号が見つかりました！</string>
     <string name="meter_registered_successfully">✅ メーターが正常に登録されました！</string>
 
+    <!-- ========================================== -->
+    <!-- CSV EXPORT FUNCTIONALITY -->
+    <!-- ========================================== -->
+    <string name="title_export">エクスポート</string>
+    <string name="export_data">データのエクスポート</string>
+    <string name="export_csv">CSVにエクスポート</string>
+    <string name="export_meters">メーターをエクスポート</string>
+    <string name="export_data_description">フィルタリングオプション付きでメーターデータをCSV形式にエクスポート</string>
+    <string name="export_success">CSVファイルのエクスポートが完了しました</string>
+    <string name="export_failed">CSVファイルのエクスポートに失敗しました</string>
+    <string name="export_no_data">エクスポートするデータがありません</string>
+    <string name="export_permission_required">ファイルをエクスポートするにはストレージ権限が必要です</string>
+    <string name="export_file_created">ファイルが作成されました: %s</string>
+
+    <!-- Export Filtering Options -->
+    <string name="export_filter_title">エクスポートフィルター</string>
+    <string name="export_filter_subtitle">エクスポートに含めるデータを選択してください</string>
+    <string name="export_filter_data_source">データソース</string>
+    <string name="export_filter_meter_check">MeterCheckデータ</string>
+    <string name="export_filter_meter_match">MeterMatchデータ</string>
+    <string name="export_filter_all_data">すべてのデータ</string>
+
+    <!-- File Selection -->
+    <string name="export_filter_files">ソースファイル</string>
+    <string name="export_filter_all_files">すべてのファイル</string>
+    <string name="export_filter_select_files">ファイルを選択</string>
+    <string name="export_filter_selected_files">選択されたファイル (%d)</string>
+    <string name="export_filter_no_files_selected">ファイルが選択されていません</string>
+
+    <!-- Place/Location Selection -->
+    <string name="export_filter_places">場所</string>
+    <string name="export_filter_all_places">すべての場所</string>
+    <string name="export_filter_select_places">場所を選択</string>
+    <string name="export_filter_selected_places">選択された場所 (%d)</string>
+    <string name="export_filter_no_places_selected">場所が選択されていません</string>
+
+    <!-- Registration Status -->
+    <string name="export_filter_registration">登録ステータス</string>
+    <string name="export_filter_all_status">すべてのステータス</string>
+    <string name="export_filter_registered_only">登録済みのみ</string>
+    <string name="export_filter_unregistered_only">未登録のみ</string>
+
+    <!-- Check Status (for MeterCheck) -->
+    <string name="export_filter_check_status">チェックステータス</string>
+    <string name="export_filter_checked_only">チェック済みのみ</string>
+    <string name="export_filter_unchecked_only">未チェックのみ</string>
+    <string name="export_filter_all_check_status">すべてのチェックステータス</string>
+
+    <!-- Export File Options -->
+    <string name="export_file_options">ファイルオプション</string>
+    <string name="export_filename">ファイル名</string>
+    <string name="export_filename_hint">meter_export_%s</string>
+    <string name="export_filename_default">meter_export_%s</string>
+    <string name="export_include_timestamp">タイムスタンプを含める</string>
+    <string name="export_file_format">ファイル形式</string>
+    <string name="export_format_csv">CSV (.csv)</string>
+
+    <!-- Export Summary -->
+    <string name="export_summary">エクスポート概要</string>
+    <string name="export_total_records">総レコード数: %d</string>
+    <string name="export_filtered_records">フィルタされたレコード数: %d</string>
+    <string name="export_file_size_estimate">推定サイズ: %s</string>
+
+    <!-- Export Actions -->
+    <string name="export_preview">プレビュー</string>
+    <string name="export_start">エクスポート開始</string>
+    <string name="export_cancel">キャンセル</string>
+    <string name="export_clear_filters">フィルターをクリア</string>
+    <string name="export_apply_filters">フィルターを適用</string>
+
+    <!-- Export Progress -->
+    <string name="export_progress_title">データをエクスポート中</string>
+    <string name="export_progress_message">CSVファイルを準備中...</string>
+    <string name="export_progress_processing">%d件中%d件を処理中</string>
+    <string name="export_progress_writing">ファイルに書き込み中...</string>
+    <string name="export_progress_complete">エクスポート完了</string>
+
+    <!-- Export Errors -->
+    <string name="export_error_no_permission">ストレージ権限が拒否されました</string>
+    <string name="export_error_write_failed">ファイルの書き込みに失敗しました</string>
+    <string name="export_error_invalid_filename">無効なファイル名です</string>
+    <string name="export_error_no_data_selected">選択されたフィルターに一致するデータがありません</string>
+    <string name="export_error_generic">エクスポートに失敗しました: %s</string>
+
+    <!-- CSV Headers -->
+    <string name="csv_header_number">番号</string>
+    <string name="csv_header_serial_number">シリアル番号</string>
+    <string name="csv_header_place">場所</string>
+    <string name="csv_header_registered">登録済み</string>
+    <string name="csv_header_checked">チェック済み</string>
+    <string name="csv_header_source_file">ソースファイル</string>
+    <string name="csv_header_export_date">エクスポート日</string>
+
+    <!-- Dialog Titles -->
+    <string name="dialog_export_filters">エクスポートフィルター</string>
+    <string name="dialog_select_files">ファイルを選択</string>
+    <string name="dialog_select_places">場所を選択</string>
+    <string name="dialog_export_confirm">エクスポートの確認</string>
+    <string name="dialog_export_confirm_message">%d件のレコードを%sにエクスポートしますか？</string>
+
+    <!-- Accessibility -->
+    <string name="export_icon">エクスポートアイコン</string>
+    <string name="filter_icon">フィルターアイコン</string>
+    <string name="clear_filters_icon">フィルタークリアアイコン</string>
+    <string name="file_selection_icon">ファイル選択アイコン</string>
+    <string name="location_selection_icon">場所選択アイコン</string>
+
+    <!-- Buttons -->
+    <string name="btn_export">エクスポート</string>
+    <string name="btn_filters">フィルター</string>
+    <string name="btn_preview">プレビュー</string>
+    <string name="btn_select_all">すべて選択</string>
+    <string name="btn_deselect_all">すべて選択解除</string>
+
+    <!-- Sort Options for Export Preview -->
+    <string name="sort_check_status">チェックステータス</string>
+
+    <!-- File Sharing -->
+    <string name="export_share_title">CSVエクスポートを共有</string>
+    <string name="export_open_with">CSVファイルを開く...</string>
+    <string name="export_saved_to">ファイルが保存されました: %s</string>
+
+    <!-- Menu Items -->
+    <string name="menu_export">エクスポート</string>
+    <string name="menu_export_data">データをエクスポート</string>
+    <string name="menu_import_export">インポート/エクスポート</string>
+
+    <!-- Japanese Translations for values-ja/strings.xml -->
+    <string name="main_actions">メインアクション</string>
+    <string name="export_description_home">フィルタリングオプション付きでメーターデータをCSV形式にエクスポート</string>
+
 </resources>

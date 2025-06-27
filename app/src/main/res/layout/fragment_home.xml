@@ -55,12 +55,12 @@
             android:shadowColor="@android:color/black"
             android:shadowDx="1"
             android:shadowDy="1"
-            android:shadowRadius="2"
+            android:shadowRadius="3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_welcome_title" />
 
-        <!-- Quick Stats Card (moved up) -->
+        <!-- Quick Stats Card -->
         <include
             android:id="@+id/include_quick_stats"
             layout="@layout/card_home_quick_stats"
@@ -71,148 +71,129 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_user_greeting" />
 
-
-
         <!-- Action Cards Section -->
         <LinearLayout
             android:id="@+id/layout_action_cards"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/include_quick_stats">
 
-            <!-- Match Meter Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_match_meter"
+            <!-- Action Cards Row 1: Match and Check -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:cardBackgroundColor="@color/card_background"
-                app:strokeWidth="0dp"
-                app:rippleColor="@color/primary_color_light">
+                android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="20dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_match_24"
-                        android:contentDescription="@string/match_meter_icon"
-                        android:background="@drawable/circle_background_primary"
-                        android:padding="12dp" />
+                <!-- Match Meter Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_match_meter"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    app:cardBackgroundColor="@color/card_background"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="8dp"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:orientation="vertical">
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:contentDescription="@string/match_meters"
+                            android:src="@drawable/ic_match_24"
+                            app:tint="@color/primary_color" />
 
                         <TextView
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/match_meter"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/match_meters"
+                            android:textAlignment="center"
                             android:textColor="@color/primary_text_color"
-                            android:textSize="18sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="@string/match_new_meters_with_existing_records"
+                            android:textAlignment="center"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="14sp" />
+                            android:textSize="12sp" />
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow_forward_24"
-                        android:contentDescription="@string/navigate_forward"
-                        app:tint="@color/primary_color" />
+                </com.google.android.material.card.MaterialCardView>
 
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Meter Check Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_meter_check"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:cardBackgroundColor="@color/card_background"
-                app:strokeWidth="0dp"
-                app:rippleColor="@color/primary_color_light">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="20dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_checklist_24"
-                        android:contentDescription="@string/meter_check_icon"
-                        android:background="@drawable/circle_background_secondary"
-                        android:padding="12dp" />
+                <!-- Meter Check Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_meter_check"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    app:cardBackgroundColor="@color/card_background"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="8dp"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:orientation="vertical">
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:contentDescription="@string/check_meters"
+                            android:src="@drawable/ic_checklist_24"
+                            app:tint="@color/primary_color" />
 
                         <TextView
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/meter_check"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/check_meters"
+                            android:textAlignment="center"
                             android:textColor="@color/primary_text_color"
-                            android:textSize="18sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="@string/check_and_scan_qr_codes_on_meters"
+                            android:textAlignment="center"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="14sp" />
+                            android:textSize="12sp" />
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow_forward_24"
-                        android:contentDescription="@string/navigate_forward"
-                        app:tint="@color/primary_color" />
+                </com.google.android.material.card.MaterialCardView>
 
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
             <!-- File Upload Card -->
             <com.google.android.material.card.MaterialCardView
@@ -222,38 +203,39 @@
                 android:layout_marginBottom="12dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/card_background"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="8dp"
-                app:cardBackgroundColor="@color/card_background"
-                app:strokeWidth="0dp"
-                app:rippleColor="@color/primary_color_light">
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="20dp"
-                    android:gravity="center_vertical">
+                    android:padding="20dp">
 
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_file_upload"
+                        android:background="@drawable/circle_background_primary"
                         android:contentDescription="@string/file_upload_icon"
-                        android:background="@drawable/circle_background_tertiary"
-                        android:padding="12dp" />
+                        android:padding="12dp"
+                        android:src="@drawable/ic_upload_file_24"
+                        app:tint="@color/white" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_marginStart="16dp"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/file_upload"
+                            android:text="@string/upload_meter_csv_file"
                             android:textColor="@color/primary_text_color"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -271,8 +253,74 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow_forward_24"
                         android:contentDescription="@string/navigate_forward"
+                        android:src="@drawable/ic_arrow_forward_24"
+                        app:tint="@color/primary_color" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- NEW: Export Data Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardExportData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="20dp">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/circle_background_primary"
+                        android:contentDescription="@string/export_icon"
+                        android:padding="12dp"
+                        android:src="@drawable/ic_download_24"
+                        app:tint="@color/white" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/export_data"
+                            android:textColor="@color/primary_text_color"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/export_description_home"
+                            android:textColor="@color/secondary_text_color"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@string/navigate_forward"
+                        android:src="@drawable/ic_arrow_forward_24"
                         app:tint="@color/primary_color" />
 
                 </LinearLayout>
@@ -305,11 +353,11 @@
             android:textSize="16sp"
             app:icon="@drawable/ic_logout"
             app:iconTint="@android:color/white"
-            app:rippleColor="@color/ripple_color"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/include_qr_management"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:rippleColor="@color/ripple_color" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -554,4 +554,137 @@
     <string name="serial_found_success">✅ Serial number found!</string>
     <string name="meter_registered_successfully">✅ Meter registered successfully!</string>
 
+    <!-- ========================================== -->
+    <!-- CSV EXPORT FUNCTIONALITY -->
+    <!-- ========================================== -->
+    <string name="title_export">Export</string>
+    <string name="export_data">Export Data</string>
+    <string name="export_csv">Export to CSV</string>
+    <string name="export_meters">Export Meters</string>
+    <string name="export_data_description">Export your meter data to CSV format with filtering options</string>
+    <string name="export_success">CSV file exported successfully</string>
+    <string name="export_failed">Failed to export CSV file</string>
+    <string name="export_no_data">No data to export</string>
+    <string name="export_permission_required">Storage permission required to export files</string>
+    <string name="export_file_created">File created: %s</string>
+
+    <!-- Export Filtering Options -->
+    <string name="export_filter_title">Export Filters</string>
+    <string name="export_filter_subtitle">Choose what data to include in your export</string>
+    <string name="export_filter_data_source">Data Source</string>
+    <string name="export_filter_meter_check">MeterCheck Data</string>
+    <string name="export_filter_meter_match">MeterMatch Data</string>
+    <string name="export_filter_all_data">All Data</string>
+
+    <!-- File Selection -->
+    <string name="export_filter_files">Source Files</string>
+    <string name="export_filter_all_files">All Files</string>
+    <string name="export_filter_select_files">Select Files</string>
+    <string name="export_filter_selected_files">Selected Files (%d)</string>
+    <string name="export_filter_no_files_selected">No files selected</string>
+
+    <!-- Place/Location Selection -->
+    <string name="export_filter_places">Locations</string>
+    <string name="export_filter_all_places">All Locations</string>
+    <string name="export_filter_select_places">Select Locations</string>
+    <string name="export_filter_selected_places">Selected Locations (%d)</string>
+    <string name="export_filter_no_places_selected">No locations selected</string>
+
+    <!-- Registration Status -->
+    <string name="export_filter_registration">Registration Status</string>
+    <string name="export_filter_all_status">All Status</string>
+    <string name="export_filter_registered_only">Registered Only</string>
+    <string name="export_filter_unregistered_only">Unregistered Only</string>
+
+    <!-- Check Status (for MeterCheck) -->
+    <string name="export_filter_check_status">Check Status</string>
+    <string name="export_filter_checked_only">Checked Only</string>
+    <string name="export_filter_unchecked_only">Unchecked Only</string>
+    <string name="export_filter_all_check_status">All Check Status</string>
+
+    <!-- Export File Options -->
+    <string name="export_file_options">File Options</string>
+    <string name="export_filename">File Name</string>
+    <string name="export_filename_hint">meter_export_%s</string>
+    <string name="export_filename_default">meter_export_%s</string>
+    <string name="export_include_timestamp">Include Timestamp</string>
+    <string name="export_file_format">File Format</string>
+    <string name="export_format_csv">CSV (.csv)</string>
+
+    <!-- Export Summary -->
+    <string name="export_summary">Export Summary</string>
+    <string name="export_total_records">Total Records: %d</string>
+    <string name="export_filtered_records">Filtered Records: %d</string>
+    <string name="export_file_size_estimate">Estimated Size: %s</string>
+
+    <!-- Export Actions -->
+    <string name="export_preview">Preview</string>
+    <string name="export_start">Start Export</string>
+    <string name="export_cancel">Cancel</string>
+    <string name="export_clear_filters">Clear Filters</string>
+    <string name="export_apply_filters">Apply Filters</string>
+
+    <!-- Export Progress -->
+    <string name="export_progress_title">Exporting Data</string>
+    <string name="export_progress_message">Preparing CSV file...</string>
+    <string name="export_progress_processing">Processing %d of %d records</string>
+    <string name="export_progress_writing">Writing to file...</string>
+    <string name="export_progress_complete">Export completed</string>
+
+    <!-- Export Errors -->
+    <string name="export_error_no_permission">Storage permission denied</string>
+    <string name="export_error_write_failed">Failed to write file</string>
+    <string name="export_error_invalid_filename">Invalid filename</string>
+    <string name="export_error_no_data_selected">No data matches the selected filters</string>
+    <string name="export_error_generic">Export failed: %s</string>
+
+    <!-- CSV Headers -->
+    <string name="csv_header_number">Number</string>
+    <string name="csv_header_serial_number">SerialNumber</string>
+    <string name="csv_header_place">Place</string>
+    <string name="csv_header_registered">Registered</string>
+    <string name="csv_header_checked">Checked</string>
+    <string name="csv_header_source_file">SourceFile</string>
+    <string name="csv_header_export_date">ExportDate</string>
+
+    <!-- Dialog Titles -->
+    <string name="dialog_export_filters">Export Filters</string>
+    <string name="dialog_select_files">Select Files</string>
+    <string name="dialog_select_places">Select Locations</string>
+    <string name="dialog_export_confirm">Confirm Export</string>
+    <string name="dialog_export_confirm_message">Export %d records to %s?</string>
+
+    <!-- Accessibility -->
+    <string name="export_icon">Export icon</string>
+    <string name="filter_icon">Filter icon</string>
+    <string name="clear_filters_icon">Clear filters icon</string>
+    <string name="file_selection_icon">File selection icon</string>
+    <string name="location_selection_icon">Location selection icon</string>
+
+    <!-- Buttons -->
+    <string name="btn_export">Export</string>
+    <string name="btn_filters">Filters</string>
+    <string name="btn_preview">Preview</string>
+    <string name="btn_select_all">Select All</string>
+    <string name="btn_deselect_all">Deselect All</string>
+
+    <!-- Sort Options for Export Preview -->
+    <string name="sort_check_status">Check Status</string>
+
+    <!-- File Sharing -->
+    <string name="export_share_title">Share CSV Export</string>
+    <string name="export_open_with">Open CSV file with...</string>
+    <string name="export_saved_to">File saved to: %s</string>
+
+    <!-- Menu Items -->
+    <string name="menu_export">Export</string>
+    <string name="menu_export_data">Export Data</string>
+    <string name="menu_import_export">Import/Export</string>
+
+    <!-- Home Fragment Additional Strings -->
+    <string name="main_actions">Main Actions</string>
+    <string name="export_description_home">Export your meter data to CSV format with filtering options</string>
+    <string name="nav_to_files">to Files</string>
+
+
 </resources>

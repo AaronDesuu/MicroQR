@@ -58,6 +58,13 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_homeFragment_to_exportFragment"
+            app:destination="@id/navigation_export"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
     </fragment>
     <fragment
         android:id="@+id/navigation_metercheck"
@@ -138,5 +145,11 @@
         android:name="com.example.microqr.ui.metermatch.MeterDetailScanFragment"
         android:label="Scan Meter"
         tools:layout="@layout/fragment_meter_detail_scan" />
+
+    <fragment
+        android:id="@+id/navigation_export"
+        android:name="com.example.microqr.ui.export.ExportFragment"
+        android:label="@string/title_export"
+        tools:layout="@layout/fragment_export" />
 
 </navigation>

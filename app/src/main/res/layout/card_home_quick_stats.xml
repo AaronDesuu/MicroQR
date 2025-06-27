@@ -282,7 +282,7 @@
             <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:src="@drawable/ic_folder"
+                android:src="@drawable/ic_folder_24"
                 app:tint="@color/secondary_text_color"
                 android:layout_marginEnd="6dp" />
 
