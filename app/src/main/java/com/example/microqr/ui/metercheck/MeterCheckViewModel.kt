@@ -1,61 +1,110 @@
 package com.example.microqr.ui.metercheck
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.microqr.ui.files.MeterStatus
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+data class MeterCheckUiState(
+    val meters: List<MeterStatus> = emptyList(),
+    val searchQuery: String = "",
+    val selectedLocation: String = "",
+    val selectedStatus: String = "",
+    val sortOption: String = "",
+    val totalCount: Int = 0,
+    val scannedCount: Int = 0,
+    val remainingCount: Int = 0,
+    val hasActiveFilters: Boolean = false,
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val selectedMeter: MeterStatus? = null,
+    val shouldNavigateToScan: Boolean = false
+)
 
 class MeterCheckViewModel : ViewModel() {
 
-    private val _screenTitle = MutableLiveData<String>().apply {
-        value = "Scan & Register"
-    }
-    val screenTitle: LiveData<String> = _screenTitle
+    private val _uiState = MutableStateFlow(MeterCheckUiState())
+    val uiState: StateFlow<MeterCheckUiState> = _uiState.asStateFlow()
 
-    private val _searchQuery = MutableLiveData<String>().apply {
-        value = ""
-    }
-    val searchQuery: LiveData<String> = _searchQuery
+    fun setMeters(meters: List<MeterStatus>) {
+        viewModelScope.launch {
+            // Assign numbers starting from 1 for MeterCheck workflow
+            val numberedMeters = meters.mapIndexed { index, meter ->
+                meter.copy(number = (index + 1).toString().padStart(3, '0'))
+            }
 
-    private val _isRefreshing = MutableLiveData<Boolean>().apply {
-        value = false
+            _uiState.value = _uiState.value.copy(
+                meters = numberedMeters,
+                totalCount = numberedMeters.size,
+                scannedCount = numberedMeters.count { it.isChecked },
+                remainingCount = numberedMeters.count { !it.isChecked }
+            )
+        }
     }
-    val isRefreshing: LiveData<Boolean> = _isRefreshing
-
-    // Statistics
-    private val _totalMetersCount = MutableLiveData<Int>().apply {
-        value = 0
-    }
-    val totalMetersCount: LiveData<Int> = _totalMetersCount
-
-    private val _registeredMetersCount = MutableLiveData<Int>().apply {
-        value = 0
-    }
-    val registeredMetersCount: LiveData<Int> = _registeredMetersCount
-
-    private val _unregisteredMetersCount = MutableLiveData<Int>().apply {
-        value = 0
-    }
-    val unregisteredMetersCount: LiveData<Int> = _unregisteredMetersCount
 
     fun updateSearchQuery(query: String) {
-        _searchQuery.value = query
+        _uiState.value = _uiState.value.copy(
+            searchQuery = query,
+            hasActiveFilters = calculateHasActiveFilters(query, _uiState.value.selectedLocation, _uiState.value.selectedStatus)
+        )
     }
 
-    fun clearSearch() {
-        _searchQuery.value = ""
+    fun setLocationFilter(location: String) {
+        _uiState.value = _uiState.value.copy(
+            selectedLocation = location,
+            hasActiveFilters = calculateHasActiveFilters(_uiState.value.searchQuery, location, _uiState.value.selectedStatus)
+        )
     }
 
-    fun setRefreshing(isRefreshing: Boolean) {
-        _isRefreshing.value = isRefreshing
+    fun setStatusFilter(status: String) {
+        _uiState.value = _uiState.value.copy(
+            selectedStatus = status,
+            hasActiveFilters = calculateHasActiveFilters(_uiState.value.searchQuery, _uiState.value.selectedLocation, status)
+        )
     }
 
-    fun updateStatistics(total: Int, registered: Int, unregistered: Int) {
-        _totalMetersCount.value = total
-        _registeredMetersCount.value = registered
-        _unregisteredMetersCount.value = unregistered
+    fun setSortOption(sortOption: String) {
+        _uiState.value = _uiState.value.copy(sortOption = sortOption)
     }
 
-    fun updateScreenTitle(title: String) {
-        _screenTitle.value = title
+    fun updateStatistics(total: Int, scanned: Int, remaining: Int) {
+        _uiState.value = _uiState.value.copy(
+            totalCount = total,
+            scannedCount = scanned,
+            remainingCount = remaining
+        )
+    }
+
+    fun selectMeterForScanning(meter: MeterStatus) {
+        _uiState.value = _uiState.value.copy(
+            selectedMeter = meter,
+            shouldNavigateToScan = true
+        )
+    }
+
+    fun clearNavigationFlag() {
+        _uiState.value = _uiState.value.copy(
+            shouldNavigateToScan = false,
+            selectedMeter = null
+        )
+    }
+
+    fun clearAllFilters() {
+        _uiState.value = _uiState.value.copy(
+            searchQuery = "",
+            selectedLocation = "",
+            selectedStatus = "",
+            sortOption = "",
+            hasActiveFilters = false
+        )
+    }
+
+    private fun calculateHasActiveFilters(query: String, location: String, status: String): Boolean {
+        return query.isNotEmpty() ||
+                (location.isNotEmpty() && location != "All Locations") ||
+                (status.isNotEmpty() && status != "All")
     }
 }

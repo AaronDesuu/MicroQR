@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light"
+    android:background="@color/design_default_color_background"
     tools:context=".ui.metercheck.MeterCheckFragment">
 
     <!-- App Bar Layout with Collapsing Toolbar -->
@@ -38,26 +38,26 @@
                     android:layout_height="wrap_content"
                     android:text="@string/meter_check_welcome"
                     android:textSize="16sp"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/white"
                     android:alpha="0.8" />
 
                 <TextView
                     android:id="@+id/main_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/scan_register"
+                    android:text="@string/meter_check_workflow_title"
                     android:textSize="28sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/white"
                     android:layout_marginTop="4dp" />
 
                 <TextView
                     android:id="@+id/subtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/monitor_your_devices"
+                    android:text="@string/meter_check_workflow_subtitle"
                     android:textSize="14sp"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/white"
                     android:alpha="0.7"
                     android:layout_marginTop="8dp" />
 
@@ -69,11 +69,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:title="@string/verify_meter" />
+                app:title="@string/meter_check_workflow_title" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        <!-- Fixed Search and Refresh Section -->
+        <!-- Fixed Search and Filter Section -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/search_card_view"
             android:layout_width="match_parent"
@@ -90,45 +90,99 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/search_text_input_layout"
-                    android:layout_width="0dp"
+                <!-- Search and Clear Filters Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="12dp"
-                    app:boxBackgroundMode="outline"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:boxCornerRadiusBottomEnd="8dp"
-                    app:boxCornerRadiusBottomStart="8dp"
-                    app:boxCornerRadiusTopEnd="8dp"
-                    app:boxCornerRadiusTopStart="8dp"
-                    app:startIconDrawable="@drawable/ic_search_24"
-                    app:hintTextColor="@color/md_theme_light_onSurfaceVariant"
-                    app:endIconMode="clear_text"
-                    android:hint="@string/search_meters">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/search_edit_text"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/search_text_input_layout"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:textColor="@android:color/black"
-                        android:maxLines="1" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_weight="1"
+                        android:layout_marginEnd="12dp"
+                        app:boxBackgroundMode="outline"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:startIconDrawable="@drawable/ic_search_24"
+                        app:hintTextColor="@color/secondary_text_color"
+                        app:endIconMode="clear_text"
+                        android:hint="@string/search_meters">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/refresh_button"
-                    style="@style/Widget.Material3.Button.IconButton.Outlined"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    app:icon="@drawable/ic_refresh_24"
-                    app:iconSize="20dp"
-                    android:contentDescription="@string/refresh" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSearch"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textColor="@color/primary_text_color"
+                            android:imeOptions="actionSearch" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClearFilters"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/clear_filters"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+                <!-- Filter Buttons Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFilterLocation"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/filter_by_location"
+                        android:textSize="11sp"
+                        android:layout_marginEnd="4dp"
+                        app:icon="@drawable/ic_location_on_24"
+                        app:iconSize="16dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFilterStatus"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/filter_by_status"
+                        android:textSize="11sp"
+                        android:layout_marginHorizontal="4dp"
+                        app:icon="@drawable/ic_check_circle"
+                        app:iconSize="16dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSort"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/sort_options"
+                        android:textSize="11sp"
+                        android:layout_marginStart="4dp"
+                        app:icon="@drawable/ic_sort_24"
+                        app:iconSize="16dp" />
+
+                </LinearLayout>
+
             </LinearLayout>
+
         </com.google.android.material.card.MaterialCardView>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -144,13 +198,76 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Quick Stats Card -->
+            <!-- Setup Locations Button -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/setup_locations_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_location_on_24"
+                        android:contentDescription="@string/setup_locations"
+                        android:background="@drawable/circle_background_primary"
+                        android:padding="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setup_locations"
+                            android:textColor="@color/primary_text_color"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/locations_required"
+                            android:textColor="@color/secondary_text_color"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_forward_24"
+                        android:contentDescription="@string/navigate_forward"
+                        app:tint="@color/primary_color" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Statistics Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
                 app:strokeWidth="0dp">
@@ -169,20 +286,20 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/total_meters_count"
+                            android:id="@+id/totalMetersCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/zero"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary" />
+                            android:textColor="@color/primary_color" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/total_meters"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="@color/secondary_text_color"
                             android:layout_marginTop="4dp" />
 
                     </LinearLayout>
@@ -201,7 +318,7 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/active_meters_count"
+                            android:id="@+id/scannedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/zero"
@@ -212,9 +329,9 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/registered"
+                            android:text="@string/scanned_count"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="@color/secondary_text_color"
                             android:layout_marginTop="4dp" />
 
                     </LinearLayout>
@@ -233,7 +350,7 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/alerts_count"
+                            android:id="@+id/remainingCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/zero"
@@ -244,107 +361,82 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/unregistered"
+                            android:text="@string/remaining_count"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="@color/secondary_text_color"
                             android:layout_marginTop="4dp" />
+
                     </LinearLayout>
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Current Files TextView -->
-            <TextView
-                android:id="@+id/current_files_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_horizontal"
-                android:textAppearance="?attr/textAppearanceCaption"
-                android:textColor="@color/md_theme_light_onSurfaceVariant"
-                tools:text="Data from: meter_data_2024.csv, old_meters.csv"
-                android:visibility="gone"
-                tools:visibility="visible"/>
-
-            <!-- Section Header -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/your_meters"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface" />
-            </LinearLayout>
-
-            <!-- Enhanced RecyclerView Container -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/meter_recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:clipToPadding="false"
-                    android:scrollbars="vertical"
-                    tools:listitem="@layout/item_check_meter"
-                    tools:itemCount="5" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Empty State (hidden by default) -->
+            <!-- Empty State -->
             <LinearLayout
                 android:id="@+id/empty_state_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="48dp"
+                android:padding="32dp"
                 android:visibility="gone"
                 tools:visibility="visible">
 
                 <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:src="@drawable/ic_meter_empty"
-                    android:alpha="0.3"
-                    android:contentDescription="@string/no_meters" />
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_qr_code_scanner_24"
+                    android:layout_marginBottom="16dp"
+                    app:tint="@color/secondary_text_color" />
 
                 <TextView
-                    android:id="@+id/empty_state_text"
+                    android:id="@+id/empty_state_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/no_meters_found"
-                    android:textSize="20sp"
+                    android:text="@string/error_no_locations"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
-                    android:layout_marginTop="16dp" />
+                    android:textColor="@color/primary_text_color"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
+                    android:id="@+id/empty_state_message"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/add_your_meter_data"
+                    android:text="@string/locations_required"
                     android:textSize="14sp"
-                    android:textColor="@color/md_theme_light_onSurfaceVariant"
-                    android:layout_marginTop="8dp"
+                    android:textColor="@color/secondary_text_color"
                     android:gravity="center" />
+
             </LinearLayout>
+
+            <!-- Meters RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMeters"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="16dp"
+                android:clipToPadding="false"
+                tools:listitem="@layout/item_meter_check" />
+
         </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabScanMeter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_qr_code_scanner_24"
+        android:contentDescription="@string/scan_qr_code"
+        app:tint="@color/white"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

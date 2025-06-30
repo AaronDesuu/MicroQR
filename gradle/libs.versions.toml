@@ -36,6 +36,7 @@ cameraMlkitVision = "1.4.2"
 preference = "1.2.0"
 preferenceKtx = "1.2.1"
 compiler = "3.2.0-alpha11"
+recyclerview = "1.4.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -83,6 +84,7 @@ androidx-camera-mlkit-vision = { group = "androidx.camera", name = "camera-mlkit
 androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
 androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

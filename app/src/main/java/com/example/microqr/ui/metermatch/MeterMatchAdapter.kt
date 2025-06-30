@@ -18,7 +18,7 @@ class MeterMatchAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MeterViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_match_meter, parent, false)
+            .inflate(R.layout.item_meter_match, parent, false)
         return MeterViewHolder(view, onItemClick)
     }
 

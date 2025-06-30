@@ -685,4 +685,144 @@
     <string name="main_actions">メインアクション</string>
     <string name="export_description_home">フィルタリングオプション付きでメーターデータをCSV形式にエクスポート</string>
 
+    <!-- CSV Validation Messages -->
+    <string name="csv_validation_input_stream_null">入力ストリームがnullです</string>
+    <string name="csv_validation_file_empty">ファイルが空です</string>
+    <string name="csv_validation_missing_serial_column">必要な列が不足しています：SerialNumber</string>
+    <string name="csv_validation_error_reading_file">ファイル読み取りエラー：%s</string>
+
+    <!-- CSV Processing Messages -->
+    <string name="csv_processing_input_stream_null">ファイル%sの入力ストリームがnullです</string>
+    <string name="csv_processing_file_empty">ファイルが空です：%s</string>
+    <string name="csv_processing_missing_serial_column">ファイル%sに必要なSerialNumber列がありません</string>
+    <string name="csv_processing_insufficient_columns">行%1$dの列数が不足しています（%2$d vs 必要%3$d）</string>
+    <string name="csv_processing_blank_serial">行%dのシリアル番号フィールドが空白です</string>
+    <string name="csv_processing_error_parsing_line">%2$sの行%1$dの解析エラー：%3$s</string>
+    <string name="csv_processing_summary">%1$sを処理しました：%2$dのシリアル番号を解析、%3$d行をスキップ</string>
+    <string name="csv_processing_error_processing_file">CSVファイル%1$sの処理エラー：%2$s</string>
+
+    <!-- CSV Format Requirements -->
+    <string name="csv_format_requirements">📋 CSVフォーマット要件：\n\n必要な列：\n• SerialNumber - 一意のシリアル番号（例：SN123456789、2203312）\n\nCSV内容の例：\nSerialNumber\n2203312\nSN987654321\nMTR-001-ABC\n\n注意点：\n• ヘッダー行が必要です\n• カンマ区切り値\n• カンマを含むテキストは引用符で囲む\n• 空行は無視されます\n• 無効な行は警告とともにスキップされます</string>
+
+    <!-- File Size Format -->
+    <string name="file_size_bytes">%d B</string>
+    <string name="file_size_kb">%s KB</string>
+    <string name="file_size_mb">%s MB</string>
+    <string name="file_size_gb">%s GB</string>
+
+    <!-- CSV Preview Messages -->
+    <string name="csv_preview_cannot_read_file">ファイルを読み取れません</string>
+    <string name="csv_preview_file_empty">ファイルが空です</string>
+    <string name="csv_preview_content">プレビュー：\n%s</string>
+    <string name="csv_preview_error_reading_file">ファイル読み取りエラー：%s</string>
+
+    <!-- Updated File Instructions for Serial Number Only -->
+    <string name="files_upload_instructions_serial_only">📋 手順：\n\n1. 以下の必須列を含むCSVファイルをアップロードしてください：\n   • SerialNumber - 一意のシリアル番号識別子\n\n2. アップロード後、処理先を選択してください：\n   • MeterCheck - シリアル番号検証ワークフロー用\n   • Match - 照合操作用\n\n3. 有効なCSVファイルのみ処理可能です\n\nサポートされるファイル形式：CSV、TXT\n最大ファイルサイズ：10MB\n\nCSVフォーマットの例：\nSerialNumber\nSN123456789\n2203312\nMTR-001-ABC</string>
+
+    <!-- Updated Validation Messages -->
+    <string name="files_validation_missing_serial_column">必要なSerialNumber列が不足しています</string>
+    <string name="csv_validation_success">✅ 有効なCSVフォーマット - SerialNumber列が見つかりました</string>
+    <string name="csv_validation_failed">❌ 無効なCSVフォーマット - SerialNumber列が必要です</string>
+
+    <!-- Serial Number Processing -->
+    <string name="serial_numbers_processed">処理されたシリアル番号：%d</string>
+    <string name="serial_numbers_found">見つかったシリアル番号：%d</string>
+    <string name="processing_serial_numbers">シリアル番号を処理中...</string>
+    <string name="serial_number_validation_complete">シリアル番号の検証が完了しました</string>
+
+    <!-- Status Messages for Serial Number Processing -->
+    <string name="status_serial_processed">✅ 処理済み</string>
+    <string name="status_serial_pending">❌ 保留中</string>
+    <string name="status_serial_valid">✅ 有効</string>
+    <string name="status_serial_invalid">❌ 無効</string>
+
+    <!-- Error Messages for Serial Number Operations -->
+    <string name="error_serial_number_empty">シリアル番号を空にすることはできません</string>
+    <string name="error_serial_number_invalid">無効なシリアル番号フォーマット</string>
+    <string name="error_duplicate_serial_number">重複するシリアル番号が見つかりました：%s</string>
+    <string name="error_processing_serial_numbers">シリアル番号の処理エラー</string>
+
+    <!-- Success Messages -->
+    <string name="success_serial_numbers_loaded">%dのシリアル番号を正常に読み込みました</string>
+    <string name="success_csv_processed_serial_only">CSVの処理が正常に完了しました - %dのシリアル番号が見つかりました</string>
+
+    <!-- MeterCheck Fragment Updated Strings (Japanese) -->
+    <string name="meter_check_workflow_title">メーターチェック</string>
+    <string name="meter_check_workflow_subtitle">指定された場所でメーターをスキャン</string>
+    <string name="setup_locations">場所の設定</string>
+    <string name="locations_required">スキャン場所を入力</string>
+    <string name="add_location_button">場所を追加</string>
+    <string name="scan_meter_at_location">%sでメーターをスキャン</string>
+    <string name="scanning_at_location">スキャン場所：%s</string>
+
+    <!-- Location Fragment (Japanese) -->
+    <string name="location_fragment_title">スキャン場所</string>
+    <string name="location_fragment_subtitle">メーターをスキャンする場所を設定</string>
+    <string name="add_location">場所を追加</string>
+    <string name="edit_location">場所を編集</string>
+    <string name="delete_location">場所を削除</string>
+    <string name="location_name_hint">場所名を入力</string>
+    <string name="location_name_required">場所名は必須です</string>
+    <string name="location_already_exists">場所は既に存在します</string>
+    <string name="location_added">場所が追加されました：%s</string>
+    <string name="location_updated">場所が更新されました：%s</string>
+    <string name="location_deleted">場所が削除されました：%s</string>
+    <string name="no_locations_message">場所が設定されていません。メーターをスキャンする場所を追加してください。</string>
+    <string name="save_location">場所を保存</string>
+    <string name="cancel_location">キャンセル</string>
+    <string name="confirm_delete_location">この場所を削除しますか？</string>
+    <string name="confirm_delete_location_message">この操作は取り消すことができません。</string>
+
+    <!-- Meter Check Flow (Japanese) -->
+    <string name="scan_qr_at_location">%sでQRコードをスキャン</string>
+    <string name="serial_not_found_in_database">シリアル番号がデータベースに見つかりません</string>
+    <string name="add_to_database">データベースに追加</string>
+    <string name="skip_serial">スキップ</string>
+    <string name="add_serial_to_database">シリアル番号をデータベースに追加</string>
+    <string name="serial_added_to_database">シリアル番号がデータベースに追加されました</string>
+    <string name="choose_meter_number">メーター番号を選択</string>
+    <string name="choose_location">場所を選択</string>
+    <string name="enter_custom_location">カスタム場所を入力</string>
+    <string name="custom_location_hint">場所名を入力</string>
+    <string name="meter_number_hint">メーター番号を入力</string>
+    <string name="save_meter_data">メーターデータを保存</string>
+    <string name="meter_data_saved">メーターデータが正常に保存されました</string>
+    <string name="meter_updated_in_database">メーターがデータベースで更新されました</string>
+
+    <!-- Filter Strings for MeterCheck (Japanese) -->
+    <string name="filter_by_location">場所でフィルター</string>
+    <string name="filter_by_status">ステータスでフィルター</string>
+    <string name="filter_by_file">ファイルでフィルター</string>
+    <string name="sort_options">ソートオプション</string>
+    <string name="sort_by_number">番号でソート</string>
+    <string name="sort_by_serial">シリアル番号でソート</string>
+    <string name="sort_by_location">場所でソート</string>
+    <string name="sort_by_status">ステータスでソート</string>
+    <string name="clear_filters">フィルターをクリア</string>
+    <string name="all_locations">すべての場所</string>
+    <string name="all_files">すべてのファイル</string>
+    <string name="scanned_meters">スキャン済み</string>
+    <string name="unscanned_meters">未スキャン</string>
+
+    <!-- Status Messages (Japanese) -->
+    <string name="meter_scan_completed">メータースキャンが完了しました</string>
+    <string name="back_to_meter_list">メーターリストに戻る</string>
+    <string name="scan_next_meter">次のメーターをスキャン</string>
+    <string name="all_meters_scanned">すべてのメーターがスキャンされました！</string>
+
+    <!-- Progress and Statistics (Japanese) -->
+    <string name="scanned_count">スキャン済み</string>
+    <string name="remaining_count">残り</string>
+    <string name="total_for_location">%sの合計</string>
+    <string name="progress_format">%d/%d完了</string>
+
+    <!-- Error Messages (Japanese) -->
+    <string name="error_no_locations">場所が設定されていません。まず場所を追加してください。</string>
+    <string name="error_camera_permission">スキャンにはカメラの許可が必要です</string>
+    <string name="error_qr_scan_failed">QRコードのスキャンに失敗しました</string>
+    <string name="error_database_update">データベースの更新に失敗しました</string>
+    <string name="error_invalid_serial">無効なシリアル番号形式</string>
+
+    <!-- Additional common strings (Japanese) -->
+
 </resources>

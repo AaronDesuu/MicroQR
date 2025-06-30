@@ -66,6 +66,7 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"/>
     </fragment>
+
     <fragment
         android:id="@+id/navigation_metercheck"
         android:name="com.example.microqr.ui.metercheck.MeterCheckFragment"
@@ -78,7 +79,20 @@
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_meterCheck_to_location"
+            app:destination="@id/locationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
+
+    <fragment
+        android:id="@+id/locationFragment"
+        android:name="com.example.microqr.ui.location.LocationFragment"
+        android:label="@string/location_fragment_title"
+        tools:layout="@layout/fragment_location" />
 
     <fragment
         android:id="@+id/navigation_files"
@@ -143,7 +157,7 @@
     <fragment
         android:id="@+id/meterDetailScanFragment"
         android:name="com.example.microqr.ui.metermatch.MeterDetailScanFragment"
-        android:label="Scan Meter"
+        android:label="@string/scan_qr_code"
         tools:layout="@layout/fragment_meter_detail_scan" />
 
     <fragment

@@ -1,6 +1,8 @@
 package com.example.microqr.ui.files
 
+import android.content.Context
 import android.util.Log
+import com.example.microqr.R
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -10,52 +12,101 @@ object CsvHelper {
     private const val TAG = "CsvHelper"
 
     /**
-     * Required CSV columns for meter data
+     * Required CSV column for serial number validation
      */
-    private val REQUIRED_COLUMNS = listOf("Number", "SerialNumber", "Place", "Registered")
+    private const val REQUIRED_SERIAL_COLUMN = "SerialNumber"
 
     /**
-     * Validates if the CSV file has the correct format and required columns
+     * Validates if the CSV file has the correct format and required serial number column
      */
-    fun validateCsvFormat(inputStream: InputStream?): CsvValidationResult {
+    fun validateCsvFormat(inputStream: InputStream?, context: Context): CsvValidationResult {
         if (inputStream == null) {
-            return CsvValidationResult(false, emptyList(), "Input stream is null")
+            return CsvValidationResult(
+                false,
+                listOf(REQUIRED_SERIAL_COLUMN),
+                context.getString(R.string.csv_validation_input_stream_null)
+            )
         }
 
         return try {
             BufferedReader(InputStreamReader(inputStream)).use { reader ->
                 val headerLine = reader.readLine()
                 if (headerLine == null) {
-                    return CsvValidationResult(false, emptyList(), "File is empty")
+                    return CsvValidationResult(
+                        false,
+                        listOf(REQUIRED_SERIAL_COLUMN),
+                        context.getString(R.string.csv_validation_file_empty)
+                    )
                 }
 
                 val headers = headerLine.split(",").map { it.trim().removeSurrounding("\"") }
-                val missingColumns = REQUIRED_COLUMNS.filter { required ->
-                    !headers.any { header -> header.equals(required, ignoreCase = true) }
+                val hasSerialColumn = headers.any { header ->
+                    header.equals(REQUIRED_SERIAL_COLUMN, ignoreCase = true)
                 }
 
-                if (missingColumns.isEmpty()) {
+                if (hasSerialColumn) {
                     CsvValidationResult(true)
                 } else {
                     CsvValidationResult(
                         false,
-                        missingColumns,
-                        "Missing required columns: ${missingColumns.joinToString(", ")}"
+                        listOf(REQUIRED_SERIAL_COLUMN),
+                        context.getString(R.string.csv_validation_missing_serial_column)
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, context.getString(R.string.csv_validation_error_reading_file, e.message), e)
+            CsvValidationResult(
+                false,
+                listOf(REQUIRED_SERIAL_COLUMN),
+                context.getString(R.string.csv_validation_error_reading_file, e.message)
+            )
+        }
+    }
+
+    /**
+     * Backward compatibility method for existing code
+     */
+    fun validateCsvFormat(inputStream: InputStream?): CsvValidationResult {
+        if (inputStream == null) {
+            return CsvValidationResult(false, listOf(REQUIRED_SERIAL_COLUMN), "Input stream is null")
+        }
+
+        return try {
+            BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                val headerLine = reader.readLine()
+                if (headerLine == null) {
+                    return CsvValidationResult(false, listOf(REQUIRED_SERIAL_COLUMN), "File is empty")
+                }
+
+                val headers = headerLine.split(",").map { it.trim().removeSurrounding("\"") }
+                val hasSerialColumn = headers.any { header ->
+                    header.equals(REQUIRED_SERIAL_COLUMN, ignoreCase = true)
+                }
+
+                if (hasSerialColumn) {
+                    CsvValidationResult(true)
+                } else {
+                    CsvValidationResult(
+                        false,
+                        listOf(REQUIRED_SERIAL_COLUMN),
+                        "Missing required column: $REQUIRED_SERIAL_COLUMN"
                     )
                 }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error validating CSV format: ${e.message}", e)
-            CsvValidationResult(false, emptyList(), "Error reading file: ${e.message}")
+            CsvValidationResult(false, listOf(REQUIRED_SERIAL_COLUMN), "Error reading file: ${e.message}")
         }
     }
 
     /**
-     * Processes CSV file and returns list of MeterStatus objects
+     * Processes CSV file and returns list of MeterStatus objects with serial numbers only
+     * Other fields are populated with default values for compatibility
      */
-    fun processCsvFile(inputStream: InputStream?, sourceFileName: String): List<MeterStatus> {
+    fun processCsvFile(inputStream: InputStream?, sourceFileName: String, context: Context): List<MeterStatus> {
         if (inputStream == null) {
-            Log.e(TAG, "Input stream is null for file: $sourceFileName")
+            Log.e(TAG, context.getString(R.string.csv_processing_input_stream_null, sourceFileName))
             return emptyList()
         }
 
@@ -65,21 +116,18 @@ object CsvHelper {
             BufferedReader(InputStreamReader(inputStream)).use { reader ->
                 val headerLine = reader.readLine()
                 if (headerLine == null) {
-                    Log.w(TAG, "File is empty: $sourceFileName")
+                    Log.w(TAG, context.getString(R.string.csv_processing_file_empty, sourceFileName))
                     return emptyList()
                 }
 
                 val headers = headerLine.split(",").map { it.trim().removeSurrounding("\"") }
 
-                // Find column indices (case-insensitive)
-                val numberIndex = headers.indexOfFirst { it.equals("Number", ignoreCase = true) }
-                val serialIndex = headers.indexOfFirst { it.equals("SerialNumber", ignoreCase = true) }
-                val placeIndex = headers.indexOfFirst { it.equals("Place", ignoreCase = true) }
-                val registeredIndex = headers.indexOfFirst { it.equals("Registered", ignoreCase = true) }
+                // Find serial number column index (case-insensitive)
+                val serialIndex = headers.indexOfFirst { it.equals(REQUIRED_SERIAL_COLUMN, ignoreCase = true) }
 
-                // Validate that all required columns were found
-                if (numberIndex == -1 || serialIndex == -1 || placeIndex == -1 || registeredIndex == -1) {
-                    Log.e(TAG, "Missing required columns in file: $sourceFileName")
+                // Validate that serial number column was found
+                if (serialIndex == -1) {
+                    Log.e(TAG, context.getString(R.string.csv_processing_missing_serial_column, sourceFileName))
                     return emptyList()
                 }
 
@@ -100,33 +148,119 @@ object CsvHelper {
                         val tokens = parseCsvLine(line!!)
 
                         // Check if we have enough columns
-                        val maxIndex = maxOf(numberIndex, serialIndex, placeIndex, registeredIndex)
-                        if (tokens.size <= maxIndex) {
-                            Log.w(TAG, "Line $lineNumber has insufficient columns (${tokens.size} vs required ${maxIndex + 1})")
+                        if (tokens.size <= serialIndex) {
+                            Log.w(TAG, context.getString(R.string.csv_processing_insufficient_columns, lineNumber, tokens.size, serialIndex + 1))
                             skippedLines++
                             continue
                         }
 
-                        // Extract and validate data
-                        val number = tokens.getOrNull(numberIndex)?.takeIf { it.isNotBlank() }
-                        val serial = tokens.getOrNull(serialIndex)?.takeIf { it.isNotBlank() }
-                        val place = tokens.getOrNull(placeIndex)?.takeIf { it.isNotBlank() }
-                        val registeredStr = tokens.getOrNull(registeredIndex)?.takeIf { it.isNotBlank() }
+                        // Extract and validate serial number
+                        val serialNumber = tokens.getOrNull(serialIndex)?.takeIf { it.isNotBlank() }
 
-                        if (number == null || serial == null || place == null || registeredStr == null) {
-                            Log.w(TAG, "Line $lineNumber has blank required fields")
+                        if (serialNumber == null) {
+                            Log.w(TAG, context.getString(R.string.csv_processing_blank_serial, lineNumber))
                             skippedLines++
                             continue
                         }
 
-                        val registered = parseBoolean(registeredStr)
-
+                        // Create MeterStatus with default values for compatibility
                         meters.add(
                             MeterStatus(
-                                number = number,
-                                serialNumber = serial,
-                                place = place,
-                                registered = registered,
+                                number = context.getString(R.string.default_meter_number),
+                                serialNumber = serialNumber,
+                                place = context.getString(R.string.default_meter_place),
+                                registered = false, // Default to unregistered
+                                fromFile = sourceFileName,
+                                isChecked = false,
+                                isSelectedForProcessing = false
+                            )
+                        )
+                        successfullyParsed++
+
+                    } catch (e: Exception) {
+                        Log.w(TAG, context.getString(R.string.csv_processing_error_parsing_line, lineNumber, sourceFileName, e.message))
+                        skippedLines++
+                    }
+                }
+
+                Log.d(TAG, context.getString(R.string.csv_processing_summary, sourceFileName, successfullyParsed, skippedLines))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, context.getString(R.string.csv_processing_error_processing_file, sourceFileName, e.message), e)
+        }
+
+        return meters
+    }
+
+    /**
+     * Backward compatibility method for existing code
+     */
+    fun processCsvFile(inputStream: InputStream?, sourceFileName: String): List<MeterStatus> {
+        if (inputStream == null) {
+            Log.e(TAG, "Input stream is null for file: $sourceFileName")
+            return emptyList()
+        }
+
+        val meters = mutableListOf<MeterStatus>()
+
+        try {
+            BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                val headerLine = reader.readLine()
+                if (headerLine == null) {
+                    Log.w(TAG, "File is empty: $sourceFileName")
+                    return emptyList()
+                }
+
+                val headers = headerLine.split(",").map { it.trim().removeSurrounding("\"") }
+
+                // Find serial number column index (case-insensitive)
+                val serialIndex = headers.indexOfFirst { it.equals(REQUIRED_SERIAL_COLUMN, ignoreCase = true) }
+
+                // Validate that serial number column was found
+                if (serialIndex == -1) {
+                    Log.e(TAG, "Missing required SerialNumber column in file: $sourceFileName")
+                    return emptyList()
+                }
+
+                var line: String?
+                var lineNumber = 1
+                var successfullyParsed = 0
+                var skippedLines = 0
+
+                while (reader.readLine().also { line = it } != null) {
+                    lineNumber++
+
+                    if (line.isNullOrBlank()) {
+                        skippedLines++
+                        continue
+                    }
+
+                    try {
+                        val tokens = parseCsvLine(line!!)
+
+                        // Check if we have enough columns
+                        if (tokens.size <= serialIndex) {
+                            Log.w(TAG, "Line $lineNumber has insufficient columns (${tokens.size} vs required ${serialIndex + 1})")
+                            skippedLines++
+                            continue
+                        }
+
+                        // Extract and validate serial number
+                        val serialNumber = tokens.getOrNull(serialIndex)?.takeIf { it.isNotBlank() }
+
+                        if (serialNumber == null) {
+                            Log.w(TAG, "Line $lineNumber has blank serial number field")
+                            skippedLines++
+                            continue
+                        }
+
+                        // Create MeterStatus with default values for compatibility
+                        meters.add(
+                            MeterStatus(
+                                number = "M${String.format("%03d", successfullyParsed + 1)}",
+                                serialNumber = serialNumber,
+                                place = "Unknown Location",
+                                registered = false, // Default to unregistered
                                 fromFile = sourceFileName,
                                 isChecked = false,
                                 isSelectedForProcessing = false
@@ -140,7 +274,7 @@ object CsvHelper {
                     }
                 }
 
-                Log.d(TAG, "Processed $sourceFileName: $successfullyParsed meters parsed, $skippedLines lines skipped")
+                Log.d(TAG, "Processed $sourceFileName: $successfullyParsed serial numbers parsed, $skippedLines lines skipped")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error processing CSV file $sourceFileName: ${e.message}", e)
@@ -195,52 +329,52 @@ object CsvHelper {
     }
 
     /**
-     * Converts various boolean representations to actual boolean
+     * Validates if a CSV line has the required serial number column
      */
-    fun parseBoolean(value: String): Boolean {
-        return when (value.trim().lowercase()) {
-            "true", "1", "yes", "y", "on", "enabled" -> true
-            "false", "0", "no", "n", "off", "disabled" -> false
-            else -> {
-                Log.w(TAG, "Unknown boolean value: '$value', defaulting to false")
-                false
-            }
-        }
-    }
-
-    /**
-     * Validates if a CSV line has the correct number of columns
-     */
-    fun validateCsvLine(line: String, expectedColumns: Int = 4): Boolean {
+    fun validateCsvLine(line: String, serialColumnIndex: Int): Boolean {
         if (line.isBlank()) return false
 
         val tokens = parseCsvLine(line)
-        return tokens.size >= expectedColumns && tokens.all { it.isNotBlank() }
+        return tokens.size > serialColumnIndex && tokens[serialColumnIndex].isNotBlank()
     }
 
     /**
+     * Backward compatibility method for existing code
+     */
+//    fun validateCsvLine(line: String, expectedColumns: Int = 1): Boolean {
+//        if (line.isBlank()) return false
+//
+//        val tokens = parseCsvLine(line)
+//        return tokens.size >= expectedColumns && tokens.any { it.isNotBlank() }
+//    }
+
+    /**
      * Gets CSV format requirements as a formatted string for user guidance
+     */
+    fun getCsvFormatRequirements(context: Context): String {
+        return context.getString(R.string.csv_format_requirements)
+    }
+
+    /**
+     * Backward compatibility method for existing code
      */
     fun getCsvFormatRequirements(): String {
         return """
             📋 CSV Format Requirements:
             
-            Required Columns (in any order):
-            • Number - Meter identification number (e.g., M001, METER_123)
+            Required Column:
             • SerialNumber - Unique serial number (e.g., SN123456789, 2203312)
-            • Place - Location/address (e.g., "123 Main St Apt 1A")
-            • Registered - Boolean value (true/false, yes/no, 1/0)
             
             Example CSV Content:
-            Number,SerialNumber,Place,Registered
-            M001,2203312,"123 Main St Apt 1A",true
-            M002,SN987654321,"456 Oak Ave Unit 2B",false
+            SerialNumber
+            2203312
+            SN987654321
+            MTR-001-ABC
             
             Notes:
             • Header row is required
             • Comma-separated values
             • Text containing commas should be quoted
-            • Boolean values: true/false, yes/no, 1/0, on/off
             • Empty lines are ignored
             • Invalid lines are skipped with warnings
         """.trimIndent()
@@ -274,6 +408,18 @@ object CsvHelper {
     /**
      * Formats file size for display
      */
+    fun formatFileSize(sizeBytes: Long, context: Context): String {
+        return when {
+            sizeBytes < 1024 -> context.getString(R.string.file_size_bytes, sizeBytes)
+            sizeBytes < 1024 * 1024 -> context.getString(R.string.file_size_kb, String.format("%.1f", sizeBytes / 1024.0))
+            sizeBytes < 1024 * 1024 * 1024 -> context.getString(R.string.file_size_mb, String.format("%.1f", sizeBytes / (1024.0 * 1024.0)))
+            else -> context.getString(R.string.file_size_gb, String.format("%.1f", sizeBytes / (1024.0 * 1024.0 * 1024.0)))
+        }
+    }
+
+    /**
+     * Backward compatibility method for existing code
+     */
     fun formatFileSize(sizeBytes: Long): String {
         return when {
             sizeBytes < 1024 -> "$sizeBytes B"
@@ -284,12 +430,45 @@ object CsvHelper {
     }
 
     /**
-     * Gets the list of required columns
+     * Gets the required column name
      */
-    fun getRequiredColumns(): List<String> = REQUIRED_COLUMNS.toList()
+    fun getRequiredColumn(): String = REQUIRED_SERIAL_COLUMN
+
+    /**
+     * Backward compatibility method for existing code
+     */
+    fun getRequiredColumns(): List<String> = listOf(REQUIRED_SERIAL_COLUMN)
 
     /**
      * Validates CSV content preview (first few lines)
+     */
+    fun validateCsvPreview(inputStream: InputStream?, maxLines: Int = 5, context: Context): String {
+        if (inputStream == null) return context.getString(R.string.csv_preview_cannot_read_file)
+
+        return try {
+            BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                val lines = mutableListOf<String>()
+                var line: String?
+                var count = 0
+
+                while (reader.readLine().also { line = it } != null && count < maxLines) {
+                    lines.add(line!!)
+                    count++
+                }
+
+                if (lines.isEmpty()) {
+                    context.getString(R.string.csv_preview_file_empty)
+                } else {
+                    context.getString(R.string.csv_preview_content, lines.joinToString("\n"))
+                }
+            }
+        } catch (e: Exception) {
+            context.getString(R.string.csv_preview_error_reading_file, e.message)
+        }
+    }
+
+    /**
+     * Backward compatibility method for existing code
      */
     fun validateCsvPreview(inputStream: InputStream?, maxLines: Int = 5): String {
         if (inputStream == null) return "Cannot read file"

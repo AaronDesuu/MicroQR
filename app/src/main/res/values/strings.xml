@@ -684,7 +684,155 @@
     <!-- Home Fragment Additional Strings -->
     <string name="main_actions">Main Actions</string>
     <string name="export_description_home">Export your meter data to CSV format with filtering options</string>
-    <string name="nav_to_files">to Files</string>
 
+    <!-- CSV Validation Messages -->
+    <string name="csv_validation_input_stream_null">Input stream is null</string>
+    <string name="csv_validation_file_empty">File is empty</string>
+    <string name="csv_validation_missing_serial_column">Missing required column: SerialNumber</string>
+    <string name="csv_validation_error_reading_file">Error reading file: %s</string>
+
+    <!-- CSV Processing Messages -->
+    <string name="csv_processing_input_stream_null">Input stream is null for file: %s</string>
+    <string name="csv_processing_file_empty">File is empty: %s</string>
+    <string name="csv_processing_missing_serial_column">Missing required SerialNumber column in file: %s</string>
+    <string name="csv_processing_insufficient_columns">Line %1$d has insufficient columns (%2$d vs required %3$d)</string>
+    <string name="csv_processing_blank_serial">Line %d has blank serial number field</string>
+    <string name="csv_processing_error_parsing_line">Error parsing line %1$d in %2$s: %3$s</string>
+    <string name="csv_processing_summary">Processed %1$s: %2$d serial numbers parsed, %3$d lines skipped</string>
+    <string name="csv_processing_error_processing_file">Error processing CSV file %1$s: %2$s</string>
+
+    <!-- CSV Format Requirements -->
+    <string name="csv_format_requirements">📋 CSV Format Requirements:\n\nRequired Column:\n• SerialNumber - Unique serial number (e.g., SN123456789, 2203312)\n\nExample CSV Content:\nSerialNumber\n2203312\nSN987654321\nMTR-001-ABC\n\nNotes:\n• Header row is required\n• Comma-separated values\n• Text containing commas should be quoted\n• Empty lines are ignored\n• Invalid lines are skipped with warnings</string>
+
+    <!-- File Size Format -->
+    <string name="file_size_bytes">%d B</string>
+    <string name="file_size_kb">%s KB</string>
+    <string name="file_size_mb">%s MB</string>
+    <string name="file_size_gb">%s GB</string>
+
+    <!-- CSV Preview Messages -->
+    <string name="csv_preview_cannot_read_file">Cannot read file</string>
+    <string name="csv_preview_file_empty">File is empty</string>
+    <string name="csv_preview_content">Preview:\n%s</string>
+    <string name="csv_preview_error_reading_file">Error reading file: %s</string>
+
+    <!-- Updated File Instructions for Serial Number Only -->
+    <string name="files_upload_instructions_serial_only">📋 Instructions:\n\n1. Upload a CSV file with the following required column:\n   • SerialNumber - Unique serial number identifier\n\n2. After upload, choose processing destination:\n   • MeterCheck - For serial number verification workflow\n   • Match - For matching operations\n\n3. Only valid CSV files can be processed\n\nSupported file types: CSV, TXT\nMaximum file size: 10MB\n\nExample CSV format:\nSerialNumber\nSN123456789\n2203312\nMTR-001-ABC</string>
+
+    <!-- Updated Validation Messages -->
+    <string name="files_validation_missing_serial_column">Missing required SerialNumber column</string>
+    <string name="csv_validation_success">✅ Valid CSV format - SerialNumber column found</string>
+    <string name="csv_validation_failed">❌ Invalid CSV format - SerialNumber column required</string>
+
+    <!-- Serial Number Processing -->
+    <string name="serial_numbers_processed">Serial Numbers Processed: %d</string>
+    <string name="serial_numbers_found">Serial Numbers Found: %d</string>
+    <string name="processing_serial_numbers">Processing serial numbers...</string>
+    <string name="serial_number_validation_complete">Serial number validation complete</string>
+
+    <!-- Status Messages for Serial Number Processing -->
+    <string name="status_serial_processed">✅ Processed</string>
+    <string name="status_serial_pending">❌ Pending</string>
+    <string name="status_serial_valid">✅ Valid</string>
+    <string name="status_serial_invalid">❌ Invalid</string>
+
+    <!-- Error Messages for Serial Number Operations -->
+    <string name="error_serial_number_empty">Serial number cannot be empty</string>
+    <string name="error_serial_number_invalid">Invalid serial number format</string>
+    <string name="error_duplicate_serial_number">Duplicate serial number found: %s</string>
+    <string name="error_processing_serial_numbers">Error processing serial numbers</string>
+
+    <!-- Success Messages -->
+    <string name="success_serial_numbers_loaded">Successfully loaded %d serial numbers</string>
+    <string name="success_csv_processed_serial_only">CSV processed successfully - %d serial numbers found</string>
+
+    <!-- MeterCheck Fragment Updated Strings -->
+    <string name="meter_check_workflow_title">Meter Check</string>
+    <string name="meter_check_workflow_subtitle">Scan meters at specified locations</string>
+    <string name="setup_locations">Setup Locations</string>
+    <string name="locations_required">Enter scanning locations</string>
+    <string name="add_location_button">Add Location</string>
+    <string name="scan_meter_at_location">Scan Meter at %s</string>
+    <string name="scanning_at_location">Scanning at: %s</string>
+
+    <!-- Location Fragment -->
+    <string name="location_fragment_title">Scanning Locations</string>
+    <string name="location_fragment_subtitle">Configure where meters will be scanned</string>
+    <string name="add_location">Add Location</string>
+    <string name="edit_location">Edit Location</string>
+    <string name="delete_location">Delete Location</string>
+    <string name="location_name_hint">Enter location name</string>
+    <string name="location_name_required">Location name is required</string>
+    <string name="location_already_exists">Location already exists</string>
+    <string name="location_added">Location added: %s</string>
+    <string name="location_updated">Location updated: %s</string>
+    <string name="location_deleted">Location deleted: %s</string>
+    <string name="no_locations_message">No locations configured. Add locations where you will scan meters.</string>
+    <string name="save_location">Save Location</string>
+    <string name="cancel_location">Cancel</string>
+    <string name="confirm_delete_location">Delete this location?</string>
+    <string name="confirm_delete_location_message">This action cannot be undone.</string>
+
+    <!-- Meter Check Flow -->
+    <string name="scan_qr_at_location">Scan QR Code at %s</string>
+    <string name="serial_not_found_in_database">Serial number not found in database</string>
+    <string name="add_to_database">Add to Database</string>
+    <string name="skip_serial">Skip</string>
+    <string name="add_serial_to_database">Add Serial Number to Database</string>
+    <string name="serial_added_to_database">Serial number added to database</string>
+    <string name="choose_meter_number">Choose Meter Number</string>
+    <string name="choose_location">Choose Location</string>
+    <string name="enter_custom_location">Enter Custom Location</string>
+    <string name="custom_location_hint">Enter location name</string>
+    <string name="meter_number_hint">Enter meter number</string>
+    <string name="save_meter_data">Save Meter Data</string>
+    <string name="meter_data_saved">Meter data saved successfully</string>
+    <string name="meter_updated_in_database">Meter updated in database</string>
+
+    <!-- Filter Strings for MeterCheck -->
+    <string name="filter_by_location">Filter by Location</string>
+    <string name="filter_by_status">Filter by Status</string>
+    <string name="filter_by_file">Filter by File</string>
+    <string name="sort_options">Sort Options</string>
+    <string name="sort_by_number">Sort by Number</string>
+    <string name="sort_by_serial">Sort by Serial Number</string>
+    <string name="sort_by_location">Sort by Location</string>
+    <string name="sort_by_status">Sort by Status</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="all_locations">All Locations</string>
+    <string name="all_files">All Files</string>
+    <string name="scanned_meters">Scanned</string>
+    <string name="unscanned_meters">Unscanned</string>
+
+    <!-- Status Messages -->
+    <string name="meter_scan_completed">Meter scan completed</string>
+    <string name="back_to_meter_list">Back to Meter List</string>
+    <string name="scan_next_meter">Scan Next Meter</string>
+    <string name="all_meters_scanned">All meters scanned!</string>
+
+    <!-- Progress and Statistics -->
+    <string name="scanned_count">Scanned</string>
+    <string name="remaining_count">Remaining</string>
+    <string name="total_for_location">Total for %s</string>
+    <string name="progress_format">%d of %d completed</string>
+
+    <!-- Error Messages -->
+    <string name="error_no_locations">No locations configured. Please add locations first.</string>
+    <string name="error_camera_permission">Camera permission required for scanning</string>
+    <string name="error_qr_scan_failed">Failed to scan QR code</string>
+    <string name="error_database_update">Failed to update database</string>
+    <string name="error_invalid_serial">Invalid serial number format</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="no_results_found">no result found</string>
+    <string name="try_different_filters">try different filters</string>
+    <string name="meter_check_try_different_search">Try different search</string>
+    <string name="tap_to_scan">Tap to scan</string>
+    <string name="default_meter_number">0</string>
+    <string name="default_meter_place">unknown</string>
+    <string name="meter_number_helper">Unique identifier for this meter</string>
+    <string name="meter_number">Meter number</string>
+    <string name="meter_assignment_info">Both location and number are required to properly track this meter in the system</string>
+    <string name="meter_location">Meter Location</string>
 
 </resources>
