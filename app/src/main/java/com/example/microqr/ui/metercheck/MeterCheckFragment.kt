@@ -13,12 +13,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.microqr.R
 import com.example.microqr.ui.files.FilesViewModel
 import com.example.microqr.ui.files.MeterStatus
-import com.example.microqr.ui.files.ProcessingDestination
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -32,19 +32,21 @@ class MeterCheckFragment : Fragment() {
     private lateinit var meterRecyclerView: RecyclerView
     private lateinit var meterAdapter: MeterCheckAdapter
     private lateinit var totalMetersCountText: TextView
-    private lateinit var registeredMetersCountText: TextView
-    private lateinit var unregisteredMetersCountText: TextView
+    private lateinit var scannedCountText: TextView
+    private lateinit var remainingCountText: TextView
     private lateinit var searchEditText: TextInputEditText
     private lateinit var refreshButton: MaterialButton
     private lateinit var emptyStateLayout: View
-    private lateinit var currentFilesTextView: TextView
+    private lateinit var setupLocationsCard: View
+    private lateinit var fabScanMeter: View
 
     // Hold the current complete list and filtered list
     private var currentCompleteMeterList: List<MeterStatus> = emptyList()
     private var currentFilteredList: List<MeterStatus> = emptyList()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_meter_check, container, false)
@@ -75,36 +77,30 @@ class MeterCheckFragment : Fragment() {
         currentFilteredList = emptyList()
         meterAdapter.submitList(emptyList())
         viewModel.updateStatistics(0, 0, 0)
-        viewModel.updateScreenTitle(getString(R.string.meter_check_default_title))
         updateEmptyState(emptyList(), "")
     }
 
     private fun initializeViews(view: View) {
-        meterRecyclerView = view.findViewById(R.id.meter_recycler_view)
-        totalMetersCountText = view.findViewById(R.id.total_meters_count)
-        registeredMetersCountText = view.findViewById(R.id.active_meters_count)
-        unregisteredMetersCountText = view.findViewById(R.id.alerts_count)
-        searchEditText = view.findViewById(R.id.search_edit_text)
-        refreshButton = view.findViewById(R.id.refresh_button)
+        meterRecyclerView = view.findViewById(R.id.rvMeters)
+        totalMetersCountText = view.findViewById(R.id.totalMetersCount)
+        scannedCountText = view.findViewById(R.id.scannedCount)
+        remainingCountText = view.findViewById(R.id.remainingCount)
+        searchEditText = view.findViewById(R.id.etSearch)
         emptyStateLayout = view.findViewById(R.id.empty_state_layout)
-        currentFilesTextView = view.findViewById(R.id.current_files_text_view)
+        setupLocationsCard = view.findViewById(R.id.setup_locations_card)
+        fabScanMeter = view.findViewById(R.id.fabScanMeter)
+
+        // Optional refresh button (may not exist in new layout)
+//        refreshButton = view.findViewById(R.id.refresh_button) ?: MaterialButton(requireContext())
     }
 
     private fun setupRecyclerView() {
-        meterAdapter = MeterCheckAdapter { meterStatus, isChecked ->
-            filesViewModel.updateMeterCheckedStatus(
-                meterStatus.serialNumber,
-                isChecked,
-                meterStatus.fromFile
-            )
-
-            val statusText = if (isChecked) {
-                getString(R.string.meter_marked_as_scanned, meterStatus.number)
-            } else {
-                getString(R.string.meter_marked_as_not_scanned, meterStatus.number)
+        meterAdapter = MeterCheckAdapter(
+            onItemClick = { meter ->
+                startMeterScanFlow(meter)
             }
-            Toast.makeText(context, statusText, Toast.LENGTH_SHORT).show()
-        }
+        )
+
         meterRecyclerView.layoutManager = LinearLayoutManager(context)
         meterRecyclerView.adapter = meterAdapter
     }
@@ -116,171 +112,369 @@ class MeterCheckFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
                 val query = s?.toString()?.trim() ?: ""
                 viewModel.updateSearchQuery(query)
-                applySearchFilter(query)
+                applyCurrentFilters()
             }
         })
     }
 
     private fun setupClickListeners() {
-        refreshButton.setOnClickListener {
-            viewModel.clearSearch()
-            searchEditText.text?.clear()
+        // Setup Locations button
+        setupLocationsCard.setOnClickListener {
+            navigateToLocationFragment()
+        }
 
-            // Show refresh feedback
-            viewModel.setRefreshing(true)
-            Toast.makeText(context, getString(R.string.refreshing_meter_data), Toast.LENGTH_SHORT).show()
+        // FAB for quick scanning - add safety check
+        fabScanMeter.setOnClickListener {
+            // Debug what we have
+            android.util.Log.d("MeterCheckFragment",
+                "FAB clicked: complete=${currentCompleteMeterList.size}, " +
+                        "filtered=${currentFilteredList.size}"
+            )
 
-            // Simulate refresh delay
-            lifecycleScope.launch {
-                kotlinx.coroutines.delay(1000)
-                viewModel.setRefreshing(false)
-                Toast.makeText(context, getString(R.string.meter_data_refreshed), Toast.LENGTH_SHORT).show()
+            if (currentFilteredList.isNotEmpty()) {
+                startQuickScan()
+            } else {
+                // Force refresh and try again
+                applyCurrentFilters()
+                if (currentFilteredList.isNotEmpty()) {
+                    startQuickScan()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "No meters available for scanning",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
+        }
+
+        // Filter buttons - add null safety
+        view?.findViewById<MaterialButton>(R.id.btnFilterLocation)?.setOnClickListener {
+            showLocationFilterDialog()
+        }
+
+        view?.findViewById<MaterialButton>(R.id.btnFilterStatus)?.setOnClickListener {
+            showStatusFilterDialog()
+        }
+
+        view?.findViewById<MaterialButton>(R.id.btnSort)?.setOnClickListener {
+            showSortDialog()
+        }
+
+        view?.findViewById<MaterialButton>(R.id.btnClearFilters)?.setOnClickListener {
+            clearAllFilters()
         }
     }
 
     private fun observeViewModel() {
-        // Observe screen title
-        viewModel.screenTitle.observe(viewLifecycleOwner) { title ->
-            activity?.title = title
-        }
-
-        // Observe refresh state
-        viewModel.isRefreshing.observe(viewLifecycleOwner) { isRefreshing ->
-            refreshButton.isEnabled = !isRefreshing
-            refreshButton.text = if (isRefreshing) {
-                getString(R.string.refresh_button_refreshing)
-            } else {
-                getString(R.string.refresh_button_refresh)
+        // Observe UI state changes
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.uiState.collect { uiState ->
+                updateUI(uiState)
             }
-        }
-
-        // Observe statistics
-        viewModel.totalMetersCount.observe(viewLifecycleOwner) { count ->
-            totalMetersCountText.text = count.toString()
-        }
-
-        viewModel.registeredMetersCount.observe(viewLifecycleOwner) { count ->
-            registeredMetersCountText.text = count.toString()
-        }
-
-        viewModel.unregisteredMetersCount.observe(viewLifecycleOwner) { count ->
-            unregisteredMetersCountText.text = count.toString()
         }
     }
 
     private fun observeFilesViewModel() {
-        // ✅ FIXED: ONLY observe meterCheckMeters - this is the ONLY source of data for MeterCheck
+        // Observe MeterCheck specific data from FilesViewModel
         filesViewModel.meterCheckMeters.observe(viewLifecycleOwner) { meterCheckMeters ->
-            if (meterCheckMeters.isNotEmpty()) {
-                currentCompleteMeterList = meterCheckMeters
-                val screenTitle = getString(R.string.meter_check_screen_title, meterCheckMeters.size)
-                viewModel.updateScreenTitle(screenTitle)
-                updateStatisticsAndApplyFilter()
-                updateCurrentFilesDisplay()
+            currentCompleteMeterList = meterCheckMeters
+            viewModel.setMeters(meterCheckMeters)
 
-//                val toastMessage = getString(R.string.loaded_meters_for_checking, meterCheckMeters.size)
-//                Toast.makeText(
-//                    context,
-//                    toastMessage,
-//                    Toast.LENGTH_SHORT
-//                ).show()
+            // Apply filters immediately after data is loaded
+            applyCurrentFilters()
+
+            // Force update UI to ensure proper visibility
+            updateEmptyStateAndVisibility()
+        }
+    }
+
+    private fun updateEmptyStateAndVisibility() {
+        val actualFilteredSize = currentFilteredList.size
+        val isEmpty = actualFilteredSize == 0
+
+        // Force visibility update
+        emptyStateLayout.isVisible = isEmpty
+        meterRecyclerView.isVisible = !isEmpty
+
+        // Update empty state messages
+        if (isEmpty) {
+            val emptyStateTitle = view?.findViewById<TextView>(R.id.empty_state_title)
+            val emptyStateMessage = view?.findViewById<TextView>(R.id.empty_state_message)
+
+            if (currentCompleteMeterList.isEmpty()) {
+                // No data at all
+                emptyStateTitle?.text = getString(R.string.error_no_locations)
+                emptyStateMessage?.text = getString(R.string.locations_required)
             } else {
-                // No MeterCheck specific data, clear display
-                clearFragmentData()
+                // Data exists but filtered out
+                emptyStateTitle?.text = "No meters match current filters"
+                emptyStateMessage?.text = "Try adjusting your search or filters"
             }
         }
 
+        // Debug logging
+        android.util.Log.d("MeterCheckFragment",
+            "Data update: complete=${currentCompleteMeterList.size}, " +
+                    "filtered=${currentFilteredList.size}, " +
+                    "isEmpty=$isEmpty, " +
+                    "recyclerVisible=${meterRecyclerView.isVisible}, " +
+                    "emptyVisible=${emptyStateLayout.isVisible}"
+        )
+    }
 
-        // ✅ ONLY observe file changes for cleanup when files are deleted
-        filesViewModel.fileItems.observe(viewLifecycleOwner) { fileItems ->
-            // Only handle file deletions - check if our current files still exist
-            if (currentCompleteMeterList.isNotEmpty()) {
-                val currentFileNames = currentCompleteMeterList.map { it.fromFile }.distinct()
-                val existingFileNames = fileItems.filter { it.isValid }.map { it.fileName }
+    private fun updateUI(uiState: MeterCheckUiState) {
+        // Update statistics
+        totalMetersCountText.text = uiState.totalCount.toString()
+        scannedCountText.text = uiState.scannedCount.toString()
+        remainingCountText.text = uiState.remainingCount.toString()
 
-                val filesStillExist = currentFileNames.all { fileName ->
-                    existingFileNames.contains(fileName)
-                }
+        // Show/hide clear filters button
+        view?.findViewById<MaterialButton>(R.id.btnClearFilters)?.isVisible = uiState.hasActiveFilters
 
-                if (!filesStillExist) {
-                    // Some files were deleted, but let meterCheckMeters observer handle the update
-                    // Don't clear data here, let the observer do it
-                }
+        // Update empty state - fix the logic here
+        updateEmptyStateFromUiState(uiState)
+
+        // Show/hide FAB based on whether there are meters to scan
+        fabScanMeter.isVisible = uiState.totalCount > 0
+
+        // Handle navigation to ReaderFragment
+        if (uiState.shouldNavigateToScan) {
+            // Store the selected meter context for when we return from scanning
+            val bundle = Bundle().apply {
+                putString("scanContext", "METER_CHECK")
+                putString("targetSerial", uiState.selectedMeter?.serialNumber ?: "")
+                putString("targetLocation", uiState.selectedMeter?.place ?: "")
+                putString("meterNumber", uiState.selectedMeter?.number ?: "")
             }
+            findNavController().navigate(R.id.action_home_to_reader, bundle)
+            viewModel.clearNavigationFlag()
         }
     }
 
-    private fun updateCurrentFilesDisplay() {
-        if (currentCompleteMeterList.isNotEmpty()) {
-            val relevantFiles = currentCompleteMeterList.map { it.fromFile }.distinct()
-            if (relevantFiles.isNotEmpty()) {
-                val fileListString = relevantFiles.joinToString(", ")
-                currentFilesTextView.text = getString(R.string.meter_check_data_from, fileListString)
-                currentFilesTextView.isVisible = true
-            } else {
-                currentFilesTextView.isVisible = false
-            }
-        } else {
-            currentFilesTextView.text = getString(R.string.no_meter_check_data_loaded)
-            currentFilesTextView.isVisible = false
-        }
-    }
-
-    private fun updateStatisticsAndApplyFilter() {
-        updateStatistics(currentCompleteMeterList)
-        applySearchFilter(viewModel.searchQuery.value ?: "")
-    }
-
-    private fun updateStatistics(meters: List<MeterStatus>) {
-        val total = meters.size
-        val registered = meters.count { it.isChecked }
-        val unregistered = total - registered
-
-        viewModel.updateStatistics(total, registered, unregistered)
-    }
-
-    private fun applySearchFilter(query: String) {
-        currentFilteredList = if (query.isEmpty()) {
-            currentCompleteMeterList
-        } else {
-            currentCompleteMeterList.filter { meter ->
-                meter.serialNumber.contains(query, ignoreCase = true) ||
-                        meter.number.contains(query, ignoreCase = true) ||
-                        meter.place.contains(query, ignoreCase = true) ||
-                        meter.fromFile.contains(query, ignoreCase = true)
-            }
-        }
-
-        meterAdapter.submitList(currentFilteredList.toList()) // Ensure new list instance
-        updateEmptyState(currentFilteredList, query)
-        updateCurrentFilesDisplay()
-    }
-
-    private fun updateEmptyState(meters: List<MeterStatus>, searchQuery: String) {
-        val isEmpty = meters.isEmpty()
-        val hasSearchQuery = searchQuery.isNotBlank()
-        val hasAnyMeters = currentCompleteMeterList.isNotEmpty()
+    private fun updateEmptyStateFromUiState(uiState: MeterCheckUiState) {
+        // Use the actual filtered list size, not the uiState counts
+        val actualFilteredSize = currentFilteredList.size
+        val isEmpty = actualFilteredSize == 0
 
         emptyStateLayout.isVisible = isEmpty
         meterRecyclerView.isVisible = !isEmpty
 
         if (isEmpty) {
-            val emptyTextView = emptyStateLayout.findViewById<TextView>(R.id.empty_state_text)
-            emptyTextView?.text = when {
-                !hasAnyMeters -> getString(R.string.meter_check_no_meters_available)
-                hasSearchQuery -> getString(R.string.meter_check_no_meters_found_search)
-                else -> getString(R.string.meter_check_no_meter_data)
+            val emptyStateTitle = view?.findViewById<TextView>(R.id.empty_state_title)
+            val emptyStateMessage = view?.findViewById<TextView>(R.id.empty_state_message)
+
+            if (currentCompleteMeterList.isEmpty()) {
+                // No data at all
+                emptyStateTitle?.text = getString(R.string.error_no_locations)
+                emptyStateMessage?.text = getString(R.string.locations_required)
+            } else {
+                // Data exists but filtered out
+                emptyStateTitle?.text = getString(R.string.meter_check_no_meters_found_search)
+                emptyStateMessage?.text = getString(R.string.meter_check_try_different_search)
             }
         }
     }
 
-    // Public method for QR scanner integration
+    private fun updateEmptyState(meters: List<MeterStatus>, searchQuery: String) {
+        val isEmpty = meters.isEmpty()
+        emptyStateLayout.isVisible = isEmpty
+        meterRecyclerView.isVisible = !isEmpty
+
+        if (isEmpty) {
+            val emptyStateTitle = view?.findViewById<TextView>(R.id.empty_state_title)
+            val emptyStateMessage = view?.findViewById<TextView>(R.id.empty_state_message)
+
+            when {
+                searchQuery.isNotEmpty() -> {
+                    emptyStateTitle?.text = getString(R.string.meter_check_no_meters_found_search)
+                    emptyStateMessage?.text = getString(R.string.meter_check_try_different_search)
+                }
+                else -> {
+                    emptyStateTitle?.text = getString(R.string.error_no_locations)
+                    emptyStateMessage?.text = getString(R.string.locations_required)
+                }
+            }
+        }
+    }
+
+    private fun applyCurrentFilters() {
+        val uiState = viewModel.uiState.value
+        currentFilteredList = filterAndSortMeters(currentCompleteMeterList, uiState)
+
+        // Submit list to adapter
+        meterAdapter.submitList(currentFilteredList.toList())
+
+        // Update statistics in ViewModel
+        updateStatistics()
+
+        // Update UI visibility
+        updateEmptyStateAndVisibility()
+
+        // Debug logging
+        android.util.Log.d("MeterCheckFragment",
+            "Filters applied: complete=${currentCompleteMeterList.size}, " +
+                    "filtered=${currentFilteredList.size}, " +
+                    "query='${uiState.searchQuery}', " +
+                    "location='${uiState.selectedLocation}', " +
+                    "status='${uiState.selectedStatus}'"
+        )
+    }
+
+    private fun filterAndSortMeters(meters: List<MeterStatus>, uiState: MeterCheckUiState): List<MeterStatus> {
+        var filteredMeters = meters
+
+        // Apply search filter
+        if (uiState.searchQuery.isNotEmpty()) {
+            val query = uiState.searchQuery.lowercase()
+            filteredMeters = filteredMeters.filter { meter ->
+                meter.serialNumber.lowercase().contains(query) ||
+                        meter.number.lowercase().contains(query) ||
+                        meter.place.lowercase().contains(query)
+            }
+        }
+
+        // Apply location filter
+        if (uiState.selectedLocation.isNotEmpty() && uiState.selectedLocation != getString(R.string.all_locations)) {
+            filteredMeters = filteredMeters.filter { meter ->
+                meter.place.equals(uiState.selectedLocation, ignoreCase = true)
+            }
+        }
+
+        // Apply status filter
+        when (uiState.selectedStatus) {
+            getString(R.string.scanned_meters) -> {
+                filteredMeters = filteredMeters.filter { it.isChecked }
+            }
+            getString(R.string.unscanned_meters) -> {
+                filteredMeters = filteredMeters.filter { !it.isChecked }
+            }
+        }
+
+        // Apply sorting
+        filteredMeters = when (uiState.sortOption) {
+            getString(R.string.sort_by_number) -> filteredMeters.sortedBy { it.number }
+            getString(R.string.sort_by_serial) -> filteredMeters.sortedBy { it.serialNumber }
+            getString(R.string.sort_by_location) -> filteredMeters.sortedBy { it.place }
+            getString(R.string.sort_by_status) -> filteredMeters.sortedBy { it.isChecked }
+            else -> filteredMeters
+        }
+
+        return filteredMeters
+    }
+
+    private fun updateStatistics() {
+        val totalCount = currentFilteredList.size
+        val scannedCount = currentFilteredList.count { it.isChecked }
+        val remainingCount = totalCount - scannedCount
+
+        viewModel.updateStatistics(totalCount, scannedCount, remainingCount)
+    }
+
+    private fun startMeterScanFlow(meter: MeterStatus) {
+        // Store the selected meter context for when we return from scanning
+        viewModel.selectMeterForScanning(meter)
+
+        // Navigate to ReaderFragment with context
+        val bundle = Bundle().apply {
+            putString("scanContext", "METER_CHECK")
+            putString("targetSerial", meter.serialNumber)
+            putString("targetLocation", meter.place)
+            putString("meterNumber", meter.number)
+        }
+        findNavController().navigate(R.id.action_home_to_reader, bundle)
+    }
+
+    private fun startQuickScan() {
+        if (currentFilteredList.isNotEmpty()) {
+            // Find the first unscanned meter
+            val nextMeter = currentFilteredList.firstOrNull { !it.isChecked }
+            if (nextMeter != null) {
+                startMeterScanFlow(nextMeter)
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.all_meters_scanned),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun navigateToLocationFragment() {
+        findNavController().navigate(R.id.action_meterCheck_to_location)
+    }
+
+    private fun showLocationFilterDialog() {
+        val locations = currentCompleteMeterList.map { it.place }.distinct().sorted()
+        val allLocations = listOf(getString(R.string.all_locations)) + locations
+        val currentSelection = viewModel.uiState.value.selectedLocation
+
+        val selectedIndex = allLocations.indexOf(currentSelection).takeIf { it >= 0 } ?: 0
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.filter_by_location))
+            .setSingleChoiceItems(allLocations.toTypedArray(), selectedIndex) { dialog, which ->
+                viewModel.setLocationFilter(allLocations[which])
+                applyCurrentFilters()
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.cancel_location), null)
+            .show()
+    }
+
+    private fun showStatusFilterDialog() {
+        val statusOptions = listOf(
+            getString(R.string.all_locations), // Using as "All"
+            getString(R.string.scanned_meters),
+            getString(R.string.unscanned_meters)
+        )
+        val currentSelection = viewModel.uiState.value.selectedStatus
+        val selectedIndex = statusOptions.indexOf(currentSelection).takeIf { it >= 0 } ?: 0
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.filter_by_status))
+            .setSingleChoiceItems(statusOptions.toTypedArray(), selectedIndex) { dialog, which ->
+                viewModel.setStatusFilter(statusOptions[which])
+                applyCurrentFilters()
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.cancel_location), null)
+            .show()
+    }
+
+    private fun showSortDialog() {
+        val sortOptions = listOf(
+            getString(R.string.sort_by_number),
+            getString(R.string.sort_by_serial),
+            getString(R.string.sort_by_location),
+            getString(R.string.sort_by_status)
+        )
+        val currentSelection = viewModel.uiState.value.sortOption
+        val selectedIndex = sortOptions.indexOf(currentSelection).takeIf { it >= 0 } ?: 0
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.sort_options))
+            .setSingleChoiceItems(sortOptions.toTypedArray(), selectedIndex) { dialog, which ->
+                viewModel.setSortOption(sortOptions[which])
+                applyCurrentFilters()
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.cancel_location), null)
+            .show()
+    }
+
+    private fun clearAllFilters() {
+        viewModel.clearAllFilters()
+        applyCurrentFilters()
+    }
+
+    // Public method for QR scanner integration (maintaining compatibility)
     fun onMeterScanned(serialNumber: String) {
         val result = filesViewModel.updateMeterCheckedStatusBySerial(serialNumber)
         if (result.first) {
             val fileName = result.second
-            val message = getString(R.string.meter_scanned_successfully, serialNumber, fileName) // Use getString with parameters
+            val message = getString(R.string.meter_scanned_successfully, serialNumber, fileName)
             Toast.makeText(
                 context,
                 message,
@@ -306,45 +500,6 @@ class MeterCheckFragment : Fragment() {
             .setTitle(getString(R.string.dialog_meter_not_found_title))
             .setMessage(getString(R.string.dialog_meter_not_found_message, serialNumber))
             .setPositiveButton(getString(R.string.dialog_button_ok)) { dialog, _ -> dialog.dismiss() }
-            .setNeutralButton(getString(R.string.dialog_button_show_all_meters)) { _, _ ->
-                viewModel.clearSearch()
-                searchEditText.text?.clear()
-            }
             .show()
     }
-
-    // Public method for QR scanner integration
-    fun processQrResult(qrContent: String) {
-        // Extract serial number from QR content
-        val serialNumber = extractSerialNumber(qrContent)
-        if (serialNumber.isNotEmpty()) {
-            onMeterScanned(serialNumber)
-        } else {
-            Toast.makeText(context, "❌ Invalid QR code format", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun extractSerialNumber(qrContent: String): String {
-        // Implement your QR code parsing logic here
-        return when {
-            qrContent.startsWith("SN:") -> qrContent.substring(3).trim()
-            qrContent.startsWith("Serial:") -> qrContent.substring(7).trim()
-            qrContent.contains("SerialNumber:") -> {
-                val parts = qrContent.split("SerialNumber:")
-                if (parts.size > 1) parts[1].split(",")[0].trim() else ""
-            }
-            else -> qrContent.trim() // Assume whole content is serial number
-        }
-    }
-
-    // Helper method to get current statistics for external use
-    fun getCurrentStats(): Triple<Int, Int, Int> {
-        val total = currentCompleteMeterList.size
-        val registered = currentCompleteMeterList.count { it.isChecked }
-        val unregistered = total - registered
-        return Triple(total, registered, unregistered)
-    }
-
-    // Helper method to get filtered meters count
-    fun getFilteredCount(): Int = currentFilteredList.size
 }

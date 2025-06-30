@@ -381,7 +381,7 @@
                     android:padding="8dp"
                     android:clipToPadding="false"
                     android:scrollbars="vertical"
-                    tools:listitem="@layout/item_match_meter"
+                    tools:listitem="@layout/item_meter_match"
                     tools:itemCount="5" />
             </com.google.android.material.card.MaterialCardView>
 
