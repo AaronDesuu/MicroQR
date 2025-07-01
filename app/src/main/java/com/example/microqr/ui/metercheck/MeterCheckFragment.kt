@@ -3,6 +3,7 @@ package com.example.microqr.ui.metercheck
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -247,7 +248,7 @@ class MeterCheckFragment : Fragment() {
                 putString("targetLocation", uiState.selectedMeter?.place ?: "")
                 putString("meterNumber", uiState.selectedMeter?.number ?: "")
             }
-            findNavController().navigate(R.id.action_home_to_reader, bundle)
+            findNavController().navigate(R.id.action_meterCheck_to_reader, bundle)
             viewModel.clearNavigationFlag()
         }
     }
@@ -382,7 +383,18 @@ class MeterCheckFragment : Fragment() {
             putString("targetLocation", meter.place)
             putString("meterNumber", meter.number)
         }
-        findNavController().navigate(R.id.action_home_to_reader, bundle)
+
+        try {
+            // ✅ SIMPLE FIX: Always navigate directly to the Reader destination
+            findNavController().navigate(R.id.readerFragment, bundle)
+        } catch (e: Exception) {
+            Log.e("MeterCheckFragment", "Navigation failed: ${e.message}")
+            Toast.makeText(
+                requireContext(),
+                "Unable to start camera scanner",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     private fun startQuickScan() {

@@ -12,8 +12,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import java.io.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 class FilesViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -71,73 +69,144 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val contentResolver = getApplication<Application>().contentResolver
                 val fileName = getFileNameFromUri(uri, contentResolver)
-                    ?: "imported_file_${System.currentTimeMillis()}.csv"
+                    ?: "unknown_${System.currentTimeMillis()}.csv"
 
-                // Validate and read CSV content
-                var inputStreamForValidation: InputStream? = null
-                var inputStreamForSaving: InputStream? = null
-                var inputStreamForProcessing: InputStream? = null
+                Log.d(TAG, "Processing file: $fileName for destination: $destination")
 
-                try {
-                    inputStreamForValidation = contentResolver.openInputStream(uri)
-                    val validationResult = CsvHelper.validateCsvFormat(inputStreamForValidation)
+                // Copy file to internal storage
+                val internalFile = File(internalStorageDir, fileName)
+                copyUriToInternalStorage(uri, internalFile, contentResolver)
 
-                    if (!validationResult.isValid) {
-                        _toastMessage.postValue("Invalid CSV format: ${validationResult.errorMessage}")
-                        return@launch
-                    }
+                // Read and parse the CSV
+                val csvData = readCsvFile(internalFile)
+                val meters = parseCsvData(csvData, fileName)
 
-                    // Save file to internal storage
-                    inputStreamForSaving = contentResolver.openInputStream(uri)
-                    val savedFile = File(internalStorageDir, fileName)
-                    savedFile.outputStream().use { output ->
-                        inputStreamForSaving?.copyTo(output)
-                    }
+                Log.d(TAG, "Parsed ${meters.size} meters from $fileName")
 
-                    // Process meters from the file
-                    inputStreamForProcessing = FileInputStream(savedFile)
-                    val metersFromFile = CsvHelper.processCsvFile(inputStreamForProcessing, fileName)
+                if (meters.isNotEmpty()) {
+                    // Save to database
+                    repository.syncFileWithMeters(fileName, meters, destination)
 
-                    if (metersFromFile.isEmpty()) {
-                        _toastMessage.postValue("No valid meter data found in the file")
-                        return@launch
-                    }
-
-                    // Save to database with destination
-                    repository.syncFileWithMeters(fileName, metersFromFile, destination)
-
-                    // Update UI state
-                    _selectedMetersForProcessing.value = metersFromFile
+                    _selectedMetersForProcessing.value = meters
                     _lastProcessedDestination.value = destination
                     preferencesManager.lastProcessedDestination = destination
 
-                    _toastMessage.postValue("✅ File processed for ${destination.displayName}: ${metersFromFile.size} meters ready")
+                    _toastMessage.postValue("✅ ${meters.size} meters processed for ${destination.displayName}")
 
-                } finally {
-                    try {
-                        inputStreamForValidation?.close()
-                        inputStreamForSaving?.close()
-                        inputStreamForProcessing?.close()
-                    } catch (e: IOException) {
-                        e.printStackTrace()
+                    // Trigger navigation
+                    when (destination) {
+                        ProcessingDestination.METER_CHECK -> _navigateToMeterCheck.postValue(true)
+                        ProcessingDestination.METER_MATCH -> _navigateToMatch.postValue(true)
                     }
+                } else {
+                    _toastMessage.postValue("❌ No valid meters found in file")
                 }
 
             } catch (e: Exception) {
-                e.printStackTrace()
-                _toastMessage.postValue("Error processing CSV: ${e.message}")
+                Log.e(TAG, "Error processing file: ${e.message}", e)
+                _toastMessage.postValue("Error processing file: ${e.message}")
             }
         }
     }
 
-    fun deleteFile(fileNameToDelete: String) {
+    private suspend fun copyUriToInternalStorage(
+        sourceUri: Uri,
+        destinationFile: File,
+        contentResolver: ContentResolver
+    ) = withContext(Dispatchers.IO) {
+        contentResolver.openInputStream(sourceUri)?.use { inputStream ->
+            destinationFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+    }
+
+    private suspend fun readCsvFile(file: File): List<String> = withContext(Dispatchers.IO) {
+        try {
+            file.readLines()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error reading CSV file: ${e.message}")
+            emptyList()
+        }
+    }
+
+    private fun parseCsvData(csvLines: List<String>, fromFile: String): List<MeterStatus> {
+        if (csvLines.isEmpty()) return emptyList()
+
+        val headers = csvLines.first().split(",").map { it.trim().replace("\"", "") }
+        Log.d(TAG, "CSV Headers: $headers")
+
+        // Find required columns
+        val serialIndex = headers.indexOfFirst {
+            it.equals("SerialNumber", ignoreCase = true) ||
+                    it.equals("Serial", ignoreCase = true) ||
+                    it.equals("serial_number", ignoreCase = true)
+        }
+        val numberIndex = headers.indexOfFirst {
+            it.equals("Number", ignoreCase = true) ||
+                    it.equals("MeterNumber", ignoreCase = true) ||
+                    it.equals("meter_number", ignoreCase = true)
+        }
+        val placeIndex = headers.indexOfFirst {
+            it.equals("Place", ignoreCase = true) ||
+                    it.equals("Location", ignoreCase = true) ||
+                    it.equals("Address", ignoreCase = true)
+        }
+
+        if (serialIndex == -1) {
+            Log.e(TAG, "SerialNumber column not found in CSV")
+            return emptyList()
+        }
+
+        val meters = mutableListOf<MeterStatus>()
+
+        for (i in 1 until csvLines.size) {
+            try {
+                val line = csvLines[i]
+                if (line.isBlank()) continue
+
+                val values = line.split(",").map { it.trim().replace("\"", "") }
+
+                if (values.size <= serialIndex) continue
+
+                val serialNumber = values[serialIndex].trim()
+                if (serialNumber.isBlank()) continue
+
+                val number = if (numberIndex != -1 && values.size > numberIndex) {
+                    values[numberIndex].trim().ifEmpty { "0" }
+                } else "0"
+
+                val place = if (placeIndex != -1 && values.size > placeIndex) {
+                    values[placeIndex].trim().ifEmpty { "unknown" }
+                } else "unknown"
+
+                meters.add(
+                    MeterStatus(
+                        number = number,
+                        serialNumber = serialNumber,
+                        place = place,
+                        registered = true,
+                        fromFile = fromFile,
+                        isChecked = false,
+                        isSelectedForProcessing = false
+                    )
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "Error parsing line ${i + 1}: ${e.message}")
+            }
+        }
+
+        return meters
+    }
+
+    fun deleteFile(fileName: String) {
         viewModelScope.launch {
             try {
-                repository.deleteFile(fileNameToDelete)
-                _toastMessage.postValue("File '$fileNameToDelete' and its meters removed from all destinations.")
+                repository.deleteFile(fileName)
+                _toastMessage.postValue("File '$fileName' deleted successfully")
             } catch (e: Exception) {
                 e.printStackTrace()
-                _toastMessage.postValue("Error deleting '$fileNameToDelete': ${e.message}")
+                _toastMessage.postValue("Error deleting '$fileName': ${e.message}")
             }
         }
     }
@@ -254,20 +323,75 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateMeterSelectionStatus(serialNumber: String, isSelected: Boolean, fromFile: String) {
+    suspend fun updateMeterLocationAndNumber(serialNumber: String, location: String, number: String) {
         viewModelScope.launch {
             try {
-                repository.updateMeterSelection(serialNumber, fromFile, isSelected)
+                Log.d(TAG, "Updating meter location and number: $serialNumber -> location: $location, number: $number")
 
-                // Update local selected meters list
-                val currentMeters = meterStatusList.value ?: return@launch
-                val selectedMeters = currentMeters.filter { it.isSelectedForProcessing }
-                _selectedMetersForProcessing.value = selectedMeters
+                // Get all meters with this serial number
+                val matchingMeters = repository.getMetersBySerial(serialNumber)
+
+                if (matchingMeters.isNotEmpty()) {
+                    // Update each matching meter
+                    for (meter in matchingMeters) {
+                        val updatedMeter = meter.copy(
+                            place = location,
+                            number = number
+                        )
+                        repository.updateMeter(updatedMeter)
+                    }
+                    Log.d(TAG, "✅ Updated ${matchingMeters.size} meters with serial $serialNumber")
+                } else {
+                    Log.w(TAG, "⚠️ No meters found with serial $serialNumber to update")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error updating meter location and number: ${e.message}", e)
+                _toastMessage.postValue("Error updating meter: ${e.message}")
+                throw e
+            }
+        }
+    }
+
+    // ✅ NEW METHOD: Add new meter to the system (needed by DetectedFragment)
+    suspend fun addNewMeter(serialNumber: String, location: String, number: String) {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Adding new meter: $serialNumber at $location with number $number")
+
+                // Create a manual entry file name
+                val fromFile = "manual_entry_${System.currentTimeMillis()}"
+
+                val newMeter = MeterStatus(
+                    serialNumber = serialNumber,
+                    place = location,
+                    number = number,
+                    registered = true,
+                    fromFile = fromFile,
+                    isChecked = false,
+                    isSelectedForProcessing = false
+                )
+
+                repository.insertMeters(listOf(newMeter))
+                Log.d(TAG, "✅ Successfully added new meter: $serialNumber")
+                _toastMessage.postValue("✅ New meter added: $number at $location")
 
             } catch (e: Exception) {
-                e.printStackTrace()
-                _toastMessage.postValue("Error updating meter selection: ${e.message}")
+                Log.e(TAG, "❌ Error adding new meter: ${e.message}", e)
+                _toastMessage.postValue("Error adding meter: ${e.message}")
+                throw e
             }
+        }
+    }
+
+    // ✅ HELPER METHOD: Determine appropriate file for new meters
+    private suspend fun determineAppropriateFile(): String? {
+        return try {
+            // Try to use the most recent MeterCheck file, or create a manual entry file
+            val meterCheckFiles = repository.getFilesByDestination(ProcessingDestination.METER_CHECK).first()
+            meterCheckFiles.maxByOrNull { it.uploadDate }?.fileName
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not determine appropriate file: ${e.message}")
+            null
         }
     }
 
@@ -349,34 +473,38 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
                 val files = fileItems.value ?: emptyList()
                 val meters = meterStatusList.value ?: emptyList()
 
-                // Check for orphaned meters (meters without corresponding files)
+                Log.d(TAG, "Data validation: ${files.size} files, ${meters.size} meters")
+
+                var issuesFound = 0
                 val fileNames = files.map { it.fileName }.toSet()
-                val orphanedMeters = meters.filter { it.fromFile !in fileNames }
 
-                if (orphanedMeters.isNotEmpty()) {
-                    Log.w(TAG, "Found ${orphanedMeters.size} orphaned meters")
-                }
-
-                // Check for file-meter count mismatches
-                files.forEach { file ->
-                    val actualMeterCount = meters.count { it.fromFile == file.fileName }
-                    if (actualMeterCount != file.meterCount) {
-                        Log.w(TAG, "Meter count mismatch for ${file.fileName}: expected ${file.meterCount}, actual $actualMeterCount")
+                // Check for orphaned meters
+                meters.forEach { meter ->
+                    if (meter.fromFile !in fileNames && !meter.fromFile.startsWith("manual_entry")) {
+                        Log.w(TAG, "Orphaned meter found: ${meter.serialNumber} from ${meter.fromFile}")
+                        issuesFound++
                     }
                 }
 
-                _toastMessage.postValue("Data integrity check completed")
+                if (issuesFound > 0) {
+                    _toastMessage.postValue("⚠️ Data validation found $issuesFound issues")
+                } else {
+                    _toastMessage.postValue("✅ Data validation passed")
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
-                _toastMessage.postValue("Error during data validation: ${e.message}")
+                _toastMessage.postValue("Error during validation: ${e.message}")
             }
         }
     }
 
-    // Debug method to test if a specific serial number exists and can be updated
+    // Debug methods
     fun debugTestSerial(serialNumber: String) {
         viewModelScope.launch {
             try {
+                Log.d(TAG, "DEBUG: Testing serial number '$serialNumber'")
+
                 // Check database directly
                 val dbMeters = repository.getMetersBySerial(serialNumber)
                 Log.d(TAG, "DEBUG: Database search for '$serialNumber': ${dbMeters.size} results")
@@ -403,7 +531,6 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Quick method to check if you have the right data processed for MeterCheck
     fun debugCheckMeterCheckData() {
         viewModelScope.launch {
             try {
@@ -430,19 +557,18 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Method to force refresh LiveData
     fun refreshData() {
         debugCheckMeterCheckData()
     }
 
-    // ✅ ADD: Method that FilesFragment expects to call
     fun processCsvFileWithDestination(uri: Uri, contentResolver: ContentResolver, destination: ProcessingDestination) {
         processFile(uri, destination)
     }
 
     private fun getFileNameFromUri(uri: Uri, contentResolver: ContentResolver): String? {
         var fileName: String? = null
-        contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+
+        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
                 if (nameIndex != -1) {
@@ -450,13 +576,16 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
-        return fileName
+
+        return fileName ?: "unknown_${System.currentTimeMillis()}.csv"
     }
 
+    // Navigation state management
+    fun onNavigateToMeterCheckComplete() {
+        _navigateToMeterCheck.value = false
+    }
 
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.d(TAG, "FilesViewModel cleared")
+    fun onNavigateToMatchComplete() {
+        _navigateToMatch.value = false
     }
 }

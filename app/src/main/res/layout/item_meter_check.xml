@@ -165,7 +165,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/tap_to_scan"
                 android:textSize="10sp"
-                android:textColor="@color/primary_color"
+                android:textColor="@color/white"
                 android:textStyle="italic"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="2dp"

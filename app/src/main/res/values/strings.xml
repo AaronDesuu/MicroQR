@@ -96,13 +96,11 @@
     <string name="check_serial">Check Serial</string>
     <string name="checking_serial">Verifying...</string>
     <string name="serial_checked">Back to Home</string>
-    <string name="scan_again_button">Scan Again</string>
     <string name="view_in_metercheck">View in MeterCheck</string>
     <string name="error_parsing_qr">Error Parsing QR</string>
     <string name="could_not_parse_serial">Could not parse valid Serial Number from QR data. Raw: %s</string>
     <string name="serial_number_format" translatable="false">S/N: %s</string>
     <string name="raw_qr_format" translatable="false">(Raw: %s)</string>
-    <string name="no_data_available">N/A</string>
     <string name="no_qr_data">No QR Data received</string>
 
     <!-- Serial Check Results -->
@@ -112,14 +110,10 @@
     <string name="status_verified_checked">✅ Status: VERIFIED CHECKED (from %s)</string>
     <string name="status_already_checked">✅ Status: ALREADY CHECKED (from %s)</string>
     <string name="status_checked_no_file">✅ Status: CHECKED</string>
-    <string name="status_not_found">❌ Status: NOT FOUND</string>
 
     <!-- Error Messages for Serial Check -->
-    <string name="serial_not_found_in_metercheck">❌ \'%1$s\' NOT FOUND in the loaded MeterCheck data (%2$d meters).</string>
     <string name="serial_not_found_process_first">❌ \'%s\' NOT FOUND. Try processing your files for MeterCheck first.</string>
     <string name="serial_not_found_no_data">❌ \'%s\' NOT FOUND. No meter data is currently loaded.</string>
-    <string name="go_to_files">Go to Files</string>
-    <string name="upload_csv_files">Upload CSV Files</string>
 
     <!-- ========================================== -->
     <!-- FILE MANAGEMENT & UPLOAD -->
@@ -151,6 +145,7 @@
     <string name="files_processing_file">Processing file...</string>
     <string name="files_processed_success">✅ File processed for %s</string>
     <string name="files_select_destination_first">Please select a destination first</string>
+    <string name="serial_not_found_in_metercheck">Serial number \'%s\' not found in MeterCheck data. Add it to continue the workflow:</string>
 
     <!-- File Status & Validation -->
     <string name="files_meter_count">%d meters</string>
@@ -159,7 +154,6 @@
     <string name="files_status_valid_ready">Valid • Ready to process</string>
     <string name="files_status_valid_empty">Valid but empty</string>
     <string name="files_status_invalid">❌ Invalid: %s</string>
-    <string name="status_valid">Valid</string>
     <string name="csv_file_icon">CSV file icon</string>
 
     <!-- File Actions & Buttons -->
@@ -262,12 +256,10 @@
     <!-- ========================================== -->
     <!-- METER SCANNING & VERIFICATION -->
     <!-- ========================================== -->
-    <string name="target_meter_info">Target Meter Information</string>
     <string name="target_meter_information">Target Meter Information</string>
     <string name="scan_meter_qr">Scan the QR code on the target meter</string>
     <string name="scanning_meter">Scanning for meter: %s</string>
     <string name="scanning_for_meter">Scanning for meter: %s</string>
-    <string name="meter_verified">Meter verified and marked as scanned!</string>
     <string name="meter_scan_success">Meter verified successfully!</string>
     <string name="meter_scan_mismatch">QR code does not match target meter</string>
     <string name="scan_to_verify">Scan QR code to verify this meter</string>
@@ -309,7 +301,6 @@
 
     <!-- Status Messages -->
     <string name="expected_serial">Expected: %s</string>
-    <string name="scanned_serial">Scanned: %s</string>
     <string name="meter_marked_scanned">Meter %s marked as scanned!</string>
     <string name="verify_correct_meter">Please verify you\'re scanning the correct meter</string>
     <string name="alternative_matches_found">However, the scanned serial number matches these other meters:</string>
@@ -318,13 +309,9 @@
     <!-- ========================================== -->
     <!-- NAVIGATION & COMMON ACTIONS -->
     <!-- ========================================== -->
-    <string name="back">back</string>
-    <string name="next">next</string>
     <string name="close">close</string>
     <string name="navigate_forward">navigate forward</string>
     <string name="delete">Delete</string>
-    <string name="cancel">Cancel</string>
-    <string name="ok">OK</string>
     <string name="done">Done</string>
     <string name="clear_all">Clear All</string>
     <string name="copy">Copy</string>
@@ -382,7 +369,6 @@
     <!-- DIALOGS & CONFIRMATIONS -->
     <!-- ========================================== -->
     <!-- Dialog Titles -->
-    <string name="meter_not_found">Meter Not Found</string>
     <string name="no_match_dialog_title">❌ No Match Found</string>
     <string name="dialog_meter_not_found_title">Meter Not Found</string>
 
@@ -423,7 +409,6 @@
     <string name="unable_start_camera">Unable to start camera scan</string>
     <string name="binding_null_camera">Binding was null when trying to bind camera controller.</string>
     <string name="failed_to_load_user_data">Failed to load user data: %s</string>
-    <string name="failed_to_load_statistics">Failed to load statistics: %s</string>
     <string name="failed_to_load_match_statistics">Failed to load match statistics: %s</string>
     <string name="failed_to_load_check_statistics">Failed to load check statistics: %s</string>
     <string name="failed_to_get_total_count">Failed to get total count: %s</string>
@@ -553,6 +538,150 @@
     <string name="meter_found_successfully_jp">✅ Meter \'%s\' found successfully!</string>
     <string name="serial_found_success">✅ Serial number found!</string>
     <string name="meter_registered_successfully">✅ Meter registered successfully!</string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT STRINGS -->
+    <!-- ========================================== -->
+
+    <!-- Basic UI Labels -->
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+
+    <!-- Button Labels -->
+    <string name="scan_again_button">Scan Again</string>
+    <string name="go_to_files">Go to Files</string>
+    <string name="upload_csv_files">Upload CSV Files</string>
+
+    <!-- Context Messages -->
+    <string name="scanned_qr_meter_check">Scanned QR Code for MeterCheck workflow</string>
+    <string name="meter_verified">Meter verified successfully</string>
+
+    <!-- Error Messages -->
+    <string name="error_no_qr_data">No QR data received</string>
+    <string name="error_serial_not_found">Serial number not found in database</string>
+    <string name="error_processing_serial">Error processing serial: %s</string>
+    <string name="error_update_scan_status">Failed to update scan status</string>
+    <string name="error_processing_scan">Error processing scan: %s</string>
+    <string name="error_location_number_required">Both location and number are required</string>
+    <string name="error_updating_meter">Error updating meter: %s</string>
+    <string name="error_adding_meter">Error adding meter: %s</string>
+    <string name="failed_to_load_statistics">Failed to load statistics: %s</string>
+    <string name="no_data_available">No data available</string>
+
+    <!-- Success Messages -->
+    <string name="success_meter_found">Serial number %s found and processed successfully!</string>
+    <string name="file_source">File source: %s</string>
+    <string name="meter_check_data">MeterCheck data: %d meters</string>
+    <string name="general_meter_data">General meter data: %d meters</string>
+    <string name="scanned_serial">Scanned serial: %s</string>
+
+    <!-- Dialog Titles -->
+    <string name="meter_setup_required">Meter Setup Required</string>
+    <string name="add_new_meter">Add New Meter</string>
+    <string name="meter_not_found">Meter Not Found</string>
+
+    <!-- Dialog Messages -->
+    <string name="meter_needs_location_and_number">This meter needs both location and number assignment:</string>
+    <string name="meter_needs_location">This meter needs location assignment:</string>
+    <string name="meter_needs_number">This meter needs number assignment:</string>
+    <string name="update_meter_info">Update meter information:</string>
+    <string name="serial_not_found_add_meter">Serial number \'%s\' not found in database. Add it with location and number:</string>
+
+    <!-- Location and Number Setup -->
+    <string name="select_location">Select Location</string>
+    <string name="custom_location">Custom Location</string>
+    <string name="meter_location">Meter Location</string>
+    <string name="meter_number">Meter Number</string>
+    <string name="meter_number_helper">Unique identifier for this meter</string>
+    <string name="meter_assignment_info">Both location and number are required to properly track this meter in the system</string>
+
+    <!-- Location Options -->
+    <string name="location_lobby">Lobby</string>
+    <string name="location_basement">Basement</string>
+    <string name="location_garage">Garage</string>
+    <string name="location_rooftop">Rooftop</string>
+    <string name="location_office">Office</string>
+    <string name="location_unknown">Unknown</string>
+
+    <!-- Status Messages -->
+    <string name="status_not_found">Serial number not found in the system</string>
+    <string name="status_processed">Processed</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_valid">Valid</string>
+    <string name="status_invalid">Invalid</string>
+
+    <!-- File and Data References -->
+    <string name="unknown_file">Unknown File</string>
+    <string name="default_meter_number">0</string>
+    <string name="default_meter_place">unknown</string>
+
+    <!-- Progress and Statistics -->
+    <string name="data_status_summary">Data Status Summary</string>
+    <string name="metercheck_count">MeterCheck data: %d meters</string>
+    <string name="general_meter_count">General meter data: %d meters</string>
+
+    <!-- Toast Messages -->
+    <string name="scanning_complete">Scanning complete</string>
+
+    <!-- Validation Messages -->
+    <string name="valid_location_required">A valid location is required</string>
+    <string name="valid_number_required">A valid meter number is required</string>
+    <string name="location_and_number_required">Both location and number are required</string>
+
+    <!-- Processing Messages -->
+    <string name="processing_meter_data">Processing meter data...</string>
+    <string name="updating_database">Updating database...</string>
+    <string name="validating_meter_info">Validating meter information...</string>
+
+    <!-- Hard-coded text that appears in DetectedFragment -->
+    <string name="error_marking_meter_scanned">Error marking meter as scanned: %s</string>
+    <string name="error_updating_scan_status">Error updating scan status: %s</string>
+    <string name="meter_check_error">MeterCheck ERROR: %s</string>
+    <string name="database_error">Database error: %s</string>
+
+    <!-- Additional context-specific messages -->
+    <string name="meter_exists_needs_setup">Meter exists but needs location/number setup</string>
+    <string name="meter_ready_for_scan">Meter ready for scanning</string>
+    <string name="adding_new_meter">Adding new meter to system</string>
+    <string name="meter_added_successfully">Meter added successfully</string>
+
+    <!-- Log messages that might be shown to user -->
+    <string name="success_serial_found_processed">✅ SUCCESS: Serial number found and processed!</string>
+    <string name="warning_serial_not_found">⚠️ Serial number not found in database</string>
+    <string name="async_update_result">Async update result: success=%1$b, foundFile=%2$s</string>
+
+    <!-- Navigation and workflow messages -->
+    <string name="metercheck_workflow_active">MeterCheck workflow active</string>
+    <string name="default_workflow_active">Default scanning workflow active</string>
+    <string name="target_meter_info">Target: %1$s, Location: %2$s, Number: %3$s</string>
+
+    <!-- Bundle and argument debugging (if shown to user) -->
+    <string name="args_received">Arguments received</string>
+    <string name="raw_qr_value">Raw QR Value: %s</string>
+    <string name="scan_context">Scan Context: %s</string>
+
+    <!-- Spinner and dropdown options -->
+    <string name="location_hint">Enter location name</string>
+    <string name="number_hint">Enter meter number</string>
+
+    <!-- Additional validation messages -->
+    <string name="invalid_location_values">Invalid location values: unknown, n/a, tbd, pending, -, null</string>
+    <string name="invalid_number_values">Invalid number values: -, unknown, pending</string>
+
+    <!-- QR Code parsing messages -->
+    <string name="parsing_qr_code">Parsing QR code data</string>
+    <string name="qr_parse_f6_f7">F6/F7 format detected</string>
+    <string name="qr_parse_fmcble">FMCBLE format detected</string>
+    <string name="qr_parse_standard">Standard format detected</string>
+    <string name="qr_parse_fallback">Using fallback parsing</string>
+
+    <!-- Information display formats -->
+    <string name="meter_info_format">Serial: %1$s\nLocation: %2$s\nNumber: %3$s\nStatus: %4$s</string>
+    <string name="scan_result_format">Scanned: %1$s\nExpected: %2$s</string>
+    <string name="data_count_format">Found %1$d meters in %2$s</string>
+
 
     <!-- ========================================== -->
     <!-- CSV EXPORT FUNCTIONALITY -->
@@ -822,17 +951,12 @@
     <string name="error_qr_scan_failed">Failed to scan QR code</string>
     <string name="error_database_update">Failed to update database</string>
     <string name="error_invalid_serial">Invalid serial number format</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="no_results_found">no result found</string>
-    <string name="try_different_filters">try different filters</string>
-    <string name="meter_check_try_different_search">Try different search</string>
+    <string name="save_and_continue">Save and Continue</string>
+    <string name="add_meter">Add Meter</string>
     <string name="tap_to_scan">Tap to scan</string>
-    <string name="default_meter_number">0</string>
-    <string name="default_meter_place">unknown</string>
-    <string name="meter_number_helper">Unique identifier for this meter</string>
-    <string name="meter_number">Meter number</string>
-    <string name="meter_assignment_info">Both location and number are required to properly track this meter in the system</string>
-    <string name="meter_location">Meter Location</string>
+    <string name="meter_check_try_different_search">Try Different Search</string>
+    <string name="add_meter_to_metercheck">Adding Meter to MeterCheck</string>
+    <string name="add_to_metercheck">Add Meter</string>
+
 
 </resources>

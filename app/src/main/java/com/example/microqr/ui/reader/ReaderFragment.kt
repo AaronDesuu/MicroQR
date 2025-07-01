@@ -88,6 +88,8 @@ class ReaderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        checkMeterCheckContext()
+
         handler = Handler(Looper.getMainLooper())
         cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -100,6 +102,45 @@ class ReaderFragment : Fragment() {
         } else {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
+    }
+
+    // ✅ ADD: Method to handle MeterCheck context
+    private fun checkMeterCheckContext() {
+        val scanContext = arguments?.getString("scanContext")
+        val targetSerial = arguments?.getString("targetSerial")
+        val targetLocation = arguments?.getString("targetLocation")
+        val meterNumber = arguments?.getString("meterNumber")
+
+        Log.d(TAG, "🎯 ReaderFragment Context Check:")
+        Log.d(TAG, "  - scanContext: $scanContext")
+        Log.d(TAG, "  - targetSerial: $targetSerial")
+        Log.d(TAG, "  - targetLocation: $targetLocation")
+        Log.d(TAG, "  - meterNumber: $meterNumber")
+
+        if (scanContext == "METER_CHECK") {
+            Log.d(TAG, "✅ MeterCheck context detected - ready for targeted scanning")
+            // Optionally update UI to show meter check mode
+            updateUIForMeterCheckMode(targetSerial, targetLocation, meterNumber)
+        }
+    }
+
+    // ✅ ADD: Optional method to update UI for MeterCheck mode
+    private fun updateUIForMeterCheckMode(targetSerial: String?, targetLocation: String?, meterNumber: String?) {
+        // Update scan result text to show we're in MeterCheck mode
+        if (targetSerial != null) {
+            // You can use this to update any UI elements to show the target meter info
+            val meterInfo = "Scanning for: #$meterNumber\nSerial: $targetSerial\nLocation: $targetLocation"
+            Log.d(TAG, "📋 MeterCheck Mode: $meterInfo")
+
+            // If you have a TextView for showing scan instructions, you could update it:
+            // binding.scanInstructionText?.text = "Scan QR code for meter #$meterNumber"
+        }
+    }
+
+    // ✅ ADD: Public method for MeterCheckFragment to call if needed
+    fun handleMeterCheckContext(bundle: Bundle) {
+        arguments = bundle
+        checkMeterCheckContext()
     }
 
     private fun setupFlashToggle() {
@@ -185,38 +226,57 @@ class ReaderFragment : Fragment() {
 
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.scanResult.collect { result ->
-                _binding?.scannedQrResultText?.text = result
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.navigationTrigger.collect { shouldNavigate ->
-                if (shouldNavigate) {
-                    if (isAdded && _binding != null) { // Check fragment state
-                        viewModel.rawQrDataToNavigate.value?.let { rawData ->
-                            Log.d(TAG, "Navigation triggered. Data: $rawData")
-                            stopScanLineAnimation() // Stop animation
-                            // shutdownCamera() // Optionally shutdown camera fully before navigating
+                if (shouldNavigate && isAdded && _binding != null) {
+                    viewModel.rawQrDataToNavigate.value?.let { rawData ->
+                        Log.d(TAG, "Navigating to DetectedFragment with Raw QR Data: $rawData")
+                        stopScanLineAnimation() // Stop animation
+                        // shutdownCamera() // Optionally shutdown camera fully before navigating
 
-                            val bundle = Bundle().apply {
-                                putString("rawQrValue", rawData) // Pass the raw QR value
+                        // ✅ FIXED: Get scan context from fragment arguments and forward it
+                        val scanContext = arguments?.getString("scanContext")
+                        Log.d(TAG, "🔍 ReaderFragment scanContext: $scanContext")
+
+                        val bundle = Bundle().apply {
+                            putString("rawQrValue", rawData) // Pass the raw QR value
+
+                            // ✅ FORWARD SCAN CONTEXT: Pass through all MeterCheck arguments
+                            scanContext?.let {
+                                putString("scanContext", it)
+                                Log.d(TAG, "✅ Forwarding scanContext: $it")
                             }
-                            findNavController().navigate(
-                                R.id.action_ReaderFragment_to_DetectedFragment,
-                                bundle
-                            )
-                            viewModel.resetNavigationTrigger() // Reset trigger after navigation
-                            // viewModel.stopScanning() // ViewModel might do this, or do it here
-                        } ?: run {
-                            Log.e(TAG, "Navigation triggered but rawQrDataToNavigate is null!")
-                            viewModel.resetNavigationTrigger() // Reset to avoid potential loops
+
+                            // ✅ FORWARD METER CHECK DATA: Pass through all meter check arguments
+                            arguments?.getString("targetSerial")?.let {
+                                putString("targetSerial", it)
+                                Log.d(TAG, "✅ Forwarding targetSerial: $it")
+                            }
+                            arguments?.getString("targetLocation")?.let {
+                                putString("targetLocation", it)
+                                Log.d(TAG, "✅ Forwarding targetLocation: $it")
+                            }
+                            arguments?.getString("meterNumber")?.let {
+                                putString("meterNumber", it)
+                                Log.d(TAG, "✅ Forwarding meterNumber: $it")
+                            }
                         }
-                    } else {
-                        Log.d(TAG, "Navigation triggered but fragment not in a state to navigate.")
-                        // Reset trigger if navigation was attempted while fragment was not ready
-                        if (shouldNavigate) viewModel.resetNavigationTrigger()
+
+                        Log.d(TAG, "📦 Final navigation bundle: scanContext=$scanContext, targetSerial=${arguments?.getString("targetSerial")}")
+
+                        findNavController().navigate(
+                            R.id.action_ReaderFragment_to_DetectedFragment,
+                            bundle
+                        )
+                        viewModel.resetNavigationTrigger() // Reset trigger after navigation
+                        // viewModel.stopScanning() // ViewModel might do this, or do it here
+                    } ?: run {
+                        Log.e(TAG, "Navigation triggered but rawQrDataToNavigate is null!")
+                        viewModel.resetNavigationTrigger() // Reset to avoid potential loops
                     }
+                } else {
+                    Log.d(TAG, "Navigation triggered but fragment not in a state to navigate.")
+                    // Reset trigger if navigation was attempted while fragment was not ready
+                    if (shouldNavigate) viewModel.resetNavigationTrigger()
                 }
             }
         }

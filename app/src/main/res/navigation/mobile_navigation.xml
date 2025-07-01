@@ -67,13 +67,15 @@
             app:popExitAnim="@anim/slide_out_right"/>
     </fragment>
 
+    <!-- ✅ FIXED: MeterCheck fragment with correct navigation action -->
     <fragment
         android:id="@+id/navigation_metercheck"
         android:name="com.example.microqr.ui.metercheck.MeterCheckFragment"
         android:label="@string/title_metercheck"
         tools:layout="@layout/fragment_meter_check">
+        <!-- ✅ CORRECT: Action from MeterCheck to Reader -->
         <action
-            android:id="@+id/action_home_to_reader"
+            android:id="@+id/action_meterCheck_to_reader"
             app:destination="@id/readerFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"
