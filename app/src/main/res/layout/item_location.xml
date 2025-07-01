@@ -5,15 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="4dp"
+    android:layout_margin="8dp"
     android:clickable="true"
     android:focusable="true"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp"
-    app:strokeColor="@color/stroke_color"
+    app:cardBackgroundColor="@color/card_background"
     app:strokeWidth="1dp"
-    android:foreground="?attr/selectableItemBackground">
+    app:strokeColor="@color/md_theme_light_surfaceVariant">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,47 +21,56 @@
         android:padding="16dp"
         android:gravity="center_vertical">
 
+        <!-- Location Icon -->
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_location_on_24"
             android:contentDescription="@string/location_fragment_title"
-            app:tint="@color/primary_color"
-            android:layout_marginEnd="16dp" />
+            android:layout_marginEnd="16dp"
+            app:tint="@color/primary_color" />
 
+        <!-- Location Name -->
         <TextView
-            android:id="@+id/location_name"
+            android:id="@+id/locationName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="16sp"
             android:textColor="@color/primary_text_color"
-            android:maxLines="1"
+            android:textStyle="normal"
+            android:maxLines="2"
             android:ellipsize="end"
             tools:text="Building A - Floor 1" />
 
+        <!-- Action Buttons Container -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginStart="8dp">
 
+            <!-- Edit Button -->
             <ImageButton
-                android:id="@+id/edit_location_button"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:id="@+id/editLocationButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_edit_24"
-                android:contentDescription="@string/edit_location"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/primary_color"
-                android:layout_marginEnd="8dp" />
+                android:contentDescription="@string/cd_edit_location"
+                android:padding="8dp"
+                app:tint="@color/primary_color" />
 
+            <!-- Delete Button -->
             <ImageButton
-                android:id="@+id/delete_location_button"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_delete"
-                android:contentDescription="@string/delete_location"
+                android:id="@+id/deleteLocationButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_delete"
+                android:contentDescription="@string/cd_delete_location"
+                android:padding="8dp"
                 app:tint="@color/error_red" />
 
         </LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.microqr.ui.location
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -23,7 +24,9 @@ class LocationFragment : Fragment() {
     private var _binding: FragmentLocationBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: LocationViewModel by viewModels()
+    private val viewModel: LocationViewModel by viewModels {
+        LocationViewModelFactory(requireContext())
+    }
     private lateinit var locationAdapter: LocationAdapter
 
     override fun onCreateView(
@@ -108,6 +111,10 @@ class LocationFragment : Fragment() {
         // Update empty state
         binding.emptyStateLayout.isVisible = uiState.locations.isEmpty()
 
+        // Show loading state
+        binding.addLocationButton.isEnabled = !uiState.isLoading &&
+                binding.locationInput.text?.toString()?.trim()?.isNotEmpty() == true
+
         // Clear input field after successful addition
         if (uiState.clearInput) {
             binding.locationInput.setText("")
@@ -147,15 +154,12 @@ class LocationFragment : Fragment() {
             .setView(editText)
             .setPositiveButton(getString(R.string.save_location)) { _, _ ->
                 val newName = editText.text?.toString()?.trim() ?: ""
-                if (newName.isNotEmpty() && newName != location) {
+                if (newName.isNotEmpty()) {
                     viewModel.updateLocation(location, newName)
                 }
             }
             .setNegativeButton(getString(R.string.cancel_location), null)
             .show()
-
-        // Focus and show keyboard
-        editText.requestFocus()
     }
 
     private fun showDeleteLocationDialog(location: String) {

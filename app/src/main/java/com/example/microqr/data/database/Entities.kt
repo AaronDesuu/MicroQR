@@ -31,6 +31,15 @@ data class MeterEntity(
     val lastModified: Long = System.currentTimeMillis()
 )
 
+// Entity for Location
+@Entity(tableName = "locations")
+data class LocationEntity(
+    @PrimaryKey val name: String,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis(),
+    val isActive: Boolean = true
+)
+
 // DAO for FileEntity
 @Dao
 interface FileDao {
@@ -108,16 +117,54 @@ interface MeterDao {
     suspend fun getCheckedMeterCount(): Int
 }
 
+// DAO for LocationEntity
+@Dao
+interface LocationDao {
+    @Query("SELECT * FROM locations WHERE isActive = 1 ORDER BY name ASC")
+    fun getAllActiveLocations(): Flow<List<LocationEntity>>
+
+    @Query("SELECT * FROM locations ORDER BY name ASC")
+    fun getAllLocations(): Flow<List<LocationEntity>>
+
+    @Query("SELECT * FROM locations WHERE name = :name")
+    suspend fun getLocationByName(name: String): LocationEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLocation(location: LocationEntity)
+
+    @Update
+    suspend fun updateLocation(location: LocationEntity)
+
+    @Delete
+    suspend fun deleteLocation(location: LocationEntity)
+
+    @Query("DELETE FROM locations WHERE name = :name")
+    suspend fun deleteLocationByName(name: String)
+
+    @Query("UPDATE locations SET isActive = 0 WHERE name = :name")
+    suspend fun deactivateLocation(name: String)
+
+    @Query("UPDATE locations SET name = :newName, updatedAt = :updatedAt WHERE name = :oldName")
+    suspend fun updateLocationName(oldName: String, newName: String, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("SELECT COUNT(*) FROM locations WHERE isActive = 1")
+    suspend fun getActiveLocationCount(): Int
+
+    @Query("SELECT name FROM locations WHERE isActive = 1 ORDER BY name ASC")
+    suspend fun getActiveLocationNames(): List<String>
+}
+
 // Main Database
 @Database(
-    entities = [FileEntity::class, MeterEntity::class],
-    version = 1,
+    entities = [FileEntity::class, MeterEntity::class, LocationEntity::class],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class MeterDatabase : RoomDatabase() {
     abstract fun fileDao(): FileDao
     abstract fun meterDao(): MeterDao
+    abstract fun locationDao(): LocationDao
 
     companion object {
         @Volatile

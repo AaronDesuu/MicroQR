@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/design_default_color_background"
+    android:background="@color/background_light"
     tools:context=".ui.location.LocationFragment">
 
     <!-- App Bar Layout with Collapsing Toolbar -->
@@ -85,6 +85,7 @@
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/card_background"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -103,21 +104,25 @@
                         android:layout_marginBottom="16dp" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/location_input_layout"
+                        android:id="@+id/locationInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        app:boxBackgroundMode="outline"
+                        android:hint="@string/location_name_hint"
+                        app:boxStrokeColor="@color/primary_color"
                         app:hintTextColor="@color/secondary_text_color"
-                        android:hint="@string/location_name_hint">
+                        app:errorTextColor="@color/error_red"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/location_input"
+                            android:id="@+id/locationInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:inputType="textCapWords"
                             android:maxLines="1"
+                            android:imeOptions="actionDone"
                             android:textColor="@color/primary_text_color"
-                            android:imeOptions="actionDone" />
+                            android:textColorHint="@color/secondary_text_color" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -127,7 +132,10 @@
                         android:layout_height="wrap_content"
                         android:text="@string/add_location_button"
                         android:layout_gravity="end"
+                        android:backgroundTint="@color/primary_color"
+                        android:textColor="@color/white"
                         app:icon="@drawable/ic_add_24"
+                        app:iconTint="@color/white"
                         style="@style/Widget.MaterialComponents.Button" />
 
                 </LinearLayout>
@@ -140,6 +148,7 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/card_background"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -163,7 +172,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp"
+                        android:padding="40dp"
                         android:gravity="center"
                         android:visibility="gone"
                         tools:visibility="visible">
@@ -171,9 +180,19 @@
                         <ImageView
                             android:layout_width="64dp"
                             android:layout_height="64dp"
-                            android:src="@drawable/ic_location_on_24"
+                            android:src="@drawable/ic_location_24"
                             android:layout_marginBottom="16dp"
-                            app:tint="@color/secondary_text_color" />
+                            app:tint="@color/secondary_text_color"
+                            android:contentDescription="@string/empty_locations_title" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/empty_locations_title"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/primary_text_color"
+                            android:layout_marginBottom="8dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -181,16 +200,19 @@
                             android:text="@string/no_locations_message"
                             android:textSize="14sp"
                             android:textColor="@color/secondary_text_color"
-                            android:gravity="center" />
+                            android:gravity="center"
+                            android:lineSpacingExtra="4dp" />
 
                     </LinearLayout>
 
-                    <!-- Locations RecyclerView -->
+                    <!-- RecyclerView for Locations -->
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/locations_recycler_view"
+                        android:id="@+id/locationsRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:clipToPadding="false"
                         android:paddingBottom="16dp"
+                        tools:itemCount="3"
                         tools:listitem="@layout/item_location" />
 
                 </LinearLayout>

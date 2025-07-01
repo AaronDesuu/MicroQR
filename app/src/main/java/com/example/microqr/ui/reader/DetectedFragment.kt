@@ -17,8 +17,10 @@ import com.example.microqr.R
 import com.example.microqr.databinding.FragmentDetectedBinding
 import com.example.microqr.ui.files.FilesViewModel
 import com.example.microqr.ui.files.MeterStatus
+import com.example.microqr.data.repository.LocationRepository
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -32,6 +34,7 @@ class DetectedFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val filesViewModel: FilesViewModel by activityViewModels()
+    private lateinit var locationRepository: LocationRepository
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,6 +47,9 @@ class DetectedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Initialize location repository
+        locationRepository = LocationRepository(requireContext())
 
         val args = arguments
         val rawQrValue = args?.getString("rawQrValue")
@@ -76,357 +82,366 @@ class DetectedFragment : Fragment() {
         // Parse the scanned QR to get serial number
         val scannedSerial = parseSerialNumber(rawQrValue)
 
-        // Fixed: Use the correct view ID from layout
         binding.serialNumberText.text = scannedSerial
         binding.detectedInfoText.text = getString(R.string.scanned_qr_meter_check)
 
-        // Process the meter check scan with location/numbering validation
-        processMeterCheckScan(scannedSerial, targetSerial, targetLocation, meterNumber)
+        // Process the meter check scan with enhanced location/numbering validation
+        processMeterCheckScanWithLocationValidation(scannedSerial, targetSerial, targetLocation, meterNumber)
     }
 
     private fun handleDefaultContext(rawQrValue: String) {
-        // Your existing default handling logic
         val serialNumberToCheck = parseSerialNumber(rawQrValue)
-        // Fixed: Use the correct view ID from layout
         binding.serialNumberText.text = serialNumberToCheck
 
-        // Continue with existing logic...
-        processDetectedSerial(serialNumberToCheck)
+        // Process with location validation for default context too
+        processDetectedSerialWithLocationValidation(serialNumberToCheck)
     }
 
-    private fun processDetectedSerial(serialNumberToCheck: String) {
-        // Your existing implementation for default context
-        // This would include your current DetectedFragment logic
-
-        val meterCheckCount = filesViewModel.meterCheckMeters.value?.size ?: 0
-        val generalMeterCount = filesViewModel.meterStatusList.value?.size ?: 0
-
-        Log.d(TAG, "📊 Data Status:")
-        Log.d(TAG, "  - MeterCheck data: $meterCheckCount meters")
-        Log.d(TAG, "  - General meter data: $generalMeterCount meters")
-
-        // Use coroutine to handle async database operation
+    private fun processMeterCheckScanWithLocationValidation(
+        scannedSerial: String,
+        targetSerial: String?,
+        targetLocation: String?,
+        meterNumber: String?
+    ) {
         lifecycleScope.launch {
             try {
-                // Use the async method for proper database handling
-                val (success, foundItemFile) = filesViewModel.updateMeterCheckedStatusBySerialAsync(serialNumberToCheck)
+                // First check if the meter exists in database
+                val existingMeter = findMeterBySerial(scannedSerial)
 
-                Log.d(TAG, "📝 Async update result: success=$success, foundFile=$foundItemFile")
-
-                if (success) {
-                    // SUCCESS CASE - Serial number was found and updated
-                    Log.d(TAG, "✅ SUCCESS: Serial number found and processed!")
-
-                    // Wait a bit for the LiveData to refresh
-                    delay(1000)
-
-                    // Check the updated status in LiveData
-                    val updatedMeter = if (foundItemFile != null) {
-                        filesViewModel.meterCheckMeters.value?.find {
-                            it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile
-                        } ?: filesViewModel.meterStatusList.value?.find {
-                            it.serialNumber == serialNumberToCheck && it.fromFile == foundItemFile
-                        }
-                    } else {
-                        filesViewModel.meterStatusList.value?.find { it.serialNumber == serialNumberToCheck }
-                    }
-
-                    showSuccessResult(serialNumberToCheck, foundItemFile ?: getString(R.string.unknown_file))
-
+                if (existingMeter != null) {
+                    // Meter exists - validate location and number registration
+                    validateMeterRegistration(existingMeter, targetSerial, targetLocation, meterNumber)
                 } else {
-                    // FAILURE CASE - Serial number not found
-                    Log.d(TAG, "❌ FAILURE: Serial number not found!")
-                    showErrorResult(serialNumberToCheck, getString(R.string.error_serial_not_found))
+                    // Meter not found - show registration dialog
+                    showMeterRegistrationDialog(scannedSerial, getString(R.string.serial_not_found_in_database))
                 }
-
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Error processing serial: ${e.message}", e)
+                Log.e(TAG, "❌ Error processing meter check scan: ${e.message}", e)
+                showErrorResult(scannedSerial, getString(R.string.error_processing_scan, e.message))
+            }
+        }
+    }
+
+    private fun processDetectedSerialWithLocationValidation(serialNumberToCheck: String) {
+        lifecycleScope.launch {
+            try {
+                val existingMeter = findMeterBySerial(serialNumberToCheck)
+
+                if (existingMeter != null) {
+                    // Meter exists - validate location and number registration
+                    validateMeterRegistration(existingMeter)
+                } else {
+                    // Meter not found - show registration dialog
+                    showMeterRegistrationDialog(serialNumberToCheck, getString(R.string.serial_not_found_in_database))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error processing detected serial: ${e.message}", e)
                 showErrorResult(serialNumberToCheck, getString(R.string.error_processing_serial, e.message))
             }
         }
     }
 
-    private fun processMeterCheckScan(scannedSerial: String, targetSerial: String?, targetLocation: String?, meterNumber: String?) {
-        lifecycleScope.launch {
-            try {
-                // ✅ FIXED: Only search in MeterCheck data, not all meters
-                val foundMeter = filesViewModel.meterCheckMeters.value?.find { meter ->
-                    meter.serialNumber == scannedSerial
-                }
+    private suspend fun validateMeterRegistration(
+        meter: MeterStatus,
+        targetSerial: String? = null,
+        targetLocation: String? = null,
+        meterNumber: String? = null
+    ) {
+        val isLocationRegistered = isLocationValid(meter.place)
+        val isMeterNumberRegistered = isMeterNumberValid(meter.number)
+        val isLocationInDatabase = if (isLocationRegistered) {
+            locationRepository.isLocationActive(meter.place)
+        } else false
 
-                Log.d(TAG, "🔍 Searching in MeterCheck data only: ${filesViewModel.meterCheckMeters.value?.size} meters")
-                Log.d(TAG, "🎯 Looking for serial: $scannedSerial")
-                Log.d(TAG, "📝 Found meter: ${foundMeter?.serialNumber}")
+        Log.d(TAG, "🔍 Validation Results for ${meter.serialNumber}:")
+        Log.d(TAG, "  - Location '${meter.place}' registered: $isLocationRegistered, in DB: $isLocationInDatabase")
+        Log.d(TAG, "  - Meter number '${meter.number}' registered: $isMeterNumberRegistered")
 
-                if (foundMeter != null) {
-                    Log.d(TAG, "✅ Found meter in MeterCheck data: ${foundMeter.serialNumber}")
-
-                    // Check if location and number are valid
-                    val hasValidLocation = isValidLocation(foundMeter.place)
-                    val hasValidNumber = isValidNumber(foundMeter.number)
-
-                    if (!hasValidLocation || !hasValidNumber) {
-                        // Show dialog to collect missing information
-                        showLocationNumberDialog(foundMeter, hasValidLocation, hasValidNumber)
-                        return@launch
-                    }
-
-                    // Mark as scanned using MeterCheck specific method
-                    val (success, fileName) = updateMeterCheckStatusAsync(scannedSerial)
-
-                    if (success) {
-                        showSuccessResult(scannedSerial, fileName ?: getString(R.string.unknown_file))
-                        setupNavigationButton()
-                    } else {
-                        showErrorResult(scannedSerial, getString(R.string.error_update_scan_status))
-                    }
-
-                } else {
-                    // ✅ FIXED: Meter not found in MeterCheck data - show option to add it to MeterCheck
-                    Log.d(TAG, "❌ Meter not found in MeterCheck data: $scannedSerial")
-                    showAddMeterToMeterCheckDialog(scannedSerial)
-                }
-
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ MeterCheck ERROR: ${e.message}", e)
-                showErrorResult(scannedSerial, getString(R.string.error_processing_scan, e.message))
+        when {
+            // Case 1: Neither location nor meter number is properly registered
+            !isLocationRegistered && !isMeterNumberRegistered -> {
+                showRegistrationRequiredDialog(
+                    meter,
+                    getString(R.string.meter_needs_location_and_number),
+                    needsLocation = true,
+                    needsNumber = true
+                )
+            }
+            // Case 2: Location not registered but meter number is
+            !isLocationRegistered -> {
+                showRegistrationRequiredDialog(
+                    meter,
+                    getString(R.string.meter_needs_location),
+                    needsLocation = true,
+                    needsNumber = false
+                )
+            }
+            // Case 3: Meter number not registered but location is
+            !isMeterNumberRegistered -> {
+                showRegistrationRequiredDialog(
+                    meter,
+                    getString(R.string.meter_needs_number),
+                    needsLocation = false,
+                    needsNumber = true
+                )
+            }
+            // Case 4: Location exists but not in location database
+            !isLocationInDatabase -> {
+                showLocationNotInDatabaseDialog(meter)
+            }
+            // Case 5: Everything is registered - offer to edit
+            else -> {
+                showEditMeterInfoDialog(meter)
             }
         }
     }
-    private suspend fun updateMeterCheckStatusAsync(serialNumber: String): Pair<Boolean, String?> {
-        return try {
-            // Only look in MeterCheck meters
-            val meterCheckMeters = filesViewModel.meterCheckMeters.value ?: emptyList()
-            val targetMeter = meterCheckMeters.find { it.serialNumber == serialNumber }
 
-            if (targetMeter != null) {
-                filesViewModel.updateMeterCheckedStatus(serialNumber, true, targetMeter.fromFile)
-                Pair(true, targetMeter.fromFile)
-            } else {
-                Log.w(TAG, "❌ Serial $serialNumber not found in MeterCheck data")
-                Pair(false, null)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Error updating MeterCheck status: ${e.message}", e)
-            Pair(false, null)
-        }
-    }
-
-    private fun isValidLocation(location: String): Boolean {
-        return location.isNotBlank() &&
-                location.lowercase() !in listOf("unknown", "n/a", "tbd", "pending", "-", "null")
-    }
-
-    private fun isValidNumber(number: String): Boolean {
-        return number.isNotBlank() &&
-                number != "-" &&
-                number.lowercase() != "unknown" &&
-                number.lowercase() != "pending"
-    }
-
-    private fun showLocationNumberDialog(meter: MeterStatus, hasValidLocation: Boolean, hasValidNumber: Boolean) {
-        val dialogView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_meter_location_number, null)
-
-        val locationSpinner = dialogView.findViewById<Spinner>(R.id.location_spinner)
-        val customLocationInput = dialogView.findViewById<TextInputEditText>(R.id.custom_location_input)
-        val numberInput = dialogView.findViewById<TextInputEditText>(R.id.meter_number_input)
-
-        // Setup location spinner with data from LocationFragment
-        setupLocationSpinner(locationSpinner, customLocationInput, if (hasValidLocation) meter.place else "")
-
-        // Pre-fill number if valid
-        if (hasValidNumber) {
-            numberInput.setText(meter.number)
-        }
-
-        val message = when {
-            !hasValidLocation && !hasValidNumber -> getString(R.string.meter_needs_location_and_number)
-            !hasValidLocation -> getString(R.string.meter_needs_location)
-            !hasValidNumber -> getString(R.string.meter_needs_number)
-            else -> getString(R.string.update_meter_info)
-        }
-
+    private fun showRegistrationRequiredDialog(
+        meter: MeterStatus,
+        message: String,
+        needsLocation: Boolean,
+        needsNumber: Boolean
+    ) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.meter_setup_required))
-            .setMessage(message)
-            .setView(dialogView)
-            .setPositiveButton(getString(R.string.save_and_continue)) { _, _ ->
-                val selectedLocation = getSelectedLocation(locationSpinner, customLocationInput)
-                val enteredNumber = numberInput.text?.toString()?.trim() ?: ""
-
-                if (selectedLocation.isNotEmpty() && enteredNumber.isNotEmpty()) {
-                    updateMeterLocationAndNumber(meter, selectedLocation, enteredNumber)
-                } else {
-                    Toast.makeText(requireContext(), getString(R.string.error_location_number_required), Toast.LENGTH_SHORT).show()
-                    showLocationNumberDialog(meter, hasValidLocation, hasValidNumber) // Show again
-                }
+            .setMessage("$message\n\n${getString(R.string.meter_assignment_info)}")
+            .setPositiveButton(getString(R.string.setup_meter)) { _, _ ->
+                showMeterSetupDialog(meter, needsLocation, needsNumber)
             }
             .setNegativeButton(getString(R.string.cancel)) { _, _ ->
-                // Go back to meter list
-                findNavController().navigate(R.id.action_detectedFragment_to_meterCheckFragment)
+                navigateBack()
             }
             .setCancelable(false)
             .show()
     }
 
-    private fun showAddMeterToMeterCheckDialog(scannedSerial: String) {
-        val dialogView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_meter_location_number, null)
-
-        val locationSpinner = dialogView.findViewById<Spinner>(R.id.location_spinner)
-        val customLocationInput = dialogView.findViewById<TextInputEditText>(R.id.custom_location_input)
-        val numberInput = dialogView.findViewById<TextInputEditText>(R.id.meter_number_input)
-
-        setupLocationSpinner(locationSpinner, customLocationInput, "")
+    private fun showLocationNotInDatabaseDialog(meter: MeterStatus) {
+        val message = getString(R.string.location_not_in_database, meter.place)
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.add_meter_to_metercheck))
-            .setMessage(getString(R.string.serial_not_found_in_metercheck, scannedSerial))
-            .setView(dialogView)
-            .setPositiveButton(getString(R.string.add_to_metercheck)) { _, _ ->
-                val selectedLocation = getSelectedLocation(locationSpinner, customLocationInput)
-                val enteredNumber = numberInput.text?.toString()?.trim() ?: ""
-
-                if (selectedLocation.isNotEmpty() && enteredNumber.isNotEmpty()) {
-                    addMeterToMeterCheck(scannedSerial, selectedLocation, enteredNumber)
-                } else {
-                    Toast.makeText(requireContext(), getString(R.string.error_location_number_required), Toast.LENGTH_SHORT).show()
-                }
+            .setTitle(getString(R.string.location_registration_required))
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.add_location_to_database)) { _, _ ->
+                addLocationToDatabase(meter)
+            }
+            .setNeutralButton(getString(R.string.change_location)) { _, _ ->
+                showMeterSetupDialog(meter, needsLocation = true, needsNumber = false)
             }
             .setNegativeButton(getString(R.string.cancel)) { _, _ ->
-                findNavController().navigate(R.id.action_detectedFragment_to_meterCheckFragment)
+                navigateBack()
+            }
+            .show()
+    }
+
+    private fun showEditMeterInfoDialog(meter: MeterStatus) {
+        val message = "${getString(R.string.meter_registered_successfully)}\n\n" +
+                "${getString(R.string.current_location)}: ${meter.place}\n" +
+                "${getString(R.string.current_meter_number)}: ${meter.number}\n\n" +
+                getString(R.string.update_meter_info)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.meter_information))
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.proceed_with_scan)) { _, _ ->
+                // Mark as scanned and proceed
+                markMeterAsScanned(meter)
+            }
+            .setNeutralButton(getString(R.string.edit_meter_info)) { _, _ ->
+                showMeterSetupDialog(meter, needsLocation = true, needsNumber = true)
+            }
+            .setNegativeButton(getString(R.string.cancel)) { _, _ ->
+                navigateBack()
+            }
+            .show()
+    }
+
+    private fun showMeterRegistrationDialog(serialNumber: String, message: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.meter_not_found))
+            .setMessage("$message\n\n${getString(R.string.serial_not_found_add_meter, serialNumber)}")
+            .setPositiveButton(getString(R.string.add_to_database)) { _, _ ->
+                showNewMeterSetupDialog(serialNumber)
+            }
+            .setNegativeButton(getString(R.string.skip_serial)) { _, _ ->
+                navigateBack()
             }
             .setCancelable(false)
             .show()
     }
 
-    private fun addMeterToMeterCheck(serialNumber: String, location: String, number: String) {
+    private fun showMeterSetupDialog(
+        meter: MeterStatus,
+        needsLocation: Boolean,
+        needsNumber: Boolean
+    ) {
         lifecycleScope.launch {
-            try {
-                // ✅ FIXED: Use only 3 parameters (no fromFile parameter)
-                filesViewModel.addNewMeter(serialNumber, location, number)
+            val dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_meter_setup, null)
 
-                // After adding the meter, we need to process it for MeterCheck destination
-                // Since the meter was just added, it should be in the most recent "manual_entry" type file
-                delay(500) // Give a moment for the database to update
+            val locationSpinner = dialogView.findViewById<Spinner>(R.id.locationSpinner)
+            val locationInputLayout = dialogView.findViewById<TextInputLayout>(R.id.customLocationInputLayout)
+            val locationInput = dialogView.findViewById<TextInputEditText>(R.id.customLocationInput)
+            val numberInputLayout = dialogView.findViewById<TextInputLayout>(R.id.meterNumberInputLayout)
+            val numberInput = dialogView.findViewById<TextInputEditText>(R.id.meterNumberInput)
 
-                // Mark as scanned using MeterCheck-specific method
-                val (success, fileName) = updateMeterCheckStatusOnly(serialNumber)
+            // Setup location spinner with database locations
+            setupLocationSpinner(locationSpinner, locationInputLayout, locationInput, meter.place)
 
-                if (success) {
-                    showSuccessResult(serialNumber, fileName ?: getString(R.string.unknown_file))
-                    setupNavigationButton()
-                } else {
-                    showErrorResult(serialNumber, getString(R.string.error_update_scan_status))
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error adding meter to MeterCheck: ${e.message}", e)
-                showErrorResult(serialNumber, getString(R.string.error_adding_meter, e.message))
-            }
-        }
-    }
-
-    private fun addNewMeter(serialNumber: String, location: String, number: String) {
-        lifecycleScope.launch {
-            try {
-                // ✅ FIXED: Use only 3 parameters
-                filesViewModel.addNewMeter(serialNumber, location, number)
-
-                // Mark as scanned
-                val (success, fileName) = filesViewModel.updateMeterCheckedStatusBySerialAsync(serialNumber)
-
-                if (success) {
-                    showSuccessResult(serialNumber, fileName ?: getString(R.string.unknown_file))
-                    setupNavigationButton()
-                } else {
-                    showErrorResult(serialNumber, getString(R.string.error_update_scan_status))
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error adding meter: ${e.message}", e)
-                showErrorResult(serialNumber, getString(R.string.error_adding_meter, e.message))
-            }
-        }
-    }
-
-    private suspend fun updateMeterCheckStatusOnly(serialNumber: String): Pair<Boolean, String?> {
-        return try {
-            // Only look in MeterCheck meters
-            val meterCheckMeters = filesViewModel.meterCheckMeters.value ?: emptyList()
-            val targetMeter = meterCheckMeters.find { it.serialNumber == serialNumber }
-
-            if (targetMeter != null) {
-                filesViewModel.updateMeterCheckedStatus(serialNumber, true, targetMeter.fromFile)
-                Pair(true, targetMeter.fromFile)
+            // Setup meter number input
+            if (needsNumber) {
+                numberInput.setText(if (isMeterNumberValid(meter.number)) meter.number else "")
+                numberInputLayout.visibility = View.VISIBLE
             } else {
-                // If not found in MeterCheck data, try to find in all meters and mark as scanned
-                // This handles the case where meter was just added
-                val allMeters = filesViewModel.meterStatusList.value ?: emptyList()
-                val newMeter = allMeters.find { it.serialNumber == serialNumber }
+                numberInputLayout.visibility = View.GONE
+            }
 
-                if (newMeter != null) {
-                    filesViewModel.updateMeterCheckedStatus(serialNumber, true, newMeter.fromFile)
+            // Hide location setup if not needed
+            if (!needsLocation) {
+                locationSpinner.visibility = View.GONE
+                locationInputLayout.visibility = View.GONE
+            }
 
-                    // Also try to process the file for MeterCheck if it's a manual entry
-                    if (newMeter.fromFile.contains("manual")) {
-                        try {
-                            filesViewModel.processForMeterCheck(newMeter.fromFile)
-                        } catch (e: Exception) {
-                            Log.w(TAG, "Could not process file for MeterCheck: ${e.message}")
-                        }
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.update_meter_info))
+                .setView(dialogView)
+                .setPositiveButton(getString(R.string.save_meter_data)) { _, _ ->
+                    val selectedLocation = if (needsLocation) {
+                        getSelectedLocation(locationSpinner, locationInput)
+                    } else {
+                        meter.place
                     }
 
-                    Pair(true, newMeter.fromFile)
-                } else {
-                    Log.w(TAG, "❌ Serial $serialNumber not found even after adding")
-                    Pair(false, null)
+                    val enteredNumber = if (needsNumber) {
+                        numberInput.text?.toString()?.trim() ?: ""
+                    } else {
+                        meter.number
+                    }
+
+                    if (selectedLocation.isNotEmpty() && enteredNumber.isNotEmpty()) {
+                        updateMeterLocationAndNumber(meter, selectedLocation, enteredNumber)
+                    } else {
+                        Toast.makeText(requireContext(), getString(R.string.error_location_number_required), Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton(getString(R.string.cancel)) { _, _ ->
+                    navigateBack()
+                }
+                .setCancelable(false)
+                .show()
+        }
+    }
+
+    private fun showNewMeterSetupDialog(serialNumber: String) {
+        lifecycleScope.launch {
+            val dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_meter_setup, null)
+
+            val locationSpinner = dialogView.findViewById<Spinner>(R.id.locationSpinner)
+            val locationInputLayout = dialogView.findViewById<TextInputLayout>(R.id.customLocationInputLayout)
+            val locationInput = dialogView.findViewById<TextInputEditText>(R.id.customLocationInput)
+            val numberInputLayout = dialogView.findViewById<TextInputLayout>(R.id.meterNumberInputLayout)
+            val numberInput = dialogView.findViewById<TextInputEditText>(R.id.meterNumberInput)
+
+            // Setup location spinner
+            setupLocationSpinner(locationSpinner, locationInputLayout, locationInput, "")
+
+            // Show all inputs for new meter
+            numberInputLayout.visibility = View.VISIBLE
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.add_new_meter))
+                .setView(dialogView)
+                .setPositiveButton(getString(R.string.save_meter_data)) { _, _ ->
+                    val selectedLocation = getSelectedLocation(locationSpinner, locationInput)
+                    val enteredNumber = numberInput.text?.toString()?.trim() ?: ""
+
+                    if (selectedLocation.isNotEmpty() && enteredNumber.isNotEmpty()) {
+                        addMeterToDatabase(serialNumber, selectedLocation, enteredNumber)
+                    } else {
+                        Toast.makeText(requireContext(), getString(R.string.error_location_number_required), Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton(getString(R.string.cancel)) { _, _ ->
+                    navigateBack()
+                }
+                .setCancelable(false)
+                .show()
+        }
+    }
+
+    private suspend fun setupLocationSpinner(
+        spinner: Spinner,
+        customInputLayout: TextInputLayout,
+        customInput: TextInputEditText,
+        preselectedLocation: String
+    ) {
+        try {
+            // Get locations from database
+            val dbLocations = locationRepository.getActiveLocationNames().sorted()
+
+            val locationList = mutableListOf<String>()
+            locationList.add(getString(R.string.select_location))
+            locationList.addAll(dbLocations)
+            locationList.add(getString(R.string.custom_location))
+
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, locationList)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner.adapter = adapter
+
+            // Handle spinner selection
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    val selectedItem = locationList[position]
+                    if (selectedItem == getString(R.string.custom_location)) {
+                        customInputLayout.visibility = View.VISIBLE
+                    } else {
+                        customInputLayout.visibility = View.GONE
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+            // Preselect location if provided and valid
+            if (preselectedLocation.isNotEmpty()) {
+                val index = locationList.indexOf(preselectedLocation)
+                if (index != -1) {
+                    spinner.setSelection(index)
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error updating MeterCheck status: ${e.message}", e)
-            Pair(false, null)
+            Log.e(TAG, "❌ Error setting up location spinner: ${e.message}", e)
+            // Fallback to basic spinner without database locations
+            setupBasicLocationSpinner(spinner, customInputLayout, customInput, preselectedLocation)
         }
     }
 
-
-    private fun setupLocationSpinner(spinner: Spinner, customInput: TextInputEditText, preselectedLocation: String) {
-        // Get unique locations from the data
-        val locations = mutableSetOf<String>()
-
-        // Add locations from meter data
-        filesViewModel.meterCheckMeters.value?.forEach { meter ->
-            if (isValidLocation(meter.place)) {
-                locations.add(meter.place)
-            }
-        }
-
-        // Add common locations if needed
-        val commonLocations = listOf(
+    private fun setupBasicLocationSpinner(
+        spinner: Spinner,
+        customInputLayout: TextInputLayout,
+        customInput: TextInputEditText,
+        preselectedLocation: String
+    ) {
+        val basicLocations = listOf(
+            getString(R.string.select_location),
             getString(R.string.location_lobby),
             getString(R.string.location_basement),
-            getString(R.string.location_garage),
             getString(R.string.location_rooftop),
-            getString(R.string.location_office)
+            getString(R.string.location_office),
+            getString(R.string.custom_location)
         )
-        locations.addAll(commonLocations)
 
-        val locationList = mutableListOf<String>()
-        locationList.add(getString(R.string.select_location))
-        locationList.addAll(locations.sorted())
-        locationList.add(getString(R.string.custom_location))
-
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, locationList)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, basicLocations)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
 
-        // Handle spinner selection
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = locationList[position]
+                val selectedItem = basicLocations[position]
                 if (selectedItem == getString(R.string.custom_location)) {
-                    customInput.visibility = View.VISIBLE
+                    customInputLayout.visibility = View.VISIBLE
                 } else {
-                    customInput.visibility = View.GONE
+                    customInputLayout.visibility = View.GONE
                 }
             }
 
@@ -435,7 +450,7 @@ class DetectedFragment : Fragment() {
 
         // Preselect location if provided
         if (preselectedLocation.isNotEmpty()) {
-            val index = locationList.indexOf(preselectedLocation)
+            val index = basicLocations.indexOf(preselectedLocation)
             if (index != -1) {
                 spinner.setSelection(index)
             }
@@ -453,14 +468,64 @@ class DetectedFragment : Fragment() {
         }
     }
 
+    private fun addLocationToDatabase(meter: MeterStatus) {
+        lifecycleScope.launch {
+            try {
+                val result = locationRepository.addLocation(meter.place)
+                if (result.isSuccess) {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.location_added_to_database, meter.place),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    // Now proceed with scanning
+                    markMeterAsScanned(meter)
+                } else {
+                    showErrorResult(
+                        meter.serialNumber,
+                        getString(R.string.error_adding_location_to_database)
+                    )
+                }
+            } catch (e: Exception) {
+                showErrorResult(meter.serialNumber, getString(R.string.error_adding_location_to_database))
+            }
+        }
+    }
+
+    private fun markMeterAsScanned(meter: MeterStatus) {
+        lifecycleScope.launch {
+            try {
+                val (success, fileName) = filesViewModel.updateMeterCheckedStatusBySerialAsync(meter.serialNumber)
+
+                if (success) {
+                    showSuccessResult(meter.serialNumber, fileName ?: getString(R.string.unknown_file))
+                    setupNavigationButton()
+                } else {
+                    showErrorResult(meter.serialNumber, getString(R.string.error_update_scan_status))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error marking meter as scanned: ${e.message}", e)
+                showErrorResult(meter.serialNumber, getString(R.string.error_update_scan_status))
+            }
+        }
+    }
+
     private fun updateMeterLocationAndNumber(meter: MeterStatus, location: String, number: String) {
         lifecycleScope.launch {
             try {
                 // Update meter details
                 filesViewModel.updateMeterLocationAndNumber(meter.serialNumber, location, number)
 
-                // Mark as scanned in MeterCheck context
-                val (success, fileName) = updateMeterCheckStatusAsync(meter.serialNumber)
+                // If it's a custom location, add it to the database
+                if (!location.isEmpty()) {
+                    val isLocationInDb = locationRepository.isLocationActive(location)
+                    if (!isLocationInDb) {
+                        locationRepository.addLocation(location)
+                    }
+                }
+
+                // Mark as scanned
+                val (success, fileName) = filesViewModel.updateMeterCheckedStatusBySerialAsync(meter.serialNumber)
 
                 if (success) {
                     showSuccessResult(meter.serialNumber, fileName ?: getString(R.string.unknown_file))
@@ -475,16 +540,74 @@ class DetectedFragment : Fragment() {
         }
     }
 
+    private fun addMeterToDatabase(serialNumber: String, location: String, number: String) {
+        lifecycleScope.launch {
+            try {
+                // Add meter to database
+                filesViewModel.addNewMeter(serialNumber, location, number)
+
+                // If it's a custom location, add it to the location database
+                val isLocationInDb = locationRepository.isLocationActive(location)
+                if (!isLocationInDb) {
+                    locationRepository.addLocation(location)
+                }
+
+                // Give a moment for database update
+                delay(500)
+
+                // Mark as scanned
+                val (success, fileName) = filesViewModel.updateMeterCheckedStatusBySerialAsync(serialNumber)
+
+                if (success) {
+                    showSuccessResult(serialNumber, fileName ?: getString(R.string.unknown_file))
+                    setupNavigationButton()
+                } else {
+                    showErrorResult(serialNumber, getString(R.string.error_update_scan_status))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error adding meter: ${e.message}", e)
+                showErrorResult(serialNumber, getString(R.string.error_adding_meter, e.message))
+            }
+        }
+    }
+
+    // Utility functions
+    private suspend fun findMeterBySerial(serialNumber: String): MeterStatus? {
+        return try {
+            filesViewModel.findMeterBySerial(serialNumber)
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error finding meter by serial: ${e.message}", e)
+            null
+        }
+    }
+
+    private fun isLocationValid(location: String): Boolean {
+        return location.isNotEmpty() &&
+                location != getString(R.string.default_meter_place) &&
+                location.lowercase() != "unknown" &&
+                location.lowercase() != "n/a"
+    }
+
+    private fun isMeterNumberValid(number: String): Boolean {
+        return number.isNotEmpty() &&
+                number != getString(R.string.default_meter_number) &&
+                number != "0"
+    }
+
+    private fun navigateBack() {
+        findNavController().navigateUp()
+    }
+
     private fun setupNavigationButton() {
         binding.nextButton.text = getString(R.string.back_to_meter_list)
         binding.nextButton.isEnabled = true
         binding.nextButton.setOnClickListener {
-            findNavController().navigate(R.id.action_detectedFragment_to_meterCheckFragment)
+            navigateBack()
         }
     }
 
+    // Existing utility functions (parseSerialNumber, showSuccessResult, showErrorResult, etc.)
     private fun parseSerialNumber(rawData: String): String {
-        // Use the same parsing logic as in your existing code
         return when {
             rawData.contains("F6") || rawData.contains("F7") -> {
                 "${rawData.substring(7, 8)}${rawData.substring(3, 5)}${rawData.substring(8, 15)}"
@@ -507,58 +630,27 @@ class DetectedFragment : Fragment() {
         binding.detectedInfoText.text = binding.detectedInfoText.text.toString() +
                 "\n\n✅ " + getString(R.string.meter_verified)
 
-        val meterCheckCount = filesViewModel.meterCheckMeters.value?.size ?: 0
-        val generalMeterCount = filesViewModel.meterStatusList.value?.size ?: 0
-
-        val messageBuilder = StringBuilder()
-        messageBuilder.append(getString(R.string.success_meter_found, serialNumber))
-        messageBuilder.append("\n")
-        messageBuilder.append(getString(R.string.file_source, fileName))
-
-        if (meterCheckCount > 0) {
-            messageBuilder.append("\n")
-            messageBuilder.append(getString(R.string.meter_check_data, meterCheckCount))
-        }
-
-        if (generalMeterCount > 0) {
-            messageBuilder.append("\n")
-            messageBuilder.append(getString(R.string.general_meter_data, generalMeterCount))
-        }
-
-        binding.detectedInfoText.text = messageBuilder.toString()
-
-        // Enable next button
-        binding.nextButton.isEnabled = true
-        binding.nextButton.text = getString(R.string.next)
+        binding.serialNumberText.text = serialNumber
     }
 
     private fun showErrorResult(serialNumber: String, errorMessage: String) {
-        Log.d(TAG, "❌ Showing ERROR result for $serialNumber: $errorMessage")
+        Log.e(TAG, "❌ Showing ERROR result for $serialNumber: $errorMessage")
 
-        val messageBuilder = StringBuilder()
-        if (serialNumber.isNotEmpty()) {
-            messageBuilder.append(getString(R.string.scanned_serial, serialNumber))
-            messageBuilder.append("\n\n")
+        binding.detectedInfoText.text = "❌ $errorMessage"
+        binding.serialNumberText.text = serialNumber
+
+        binding.nextButton.text = getString(R.string.back_to_meter_list)
+        binding.nextButton.isEnabled = true
+        binding.nextButton.setOnClickListener {
+            navigateBack()
         }
-        messageBuilder.append("❌ ")
-        messageBuilder.append(errorMessage)
-
-        binding.detectedInfoText.text = messageBuilder.toString()
-
-        // Enable back button to try again
-        binding.backButton.isEnabled = true
-        binding.nextButton.isEnabled = false
     }
 
     private fun argumentsToString(args: Bundle?): String {
         if (args == null) return "null"
-        val sb = StringBuilder("{")
-        for (key in args.keySet()) {
-            sb.append("$key=${args.get(key)}, ")
+        return args.keySet().joinToString(", ") { key ->
+            "$key=${args.get(key)}"
         }
-        if (sb.length > 1) sb.setLength(sb.length - 2) // Remove last ", "
-        sb.append("}")
-        return sb.toString()
     }
 
     override fun onDestroyView() {

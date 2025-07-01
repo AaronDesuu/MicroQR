@@ -3,6 +3,7 @@ package com.example.microqr.ui.metercheck
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.microqr.R
 import com.example.microqr.ui.files.MeterStatus
+import com.google.android.material.card.MaterialCardView
 
 class MeterCheckAdapter(
     private val onItemClick: (MeterStatus) -> Unit
@@ -18,142 +20,111 @@ class MeterCheckAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MeterViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_meter_check, parent, false)
-        return MeterViewHolder(view)
+        return MeterViewHolder(view, onItemClick)
     }
 
     override fun onBindViewHolder(holder: MeterViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    inner class MeterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class MeterViewHolder(
+        itemView: View,
+        private val onItemClick: (MeterStatus) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
 
+        private val cardView: MaterialCardView = itemView as MaterialCardView
+        private val meterNumberBadge: MaterialCardView = itemView.findViewById(R.id.meter_number_badge)
         private val tvMeterNumber: TextView = itemView.findViewById(R.id.tvMeterNumber)
         private val tvSerialNumber: TextView = itemView.findViewById(R.id.tvSerialNumber)
         private val tvLocation: TextView = itemView.findViewById(R.id.tvLocation)
         private val tvFileName: TextView = itemView.findViewById(R.id.tvFileName)
-        private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
-        private val tvConditionWarning: TextView = itemView.findViewById(R.id.tvConditionWarning)
-        private val tvTapHint: TextView = itemView.findViewById(R.id.tvTapHint)
-        private val statusIndicator: View = itemView.findViewById(R.id.statusIndicator)
+        private val statusBadge: MaterialCardView = itemView.findViewById(R.id.status_badge)
+        private val tvScanStatus: TextView = itemView.findViewById(R.id.tvScanStatus)
+        private val ivIncompleteWarning: ImageView = itemView.findViewById(R.id.ivIncompleteWarning)
 
         fun bind(meter: MeterStatus) {
-            // Set basic meter information
-            tvMeterNumber.text = meter.number.ifEmpty { String.format("%03d", adapterPosition + 1) }
+            // Set meter information
+            tvMeterNumber.text = formatMeterNumber(meter.number)
             tvSerialNumber.text = meter.serialNumber
             tvLocation.text = meter.place
             tvFileName.text = getShortFileName(meter.fromFile)
 
-            // Determine meter conditions
-            val hasValidLocation = isValidLocation(meter.place)
-            val hasValidNumber = isValidNumber(meter.number)
+            // Check information completeness
+            val isLocationComplete = isLocationValid(meter.place)
+            val isMeterNumberComplete = isMeterNumberValid(meter.number)
+            val isInformationComplete = isLocationComplete && isMeterNumberComplete
 
-            // Update status and conditional warnings
-            updateStatusAndConditions(meter, hasValidLocation, hasValidNumber)
+            // Set scan status and colors
+            if (meter.isChecked) {
+                tvScanStatus.text = itemView.context.getString(R.string.status_serial_processed).uppercase()
+                statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.files_status_valid))
+                meterNumberBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.success_green))
+            } else {
+                tvScanStatus.text = itemView.context.getString(R.string.status_unregistered).uppercase()
+                statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.files_status_error))
+                meterNumberBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.primary_color))
+            }
 
-            // Set click listener (whole card is clickable for scanning)
+            // Set border and warning based on information completeness
+            if (isInformationComplete) {
+                // White border for complete information
+                cardView.strokeColor = ContextCompat.getColor(itemView.context, R.color.stroke_color)
+                cardView.strokeWidth = dpToPx(1)
+                ivIncompleteWarning.visibility = View.GONE
+            } else {
+                // Yellow/Orange border for incomplete information
+                cardView.strokeColor = ContextCompat.getColor(itemView.context, R.color.warning_orange)
+                cardView.strokeWidth = dpToPx(2)
+                ivIncompleteWarning.visibility = View.VISIBLE
+            }
+
+            // Highlight incomplete fields with warning color
+            if (!isLocationComplete) {
+                tvLocation.setTextColor(ContextCompat.getColor(itemView.context, R.color.warning_orange))
+            } else {
+                tvLocation.setTextColor(ContextCompat.getColor(itemView.context, R.color.primary_text_color))
+            }
+
+            if (!isMeterNumberComplete) {
+                tvMeterNumber.setTextColor(ContextCompat.getColor(itemView.context, R.color.warning_orange))
+            } else {
+                tvMeterNumber.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
+            }
+
+            // Set card elevation based on scan status (similar to meter match)
+            if (meter.isChecked) {
+                cardView.cardElevation = dpToPx(1).toFloat()
+            } else {
+                cardView.cardElevation = dpToPx(3).toFloat()
+            }
+
+            // Handle item click
             itemView.setOnClickListener {
                 onItemClick(meter)
             }
-
-            // Update card styling based on conditions and status
-            updateCardStyling(meter, hasValidLocation, hasValidNumber)
         }
 
-        private fun isValidLocation(location: String): Boolean {
-            // Check if location is properly set (not empty, not default values)
-            return location.isNotBlank() &&
-                    location.lowercase() !in listOf("unknown", "n/a", "tbd", "pending", "-", "null")
-        }
-
-        private fun isValidNumber(number: String): Boolean {
-            // Check if meter has been properly numbered
-            return number.isNotBlank() &&
-                    number != "-" &&
-                    number.lowercase() != "unknown" &&
-                    number.lowercase() != "pending"
-        }
-
-        private fun updateStatusAndConditions(meter: MeterStatus, hasValidLocation: Boolean, hasValidNumber: Boolean) {
-            val context = itemView.context
-
-            // Update main status badge
-            if (meter.isChecked) {
-                // Scanned state
-                statusIndicator.background = ContextCompat.getDrawable(
-                    context, R.drawable.circle_background_success
-                )
-                tvStatus.text = context.getString(R.string.scanned_meters)
-                tvStatus.background = ContextCompat.getDrawable(
-                    context, R.drawable.badge_background_success
-                )
-            } else {
-                // Unscanned state
-                statusIndicator.background = ContextCompat.getDrawable(
-                    context, R.drawable.circle_background_warning
-                )
-                tvStatus.text = context.getString(R.string.unscanned_meters)
-                tvStatus.background = ContextCompat.getDrawable(
-                    context, R.drawable.badge_background_warning
-                )
-            }
-
-            // Update conditional warning/info text
-            val warningText = when {
-                !hasValidLocation && !hasValidNumber -> "No Location\n& Number"
-                !hasValidLocation -> "No Location\nSet"
-                !hasValidNumber -> "No Number\nAssigned"
-                meter.isChecked -> "Completed"
-                else -> "Ready to\nScan"
-            }
-
-            val warningColor = when {
-                !hasValidLocation || !hasValidNumber -> ContextCompat.getColor(context, R.color.error_red)
-                meter.isChecked -> ContextCompat.getColor(context, R.color.success_green)
-                else -> ContextCompat.getColor(context, R.color.primary_color)
-            }
-
-            tvConditionWarning.apply {
-                text = warningText
-                setTextColor(warningColor)
-                visibility = View.VISIBLE
+        private fun formatMeterNumber(number: String): String {
+            // Format meter number to fit in the badge nicely
+            return when {
+                number.length <= 3 -> number
+                number.startsWith("M-") || number.startsWith("m-") -> number.substring(2).take(3)
+                number.length > 3 -> number.take(3)
+                else -> number
             }
         }
 
-        private fun updateCardStyling(meter: MeterStatus, hasValidLocation: Boolean, hasValidNumber: Boolean) {
-            if (itemView is com.google.android.material.card.MaterialCardView) {
-                val cardView = itemView as com.google.android.material.card.MaterialCardView
-                val context = itemView.context
+        private fun isLocationValid(location: String): Boolean {
+            return location.isNotEmpty() &&
+                    location.lowercase() != "unknown" &&
+                    location.lowercase() != "n/a" &&
+                    !location.contains("default", ignoreCase = true)
+        }
 
-                // Determine card priority/elevation
-                val elevation = when {
-                    !hasValidLocation || !hasValidNumber -> 6f // Highest priority - needs attention
-                    !meter.isChecked -> 4f // Medium priority - ready to scan
-                    else -> 2f // Low priority - completed
-                }
-                cardView.cardElevation = elevation
-
-                // Determine stroke color based on conditions
-                val strokeColor = when {
-                    !hasValidLocation || !hasValidNumber -> ContextCompat.getColor(context, R.color.error_red)
-                    meter.isChecked -> ContextCompat.getColor(context, R.color.success_green)
-                    else -> ContextCompat.getColor(context, R.color.stroke_color)
-                }
-
-                cardView.strokeColor = strokeColor
-                cardView.strokeWidth = if (strokeColor != ContextCompat.getColor(context, R.color.stroke_color)) {
-                    (2 * context.resources.displayMetrics.density).toInt() // Thicker stroke for warnings/success
-                } else {
-                    (1 * context.resources.displayMetrics.density).toInt() // Normal stroke
-                }
-
-                // Subtle background tint based on status
-                val backgroundColor = when {
-                    !hasValidLocation || !hasValidNumber -> ContextCompat.getColor(context, R.color.error_red_alpha)
-                    meter.isChecked -> ContextCompat.getColor(context, R.color.success_green_background)
-                    else -> ContextCompat.getColor(context, R.color.card_background)
-                }
-                cardView.setCardBackgroundColor(backgroundColor)
-            }
+        private fun isMeterNumberValid(number: String): Boolean {
+            return number.isNotEmpty() &&
+                    number != "0" &&
+                    !number.contains("default", ignoreCase = true)
         }
 
         private fun getShortFileName(fileName: String): String {
@@ -162,6 +133,11 @@ class MeterCheckAdapter(
             } else {
                 fileName
             }
+        }
+
+        private fun dpToPx(dp: Int): Int {
+            val density = itemView.context.resources.displayMetrics.density
+            return (dp * density).toInt()
         }
     }
 

@@ -2,9 +2,11 @@ package com.example.microqr.ui.location
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.microqr.R
 import com.example.microqr.databinding.ItemLocationBinding
 
 class LocationAdapter(
@@ -32,18 +34,42 @@ class LocationAdapter(
         fun bind(location: String) {
             binding.locationName.text = location
 
-            binding.editLocationButton.setOnClickListener {
-                onEditClick(location)
+            // Set text color from colors.xml
+            binding.locationName.setTextColor(
+                ContextCompat.getColor(binding.root.context, R.color.primary_text_color)
+            )
+
+            // Set up edit button with proper styling
+            binding.editLocationButton.apply {
+                setOnClickListener { onEditClick(location) }
+                contentDescription = binding.root.context.getString(R.string.cd_edit_location)
+                // Use colors from colors.xml
+                setColorFilter(ContextCompat.getColor(context, R.color.primary_color))
             }
 
-            binding.deleteLocationButton.setOnClickListener {
-                onDeleteClick(location)
+            // Set up delete button with proper styling
+            binding.deleteLocationButton.apply {
+                setOnClickListener { onDeleteClick(location) }
+                contentDescription = binding.root.context.getString(R.string.cd_delete_location)
+                // Use colors from colors.xml
+                setColorFilter(ContextCompat.getColor(context, R.color.error_red))
             }
 
-            // Optional: Make the whole item clickable for editing
+            // Set card background color
+            binding.root.setCardBackgroundColor(
+                ContextCompat.getColor(binding.root.context, R.color.card_background)
+            )
+
+            // Optional: Make the whole item clickable for editing with visual feedback
             binding.root.setOnClickListener {
                 onEditClick(location)
             }
+
+            // Add ripple effect color
+            binding.root.foreground = ContextCompat.getDrawable(
+                binding.root.context,
+                R.drawable.ripple_effect
+            )
         }
     }
 

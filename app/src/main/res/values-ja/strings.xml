@@ -94,15 +94,12 @@
     <!-- ========================================== -->
     <string name="detected_serial_number">検出されたシリアル番号：</string>
     <string name="check_serial">シリアル確認</string>
-    <string name="checking_serial">確認中...</string>
     <string name="serial_checked">ホームに戻る</string>
-    <string name="scan_again_button">再スキャン</string>
     <string name="view_in_metercheck">表示</string>
     <string name="error_parsing_qr">QR解析エラー</string>
     <string name="could_not_parse_serial">QRデータから有効なシリアル番号を解析できませんでした。RAW: %s</string>
     <string name="serial_number_format" translatable="false">S/N: %s</string>
     <string name="raw_qr_format" translatable="false">(RAW: %s)</string>
-    <string name="no_data_available">N/A</string>
     <string name="no_qr_data">QRデータが受信されませんでした</string>
 
     <!-- Serial Check Results -->
@@ -112,14 +109,10 @@
     <string name="status_verified_checked">✅ ステータス: 確認済みチェック (%sから)</string>
     <string name="status_already_checked">✅ ステータス: 既にチェック済み (%sから)</string>
     <string name="status_checked_no_file">✅ ステータス: チェック済み</string>
-    <string name="status_not_found">❌ ステータス: 見つかりません</string>
 
     <!-- Error Messages for Serial Check -->
-    <string name="serial_not_found_in_metercheck">Serial number \'%s\' not found in MeterCheck data. Add it to continue the workflow:</string>
     <string name="serial_not_found_process_first">❌ 「%s」が見つかりません。最初にMeterCheck用のファイルを処理してください。</string>
     <string name="serial_not_found_no_data">❌ 「%s」が見つかりません。現在読み込まれているメーターデータがありません。</string>
-    <string name="go_to_files">ファイルに移動</string>
-    <string name="upload_csv_files">CSVファイルをアップロード</string>
 
     <!-- ========================================== -->
     <!-- FILE MANAGEMENT & UPLOAD -->
@@ -159,7 +152,6 @@
     <string name="files_status_valid_ready">有効 • 処理準備完了</string>
     <string name="files_status_valid_empty">有効ですが空です</string>
     <string name="files_status_invalid">❌ 無効: %s</string>
-    <string name="status_valid">有効</string>
     <string name="csv_file_icon">CSVファイルアイコン</string>
 
     <!-- File Actions & Buttons -->
@@ -262,12 +254,10 @@
     <!-- ========================================== -->
     <!-- METER SCANNING & VERIFICATION -->
     <!-- ========================================== -->
-    <string name="target_meter_info">対象メーター情報</string>
     <string name="target_meter_information">対象メーター情報</string>
     <string name="scan_meter_qr">対象メーターのQRコードをスキャンしてください</string>
     <string name="scanning_meter">メーター %s をスキャン中</string>
     <string name="scanning_for_meter">メーター %s をスキャン中</string>
-    <string name="meter_verified">メーターが確認されスキャン済みとしてマークされました！</string>
     <string name="meter_scan_success">メーターが正常に確認されました！</string>
     <string name="meter_scan_mismatch">QRコードが対象メーターと一致しません</string>
     <string name="scan_to_verify">このメーターを確認するためQRコードをスキャンしてください</string>
@@ -309,7 +299,6 @@
 
     <!-- Status Messages -->
     <string name="expected_serial">期待値: %s</string>
-    <string name="scanned_serial">スキャン値: %s</string>
     <string name="meter_marked_scanned">メーター %s がスキャン済みとしてマークされました！</string>
     <string name="verify_correct_meter">正しいメーターをスキャンしていることを確認してください</string>
     <string name="alternative_matches_found">ただし、スキャンしたシリアル番号は以下の他のメーターと一致します：</string>
@@ -318,13 +307,9 @@
     <!-- ========================================== -->
     <!-- NAVIGATION & COMMON ACTIONS -->
     <!-- ========================================== -->
-    <string name="back">戻る</string>
-    <string name="next">次へ</string>
     <string name="close">閉じる</string>
     <string name="navigate_forward">前に進む</string>
     <string name="delete">削除</string>
-    <string name="cancel">キャンセル</string>
-    <string name="ok">OK</string>
     <string name="done">完了</string>
     <string name="clear_all">すべてクリア</string>
     <string name="copy">コピー</string>
@@ -382,7 +367,6 @@
     <!-- DIALOGS & CONFIRMATIONS -->
     <!-- ========================================== -->
     <!-- Dialog Titles -->
-    <string name="meter_not_found">メーターが見つかりません</string>
     <string name="no_match_dialog_title">❌ 一致が見つかりません</string>
     <string name="dialog_meter_not_found_title">メーターが見つかりません</string>
 
@@ -423,7 +407,6 @@
     <string name="unable_start_camera">カメラスキャンを開始できません</string>
     <string name="binding_null_camera">カメラコントローラーをバインドしようとした際、バインディングがnullでした。</string>
     <string name="failed_to_load_user_data">ユーザーデータの読み込みに失敗しました: %s</string>
-    <string name="failed_to_load_statistics">統計情報の読み込みに失敗しました: %s</string>
     <string name="failed_to_load_match_statistics">照合統計情報の読み込みに失敗しました: %s</string>
     <string name="failed_to_load_check_statistics">チェック統計情報の読み込みに失敗しました: %s</string>
     <string name="failed_to_get_total_count">総数の取得に失敗しました: %s</string>
@@ -547,12 +530,114 @@
     <string name="fallback_micro_qr_start">フォールバック：通常のQRがまだ見つからないため、MicroQR検出を開始します。</string>
 
     <!-- ========================================== -->
-    <!-- ADDITIONAL DETECTED FRAGMENT STRINGS -->
+    <!-- DETECTED FRAGMENT - COMPLETE STRINGS (JAPANESE) -->
+    <!-- Add these to app/src/main/res/values-ja/strings.xml -->
     <!-- ========================================== -->
-    <!-- These were in the Japanese version but missing from reorganized English -->
-    <string name="meter_found_successfully_jp">✅ メーター「%s」が正常に見つかりました！</string>
-    <string name="serial_found_success">✅ シリアル番号が見つかりました！</string>
-    <string name="meter_registered_successfully">✅ メーターが正常に登録されました！</string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - ログメッセージ -->
+    <!-- ========================================== -->
+    <string name="log_detected_fragment_created">📱 DetectedFragmentが作成されました。引数: %s</string>
+    <string name="log_raw_qr_value">🔍 生QR値: %s</string>
+    <string name="log_scan_context">📋 スキャンコンテキスト: %s</string>
+    <string name="log_error_raw_qr_null">❌ エラー: rawQrValueがnullまたは空白です！</string>
+    <string name="log_handling_meter_check_context">🔍 MeterCheckコンテキストを処理中</string>
+    <string name="log_handling_default_context">🔍 デフォルトコンテキストを処理中</string>
+    <string name="log_meter_found_in_metercheck">✅ MeterCheckデータでメーターが見つかりました: %s</string>
+    <string name="log_meter_missing_info">⚠️ メーターの場所/番号情報が不足: %s</string>
+    <string name="log_meter_complete_info">✅ メーターの情報が完全です: %s</string>
+    <string name="log_meter_not_found_in_metercheck">❌ MeterCheckデータでメーターが見つかりません: %s</string>
+    <string name="log_metercheck_error">❌ MeterCheckエラー: %s</string>
+    <string name="log_error_adding_meter">❌ MeterCheckへのメーター追加エラー: %s</string>
+    <string name="log_error_updating_meter">❌ メーター更新エラー: %s</string>
+    <string name="log_error_marking_scanned">❌ スキャン済みマークエラー: %s</string>
+    <string name="log_serial_not_found_metercheck">❌ シリアル %s がMeterCheckデータで見つかりません</string>
+    <string name="log_error_updating_metercheck_status">❌ MeterCheckステータス更新エラー: %s</string>
+    <string name="log_showing_success_result">✅ %s から %s の成功結果を表示中</string>
+    <string name="log_showing_error_result">❌ %s のエラー結果を表示中: %s</string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - ダイアログタイトル -->
+    <!-- ========================================== -->
+    <string name="add_meter_to_metercheck">MeterCheckにメーターを追加</string>
+    <string name="edit_meter_info">メーター情報を編集</string>
+    <string name="meter_setup_required">メーター設定が必要</string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - ダイアログメッセージ -->
+    <!-- ========================================== -->
+    <string name="serial_not_found_in_metercheck">シリアル番号 \'%s\' がMeterCheckデータで見つかりません。\n\n追加しますか？</string>
+    <string name="meter_found_edit_option">メーターが見つかりました:\nシリアル: %s\n場所: %s\n番号: %s\n\n情報を更新しますか？</string>
+    <string name="meter_needs_location_and_number">このメーターには場所と番号の両方の割り当てが必要です:</string>
+    <string name="meter_needs_location">このメーターには場所の割り当てが必要です:</string>
+    <string name="meter_needs_number">このメーターには番号の割り当てが必要です:</string>
+    <string name="update_meter_info">メーター情報を更新:</string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - ボタンラベル -->
+    <!-- ========================================== -->
+    <string name="add_to_metercheck">MeterCheckに追加</string>
+    <string name="save_and_continue">保存して続行</string>
+    <string name="update_meter">メーターを更新</string>
+    <string name="keep_current">現在の設定を保持</string>
+    <string name="cancel">キャンセル</string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - ステータスメッセージ -->
+    <!-- ========================================== -->
+    <string name="serial_number_detected">シリアル番号が正常に検出されました</string>
+    <string name="processing_meter_data">メーターデータを処理中...</string>
+    <string name="checking_serial">シリアルを確認中...</string>
+    <string name="adding_meter_to_database">データベースにメーターを追加中...</string>
+    <string name="updating_meter_info">メーター情報を更新中...</string>
+    <string name="marking_meter_as_scanned">メーターをスキャン済みとしてマーク中...</string>
+    <string name="meter_verified">メーターが正常に確認されました</string>
+    <string name="check_mark">✅</string>
+    <string name="error_prefix">❌ エラー: </string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - エラーメッセージ -->
+    <!-- ========================================== -->
+    <string name="error_no_qr_data">QRデータが受信されませんでした</string>
+    <string name="error_processing_scan">スキャン処理エラー: %s</string>
+    <string name="error_update_scan_status">スキャンステータスの更新に失敗</string>
+    <string name="error_location_number_required">場所と番号の両方が必要です</string>
+    <string name="error_updating_meter">メーター更新エラー: %s</string>
+    <string name="error_adding_meter">メーター追加エラー: %s</string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - データ表示 -->
+    <!-- ========================================== -->
+    <string name="data_status_summary">データステータス概要</string>
+    <string name="metercheck_count">MeterCheckデータ: %d メーター</string>
+    <string name="general_meter_count">一般メーターデータ: %d メーター</string>
+    <string name="unknown_file">不明なファイル</string>
+    <string name="no_data_available">利用可能なデータがありません</string>
+    <string name="no_arguments">引数なし</string>
+
+
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - 場所オプション -->
+    <!-- ========================================== -->
+    <string name="select_location">場所を選択</string>
+    <string name="custom_location">カスタム場所</string>
+    <string name="meter_location">メーター場所</string>
+    <string name="meter_number">メーター番号</string>
+
+    <!-- 事前定義された場所オプション -->
+    <string name="location_lobby">ロビー</string>
+    <string name="location_basement">地下</string>
+    <string name="location_garage">ガレージ</string>
+    <string name="location_rooftop">屋上</string>
+    <string name="location_office">オフィス</string>
+    <string name="location_unknown">不明</string>
+
+    <!-- ========================================== -->
+    <!-- DETECTED FRAGMENT - ヘルパーテキスト -->
+    <!-- ========================================== -->
+    <string name="meter_number_helper">このメーターの一意識別子</string>
+    <string name="meter_assignment_info">システムでこのメーターを適切に追跡するには、場所と番号の両方が必要です</string>
 
     <!-- ========================================== -->
     <!-- CSV EXPORT FUNCTIONALITY -->
@@ -822,6 +907,8 @@
     <string name="error_qr_scan_failed">QRコードのスキャンに失敗しました</string>
     <string name="error_database_update">データベースの更新に失敗しました</string>
     <string name="error_invalid_serial">無効なシリアル番号形式</string>
+    <string name="back">back</string>
+    <string name="next">next</string>
 
     <!-- Additional common strings (Japanese) -->
 

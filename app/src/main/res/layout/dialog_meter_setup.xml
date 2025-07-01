@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/card_background">
+
+    <!-- Dialog Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/meter_setup_dialog_header"
+        android:textSize="16sp"
+        android:textColor="@color/secondary_text_color"
+        android:layout_marginBottom="20dp"
+        android:lineSpacingExtra="2dp" />
+
+    <!-- Location Selection Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/meter_location"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text_color"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Location Spinner with simple background -->
+    <Spinner
+        android:id="@+id/locationSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:drawable/btn_dropdown"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+    <!-- Custom Location Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/customLocationInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:hint="@string/custom_location_hint"
+        android:visibility="gone"
+        app:boxStrokeColor="@color/primary_color"
+        app:hintTextColor="@color/secondary_text_color"
+        app:errorTextColor="@color/error_red"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/customLocationInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:maxLines="1"
+            android:textColor="@color/primary_text_color"
+            android:textColorHint="@color/secondary_text_color" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Meter Number Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/meter_number"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text_color"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Meter Number Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/meterNumberInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="@string/meter_number_hint"
+        app:helperText="@string/meter_number_helper"
+        app:boxStrokeColor="@color/primary_color"
+        app:hintTextColor="@color/secondary_text_color"
+        app:helperTextTextColor="@color/secondary_text_color"
+        app:errorTextColor="@color/error_red"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/meterNumberInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions"
+            android:maxLines="1"
+            android:textColor="@color/primary_text_color"
+            android:textColorHint="@color/secondary_text_color" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Information Card using your existing colors -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@drawable/info_card_background"
+        android:gravity="center_vertical">
+
+        <!-- Info Icon -->
+        <TextView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="12dp"
+            android:text="ℹ"
+            android:textSize="18sp"
+            android:textColor="@color/primary_color"
+            android:gravity="center"
+            android:textStyle="bold" />
+
+        <!-- Info Text -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/meter_assignment_info"
+            android:textSize="14sp"
+            android:textColor="@color/primary_text_color"
+            android:lineSpacingExtra="2dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

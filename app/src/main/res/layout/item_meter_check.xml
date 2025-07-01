@@ -7,142 +7,122 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
-    android:clickable="true"
-    android:focusable="true"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="3dp"
-    app:strokeColor="@color/stroke_color"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
     app:strokeWidth="1dp"
-    android:foreground="?attr/selectableItemBackground">
+    app:strokeColor="@color/stroke_color"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
-        <!-- Header Row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+        <!-- Meter Number Badge (Similar to meter match) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/meter_number_badge"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="@color/primary_color"
+            app:cardElevation="0dp">
 
-            <!-- Meter Number Badge -->
             <TextView
                 android:id="@+id/tvMeterNumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/badge_background_primary"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:text="-"
-                android:textColor="@color/white"
-                android:textSize="12sp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                android:layout_marginEnd="12dp"
+                android:textColor="@color/white"
                 tools:text="001" />
 
-            <!-- Status Indicator -->
-            <View
-                android:id="@+id/statusIndicator"
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:background="@drawable/circle_background_warning"
-                android:layout_marginEnd="8dp" />
+        </com.google.android.material.card.MaterialCardView>
 
-            <!-- Title Section -->
+        <!-- Meter Information Column -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
+
+            <!-- Serial Number Row -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/files_serial_number"
+                    android:textSize="12sp"
+                    android:textColor="@color/secondary_text_color"
+                    android:layout_marginEnd="4dp" />
 
                 <TextView
                     android:id="@+id/tvSerialNumber"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="@color/primary_text_color"
+                    android:fontFamily="monospace"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    tools:text="ABC123456789" />
+                    tools:text="SN123456789ABC" />
+
+            </LinearLayout>
+
+            <!-- Location Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/export_filter_places"
+                    android:textSize="12sp"
+                    android:textColor="@color/secondary_text_color"
+                    android:layout_marginEnd="4dp" />
 
                 <TextView
                     android:id="@+id/tvLocation"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@color/secondary_text_color"
+                    android:layout_weight="1"
+                    android:textSize="13sp"
+                    android:textColor="@color/primary_text_color"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:layout_marginTop="2dp"
                     tools:text="Building A - Floor 1" />
 
             </LinearLayout>
 
-            <!-- Conditional Status/Action Area -->
+            <!-- File Source Row -->
             <LinearLayout
-                android:id="@+id/actionArea"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <!-- Status Badge -->
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/badge_background_warning"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="2dp"
-                    android:text="@string/unscanned_meters"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    tools:text="Pending" />
-
-                <!-- Conditional Warning/Info Text -->
-                <TextView
-                    android:id="@+id/tvConditionWarning"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="9sp"
-                    android:textColor="@color/warning_orange"
-                    android:textStyle="bold"
-                    android:layout_marginTop="2dp"
-                    android:visibility="gone"
-                    android:maxLines="2"
-                    android:gravity="center"
-                    tools:visibility="visible"
-                    tools:text="No Location\nSet" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Details Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_folder_24"
-                    app:tint="@color/secondary_text_color"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/export_filter_files"
+                    android:textSize="11sp"
+                    android:textColor="@color/secondary_text_color"
                     android:layout_marginEnd="4dp" />
 
                 <TextView
@@ -150,27 +130,57 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="@color/secondary_text_color"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    tools:text="meters_data.csv" />
+                    tools:text="meters_data_2024.csv" />
 
             </LinearLayout>
 
-            <!-- Tap to Scan Hint -->
-            <TextView
-                android:id="@+id/tvTapHint"
+        </LinearLayout>
+
+        <!-- Status Column -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="8dp">
+
+            <!-- Scan Status Indicator -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/status_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/tap_to_scan"
-                android:textSize="10sp"
-                android:textColor="@color/white"
-                android:textStyle="italic"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="2dp"
-                android:background="@drawable/background_tap_hint"
-                tools:text="Tap to scan" />
+                android:layout_marginBottom="4dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/files_status_error">
+
+                <TextView
+                    android:id="@+id/tvScanStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    tools:text="UNSCANNED" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Warning Icon for Incomplete Info -->
+            <ImageView
+                android:id="@+id/ivIncompleteWarning"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_pending_24"
+                app:tint="@color/warning_orange"
+                android:visibility="gone"
+                android:contentDescription="@string/status_pending_scan"
+                tools:visibility="visible" />
 
         </LinearLayout>
 
