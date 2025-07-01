@@ -80,6 +80,12 @@ class MeterRepository(private val context: Context) {
         meterDao.insertMeters(entities)
     }
 
+    // ✅ NEW METHOD: Update a single meter (needed for DetectedFragment)
+    suspend fun updateMeter(meter: MeterStatus) {
+        Log.d(TAG, "Updating meter: ${meter.serialNumber}")
+        meterDao.updateMeter(meter.toEntity())
+    }
+
     suspend fun updateMeterCheckedStatus(serialNumber: String, fromFile: String, isChecked: Boolean) {
         Log.d(TAG, "Updating meter checked status: $serialNumber = $isChecked")
         meterDao.updateMeterCheckedStatus(serialNumber, fromFile, isChecked)
@@ -169,7 +175,7 @@ class MeterRepository(private val context: Context) {
     }
 }
 
-// Preferences Manager for app settings
+// Keep your existing PreferencesManager exactly as it is
 class PreferencesManager(context: Context) {
     private val prefs = context.getSharedPreferences("meter_app_prefs", Context.MODE_PRIVATE)
 
@@ -183,13 +189,23 @@ class PreferencesManager(context: Context) {
     }
 
     var lastProcessedDestination: ProcessingDestination?
-        get() = prefs.getString(KEY_LAST_PROCESSED_DESTINATION, null)
-            ?.let { ProcessingDestination.valueOf(it) }
-        set(value) = prefs.edit()
-            .putString(KEY_LAST_PROCESSED_DESTINATION, value?.name)
-            .apply()
+        get() {
+            val destinationName = prefs.getString(KEY_LAST_PROCESSED_DESTINATION, null)
+            return destinationName?.let {
+                try {
+                    ProcessingDestination.valueOf(it)
+                } catch (e: IllegalArgumentException) {
+                    null
+                }
+            }
+        }
+        set(value) {
+            prefs.edit()
+                .putString(KEY_LAST_PROCESSED_DESTINATION, value?.name)
+                .apply()
+        }
 
-    var autoBackupEnabled: Boolean
+    var isAutoBackupEnabled: Boolean
         get() = prefs.getBoolean(KEY_AUTO_BACKUP_ENABLED, true)
         set(value) = prefs.edit().putBoolean(KEY_AUTO_BACKUP_ENABLED, value).apply()
 
@@ -201,15 +217,24 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean(KEY_APP_FIRST_RUN, true)
         set(value) = prefs.edit().putBoolean(KEY_APP_FIRST_RUN, value).apply()
 
-    var cameraFlashEnabled: Boolean
+    var isCameraFlashEnabled: Boolean
         get() = prefs.getBoolean(KEY_CAMERA_FLASH_ENABLED, false)
         set(value) = prefs.edit().putBoolean(KEY_CAMERA_FLASH_ENABLED, value).apply()
 
-    var scanSoundEnabled: Boolean
+    var isScanSoundEnabled: Boolean
         get() = prefs.getBoolean(KEY_SCAN_SOUND_ENABLED, true)
         set(value) = prefs.edit().putBoolean(KEY_SCAN_SOUND_ENABLED, value).apply()
 
     fun clearAllPreferences() {
         prefs.edit().clear().apply()
+    }
+
+    fun resetToDefaults() {
+        prefs.edit()
+            .putBoolean(KEY_AUTO_BACKUP_ENABLED, true)
+            .putBoolean(KEY_CAMERA_FLASH_ENABLED, false)
+            .putBoolean(KEY_SCAN_SOUND_ENABLED, true)
+            .remove(KEY_LAST_PROCESSED_DESTINATION)
+            .apply()
     }
 }

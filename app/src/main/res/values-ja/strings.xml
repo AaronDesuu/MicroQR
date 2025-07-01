@@ -115,7 +115,7 @@
     <string name="status_not_found">❌ ステータス: 見つかりません</string>
 
     <!-- Error Messages for Serial Check -->
-    <string name="serial_not_found_in_metercheck">❌ 「%1$s」は読み込まれたMeterCheckデータ（%2$dメーター）に見つかりませんでした。</string>
+    <string name="serial_not_found_in_metercheck">Serial number \'%s\' not found in MeterCheck data. Add it to continue the workflow:</string>
     <string name="serial_not_found_process_first">❌ 「%s」が見つかりません。最初にMeterCheck用のファイルを処理してください。</string>
     <string name="serial_not_found_no_data">❌ 「%s」が見つかりません。現在読み込まれているメーターデータがありません。</string>
     <string name="go_to_files">ファイルに移動</string>
