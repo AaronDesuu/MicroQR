@@ -110,6 +110,18 @@ class MeterRepository(private val context: Context) {
         }
     }
 
+    suspend fun deleteMeter(serialNumber: String, fromFile: String) {
+        Log.d(TAG, "Deleting meter: $serialNumber from $fromFile")
+        meterDao.deleteMeter(serialNumber, fromFile)
+
+        // Update file meter count
+        val file = getFile(fromFile)
+        if (file != null && file.meterCount > 0) {
+            val updatedFile = file.copy(meterCount = file.meterCount - 1)
+            updateFile(updatedFile)
+        }
+    }
+
     // Statistics
     suspend fun getTotalMeterCount(): Int {
         return meterDao.getMeterCount()

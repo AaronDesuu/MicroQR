@@ -16,6 +16,7 @@ class MeterInfoDialogFragment : DialogFragment() {
     private var meter: MeterStatus? = null
     private var onEditClick: ((MeterStatus) -> Unit)? = null
     private var onScanClick: ((MeterStatus) -> Unit)? = null
+    private var onDeleteClick: ((MeterStatus) -> Unit)? = null
 
     companion object {
         private const val ARG_METER_SERIAL = "meter_serial"
@@ -28,7 +29,8 @@ class MeterInfoDialogFragment : DialogFragment() {
         fun newInstance(
             meter: MeterStatus,
             onEditClick: (MeterStatus) -> Unit,
-            onScanClick: (MeterStatus) -> Unit
+            onScanClick: (MeterStatus) -> Unit,
+            onDeleteClick: (MeterStatus) -> Unit
         ): MeterInfoDialogFragment {
             val fragment = MeterInfoDialogFragment()
             val args = Bundle().apply {
@@ -42,6 +44,7 @@ class MeterInfoDialogFragment : DialogFragment() {
             fragment.arguments = args
             fragment.onEditClick = onEditClick
             fragment.onScanClick = onScanClick
+            fragment.onDeleteClick = onDeleteClick
             return fragment
         }
     }
@@ -142,6 +145,7 @@ class MeterInfoDialogFragment : DialogFragment() {
         val btnEditVariables = view.findViewById<MaterialButton>(R.id.btnEditVariables)
         val btnScanMeter = view.findViewById<MaterialButton>(R.id.btnScanMeter)
         val btnClose = view.findViewById<MaterialButton>(R.id.btnClose)
+        val btnDeleteMeter = view.findViewById<MaterialButton>(R.id.btnDeleteMeter)
 
         btnEditVariables.setOnClickListener {
             onEditClick?.invoke(currentMeter)
@@ -153,6 +157,11 @@ class MeterInfoDialogFragment : DialogFragment() {
             dismiss()
         }
 
+        btnDeleteMeter.setOnClickListener {
+            onDeleteClick?.invoke(currentMeter)
+            dismiss()
+        }
+
         btnClose.setOnClickListener {
             dismiss()
         }
@@ -161,6 +170,7 @@ class MeterInfoDialogFragment : DialogFragment() {
         btnEditVariables.contentDescription = getString(R.string.cd_edit_meter)
         btnScanMeter.contentDescription = getString(R.string.cd_scan_meter)
         btnClose.contentDescription = getString(R.string.cd_close_dialog)
+        btnDeleteMeter.contentDescription = getString(R.string.cd_delete_meter)
     }
 
     override fun onStart() {

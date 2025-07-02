@@ -101,6 +101,9 @@ interface MeterDao {
     @Query("DELETE FROM meters")
     suspend fun deleteAllMeters()
 
+    @Query("DELETE FROM meters WHERE serialNumber = :serialNumber AND fromFile = :fromFile")
+    suspend fun deleteMeter(serialNumber: String, fromFile: String)
+
     // Get meters by destination (via file destination)
     @Query("""
         SELECT m.* FROM meters m 

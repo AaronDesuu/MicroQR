@@ -3,7 +3,6 @@
     <!-- ========================================== -->
     <!-- APP BASICS & NAVIGATION -->
     <!-- ========================================== -->
-    <string name="app_name" translatable="false">MicroQR</string>
     <string name="app_logo">MicroQR</string>
     <string name="app_logo_description">アプリロゴ</string>
 
@@ -364,6 +363,14 @@
     <string name="meter_check_no_meters_found_search">メーターが見つかりません\n検索クエリを調整してみてください</string>
     <string name="meter_check_no_meter_data">利用可能なメーターデータがありません</string>
 
+    <!-- Meter deletion strings -->
+    <string name="delete_meter">メーター削除</string>
+    <string name="confirm_delete_meter_title">メーターを削除しますか？</string>
+    <string name="confirm_delete_meter_message">メーター %1$s（シリアル：%2$s）を削除してもよろしいですか？\n\nこの操作は元に戻せません。</string>
+    <string name="meter_deleted_successfully">メーター %s が正常に削除されました</string>
+    <string name="error_deleting_meter">メーターの削除に失敗しました：%s</string>
+    <string name="cd_delete_meter">メーターを削除</string>
+
     <!-- ========================================== -->
     <!-- DIALOGS & CONFIRMATIONS -->
     <!-- ========================================== -->
@@ -456,7 +463,7 @@
     <string name="meter_match_filter_place">場所</string>
     <string name="meter_match_filter_file">ファイル</string>
     <string name="meter_match_sort">並び替え</string>
-    <string name="meter_match_total_found">見つかった総数</string>
+    <string name="meter_match_total_found">総メーター数</string>
     <string name="meter_match_matched">照合済み</string>
     <string name="meter_match_unmatched">未照合</string>
     <string name="meter_match_no_results">表示する結果がありません</string>
@@ -713,13 +720,13 @@
     <string name="export_filter_files">ファイル</string>
     <string name="export_filter_all_files">すべてのファイル</string>
     <string name="export_filter_select_files">ファイルを選択</string>
-    <string name="export_filter_selected_files">%d個のファイルが選択されています</string>
+    <string name="export_filter_selected_files">%d個のファイル選択中</string>
 
     <!-- Place Selection -->
     <string name="export_filter_places">設置場所</string>
     <string name="export_filter_all_places">すべての場所</string>
     <string name="export_filter_select_places">場所を選択</string>
-    <string name="export_filter_selected_places">%d個の場所が選択されています</string>
+    <string name="export_filter_selected_places">%d個の場所選択中</string>
 
     <!-- Export Settings -->
     <string name="export_filename">ファイル名</string>
@@ -927,7 +934,7 @@
 
     <!-- Filter Strings for MeterCheck (Japanese) -->
     <string name="filter_by_location">場所でフィルター</string>
-    <string name="filter_by_status">ステータスでフィルター</string>
+    <string name="filter_by_status">状態</string>
     <string name="filter_by_file">ファイルでフィルター</string>
     <string name="sort_options">ソートオプション</string>
     <string name="sort_by_number">番号でソート</string>
@@ -1052,6 +1059,7 @@
 
     <!-- Missing method reference strings -->
     <string name="updateMeter">updateMeter</string>
+    <string name="serial_number">S/N</string>
 
 
 </resources>

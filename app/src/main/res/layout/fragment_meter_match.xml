@@ -156,7 +156,7 @@
                         android:text="@string/meter_match_filter_place"
                         android:textSize="11sp"
                         android:layout_marginEnd="4dp"
-                        app:icon="@android:drawable/ic_menu_mylocation"
+                        app:icon="@drawable/ic_location_24"
                         app:iconSize="16dp" />
 
                     <com.google.android.material.button.MaterialButton
@@ -169,7 +169,7 @@
                         android:textSize="11sp"
                         android:layout_marginStart="4dp"
                         android:layout_marginEnd="4dp"
-                        app:icon="@android:drawable/ic_menu_agenda"
+                        app:icon="@drawable/ic_file_24"
                         app:iconSize="16dp" />
 
                     <com.google.android.material.button.MaterialButton
@@ -181,7 +181,7 @@
                         android:text="@string/meter_match_sort"
                         android:textSize="11sp"
                         android:layout_marginStart="4dp"
-                        app:icon="@android:drawable/ic_menu_sort_alphabetically"
+                        app:icon="@drawable/ic_sort_24"
                         app:iconSize="16dp" />
 
                 </LinearLayout>

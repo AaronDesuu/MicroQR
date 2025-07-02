@@ -234,6 +234,25 @@
             app:cornerRadius="8dp"
             app:rippleColor="@color/white_ripple" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeleteMeter"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/delete_meter"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:icon="@drawable/ic_delete"
+            app:iconGravity="start"
+            app:iconSize="20dp"
+            app:iconTint="@color/white"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:backgroundTint="@color/error_red"
+            android:textColor="@color/white"
+            app:cornerRadius="8dp"
+            app:strokeColor="@color/error_red"
+            app:rippleColor="@color/white_ripple" />
+
         <!-- Close Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnClose"

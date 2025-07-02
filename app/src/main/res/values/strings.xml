@@ -27,7 +27,7 @@
     <!-- ========================================== -->
     <string name="prompt_email">Username</string>
     <string name="prompt_password">Password</string>
-    <string name="prompt_user" translatable="false">Username</string>
+    <string name="prompt_user">Username</string>
     <string name="action_sign_in">Login</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">Welcome!</string>
@@ -365,6 +365,15 @@
     <string name="meter_check_no_meters_available">No meters available\nProcess CSV files for MeterCheck to see meters here</string>
     <string name="meter_check_no_meters_found_search">No meters found\nTry adjusting your search query</string>
     <string name="meter_check_no_meter_data">No meter data available</string>
+
+
+    <!-- Meter deletion strings -->
+    <string name="delete_meter">Delete Meter</string>
+    <string name="confirm_delete_meter_title">Delete Meter?</string>
+    <string name="confirm_delete_meter_message">Are you sure you want to delete meter %1$s (Serial: %2$s)?\n\nThis action cannot be undone.</string>
+    <string name="meter_deleted_successfully">Meter %s deleted successfully</string>
+    <string name="error_deleting_meter">Failed to delete meter: %s</string>
+    <string name="cd_delete_meter">Delete meter</string>
 
     <!-- ========================================== -->
     <!-- DIALOGS & CONFIRMATIONS -->
@@ -1057,5 +1066,8 @@
 
     <!-- Missing method reference strings -->
     <string name="updateMeter">updateMeter</string>
+    <string name="serial_number">Serial Number</string>
+    <string name="scan_status">Status</string>
+    <string name="edit_meter">Edit Meter</string>
 
 </resources>

@@ -164,7 +164,7 @@
                         android:text="@string/filter_by_status"
                         android:textSize="11sp"
                         android:layout_marginHorizontal="4dp"
-                        app:icon="@drawable/ic_check_circle"
+                        app:icon="@drawable/ic_file_24"
                         app:iconSize="16dp" />
 
                     <com.google.android.material.button.MaterialButton
