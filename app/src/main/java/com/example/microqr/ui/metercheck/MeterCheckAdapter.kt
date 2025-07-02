@@ -14,13 +14,15 @@ import com.example.microqr.ui.files.MeterStatus
 import com.google.android.material.card.MaterialCardView
 
 class MeterCheckAdapter(
-    private val onItemClick: (MeterStatus) -> Unit
+    private val onItemClick: (MeterStatus) -> Unit,
+    private val onEditClick: (MeterStatus) -> Unit,
+    private val onScanClick: (MeterStatus) -> Unit
 ) : ListAdapter<MeterStatus, MeterCheckAdapter.MeterViewHolder>(MeterDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MeterViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_meter_check, parent, false)
-        return MeterViewHolder(view, onItemClick)
+        return MeterViewHolder(view, onItemClick, onEditClick, onScanClick)
     }
 
     override fun onBindViewHolder(holder: MeterViewHolder, position: Int) {
@@ -29,7 +31,9 @@ class MeterCheckAdapter(
 
     class MeterViewHolder(
         itemView: View,
-        private val onItemClick: (MeterStatus) -> Unit
+        private val onItemClick: (MeterStatus) -> Unit,
+        private val onEditClick: (MeterStatus) -> Unit,
+        private val onScanClick: (MeterStatus) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val cardView: MaterialCardView = itemView as MaterialCardView
@@ -43,29 +47,29 @@ class MeterCheckAdapter(
         private val ivIncompleteWarning: ImageView = itemView.findViewById(R.id.ivIncompleteWarning)
 
         fun bind(meter: MeterStatus) {
-            // Set meter information
+            // Set meter data
             tvMeterNumber.text = formatMeterNumber(meter.number)
             tvSerialNumber.text = meter.serialNumber
             tvLocation.text = meter.place
             tvFileName.text = getShortFileName(meter.fromFile)
+
+            // Set scan status and colors
+            if (meter.isChecked) {
+                tvScanStatus.text = itemView.context.getString(R.string.status_scanned).uppercase()
+                statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.success_green))
+                meterNumberBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.success_green))
+            } else {
+                tvScanStatus.text = itemView.context.getString(R.string.status_not_scanned).uppercase()
+                statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.warning_orange))
+                meterNumberBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.primary_color))
+            }
 
             // Check information completeness
             val isLocationComplete = isLocationValid(meter.place)
             val isMeterNumberComplete = isMeterNumberValid(meter.number)
             val isInformationComplete = isLocationComplete && isMeterNumberComplete
 
-            // Set scan status and colors
-            if (meter.isChecked) {
-                tvScanStatus.text = itemView.context.getString(R.string.status_serial_processed).uppercase()
-                statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.files_status_valid))
-                meterNumberBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.success_green))
-            } else {
-                tvScanStatus.text = itemView.context.getString(R.string.status_unregistered).uppercase()
-                statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.files_status_error))
-                meterNumberBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.primary_color))
-            }
-
-            // Set border and warning based on information completeness
+            // Set card border based on information completeness
             if (isInformationComplete) {
                 // White border for complete information
                 cardView.strokeColor = ContextCompat.getColor(itemView.context, R.color.stroke_color)
@@ -98,7 +102,7 @@ class MeterCheckAdapter(
                 cardView.cardElevation = dpToPx(3).toFloat()
             }
 
-            // Handle item click
+            // Handle item click - show meter information dialog
             itemView.setOnClickListener {
                 onItemClick(meter)
             }

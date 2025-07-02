@@ -7,14 +7,9 @@
         android:title="@string/title_home" />
 
     <item
-        android:id="@+id/matchFragment"
+        android:id="@+id/navigation_match"
         android:icon="@drawable/ic_match_24"
         android:title="@string/title_match" />
-
-    <item
-        android:id="@+id/readerFragment"
-        android:icon="@drawable/ic_qr_code_scanner_24"
-        android:title="@string/title_reader" />
 
     <item
         android:id="@+id/navigation_metercheck"
@@ -25,6 +20,11 @@
         android:id="@+id/navigation_files"
         android:icon="@drawable/ic_upload_file_24"
         android:title="@string/title_upload" />
+
+    <item
+        android:id="@+id/navigation_export"
+        android:icon="@drawable/ic_export_24"
+        android:title="@string/title_export" />
 
 
 </menu>

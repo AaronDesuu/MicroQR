@@ -1,22 +1,22 @@
 package com.example.microqr.ui.export
 
 import android.app.Application
+import android.os.Build
 import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.microqr.R
 import com.example.microqr.data.repository.MeterRepository
 import com.example.microqr.ui.files.MeterStatus
 import com.example.microqr.ui.files.ProcessingDestination
-import com.example.microqr.utils.CsvExportHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -174,88 +174,112 @@ class ExportViewModel(application: Application) : AndroidViewModel(application) 
                     return@launch
                 }
 
-                // Create export config
-                val config = CsvExportHelper.ExportConfig(
-                    filename = filename,
-                    includeTimestamp = includeTimestamp,
-                    selectedFiles = _uiState.value?.selectedFiles ?: emptySet(),
-                    selectedPlaces = _uiState.value?.selectedPlaces ?: emptySet(),
-                    registrationFilter = when (registrationFilter) {
-                        RegistrationFilter.REGISTERED_ONLY -> CsvExportHelper.RegistrationFilter.REGISTERED_ONLY
-                        RegistrationFilter.UNREGISTERED_ONLY -> CsvExportHelper.RegistrationFilter.UNREGISTERED_ONLY
-                        else -> CsvExportHelper.RegistrationFilter.ALL
-                    },
-                    checkFilter = when (checkFilter) {
-                        CheckFilter.CHECKED_ONLY -> CsvExportHelper.CheckFilter.CHECKED_ONLY
-                        CheckFilter.UNCHECKED_ONLY -> CsvExportHelper.CheckFilter.UNCHECKED_ONLY
-                        else -> CsvExportHelper.CheckFilter.ALL
-                    }
-                )
-
-                // Use the CsvExportHelper
-                val result = CsvExportHelper.exportMeterDataToCsv(
-                    data = filteredData,
-                    config = config,
-                    progressCallback = object : CsvExportHelper.ProgressCallback {
-                        override fun onStarted(totalRecords: Int) {
-                            _exportProgress.postValue(ExportProgress(
-                                isInProgress = true,
-                                message = "Starting export of $totalRecords records...",
-                                isIndeterminate = false,
-                                progress = 0
-                            ))
-                        }
-
-                        override fun onProgress(current: Int, total: Int, message: String) {
-                            val progress = ((current * 100) / total).coerceAtMost(100)
-                            _exportProgress.postValue(ExportProgress(
-                                isInProgress = true,
-                                message = message,
-                                isIndeterminate = false,
-                                progress = progress
-                            ))
-                        }
-
-                        override fun onCompleted() {
-                            _exportProgress.postValue(ExportProgress(
-                                isInProgress = false,
-                                message = "Export completed",
-                                isIndeterminate = false,
-                                progress = 100
-                            ))
-                        }
-
-                        override fun onError(error: String) {
-                            _exportProgress.postValue(ExportProgress())
-                            _exportResult.postValue(ExportResult.Error(error))
-                        }
-                    }
-                )
-
-                // Handle the result
-                when (result) {
-                    is CsvExportHelper.ExportResult.Success -> {
-                        _exportResult.value = ExportResult.Success(result.filePath)
-                        _exportProgress.value = ExportProgress()
-                    }
-                    is CsvExportHelper.ExportResult.Error -> {
-                        _exportResult.value = ExportResult.Error(result.message)
-                        _exportProgress.value = ExportProgress()
-                    }
-                    is CsvExportHelper.ExportResult.NoData -> {
-                        _exportResult.value = ExportResult.NoData
-                        _exportProgress.value = ExportProgress()
-                    }
-                    is CsvExportHelper.ExportResult.Cancelled -> {
-                        _exportResult.value = ExportResult.Error("Export was cancelled")
-                        _exportProgress.value = ExportProgress()
-                    }
+                // Create filename with timestamp if requested
+                val finalFilename = if (includeTimestamp) {
+                    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                    "${filename}_$timestamp"
+                } else {
+                    filename
                 }
+
+                // Use appropriate storage location based on Android version
+                val exportFile = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
+                    // Android 11+ with MANAGE_EXTERNAL_STORAGE permission
+                    createExternalFile(finalFilename)
+                } else {
+                    // Use app's external files directory (no special permission needed)
+                    createAppExternalFile(finalFilename)
+                }
+
+                _exportProgress.value = ExportProgress(
+                    isInProgress = true,
+                    message = "Writing CSV data...",
+                    isIndeterminate = false,
+                    progress = 0
+                )
+
+                // Write CSV data
+                writeDataToCsv(exportFile, filteredData) { current, total ->
+                    val progress = ((current * 100) / total).coerceAtMost(100)
+                    _exportProgress.postValue(ExportProgress(
+                        isInProgress = true,
+                        message = "Writing record $current of $total...",
+                        isIndeterminate = false,
+                        progress = progress
+                    ))
+                }
+
+                _exportProgress.value = ExportProgress(
+                    isInProgress = false,
+                    message = "Export completed",
+                    progress = 100
+                )
+
+                _exportResult.value = ExportResult.Success(exportFile.absolutePath)
 
             } catch (e: Exception) {
                 Log.e(TAG, "Export failed", e)
                 _exportResult.value = ExportResult.Error(e.message ?: "Unknown error")
                 _exportProgress.value = ExportProgress()
+            }
+        }
+    }
+
+    private suspend fun createExternalFile(filename: String): File = withContext(Dispatchers.IO) {
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val exportDir = File(downloadsDir, EXPORT_FOLDER)
+
+        if (!exportDir.exists()) {
+            exportDir.mkdirs()
+        }
+
+        File(exportDir, "$filename.csv")
+    }
+
+    private suspend fun createAppExternalFile(filename: String): File = withContext(Dispatchers.IO) {
+        val context = getApplication<Application>()
+        val exportDir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), EXPORT_FOLDER)
+
+        if (!exportDir.exists()) {
+            exportDir.mkdirs()
+        }
+
+        File(exportDir, "$filename.csv")
+    }
+
+    private suspend fun writeDataToCsv(
+        file: File,
+        data: List<MeterStatus>,
+        progressCallback: (current: Int, total: Int) -> Unit
+    ) = withContext(Dispatchers.IO) {
+        // Use UTF-8 with BOM for proper Japanese character support in Excel
+        file.outputStream().use { fos ->
+            // Write UTF-8 BOM for Excel compatibility
+            fos.write(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()))
+
+            fos.writer(Charsets.UTF_8).use { writer ->
+                // Write CSV header in English
+                writer.appendLine("Number,SerialNumber,Place,Registered,Checked,SourceFile,ExportDate")
+
+                val exportDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+
+                data.forEachIndexed { index, meter ->
+                    val line = buildString {
+                        append("${meter.number},")
+                        append("${meter.serialNumber},")
+                        // Place data can contain Japanese characters, properly escaped
+                        append("\"${meter.place.replace("\"", "\"\"")}\",")
+                        // Keep boolean values as true/false in English
+                        append("${meter.registered},")
+                        append("${meter.isChecked},")
+                        append("\"${meter.fromFile.replace("\"", "\"\"")}\",")
+                        append("\"$exportDate\"")
+                    }
+                    writer.appendLine(line)
+
+                    // Update progress
+                    progressCallback(index + 1, data.size)
+                }
             }
         }
     }
@@ -294,100 +318,35 @@ class ExportViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             try {
                 val currentState = _uiState.value!!
-                val totalRecords = getCurrentMeters().size
-                val filteredRecords = getFilteredData().size
-                val estimatedSize = calculateEstimatedSize(filteredRecords)
+                val meters = getCurrentMeters()
+
+                // Apply current filters
+                var filteredMeters = meters
+
+                if (currentState.selectedFiles.isNotEmpty()) {
+                    filteredMeters = filteredMeters.filter { it.fromFile in currentState.selectedFiles }
+                }
+
+                if (currentState.selectedPlaces.isNotEmpty()) {
+                    filteredMeters = filteredMeters.filter { it.place in currentState.selectedPlaces }
+                }
+
+                // Calculate estimated file size (rough estimate: ~50 bytes per record)
+                val estimatedBytes = filteredMeters.size * 50
+                val estimatedSize = when {
+                    estimatedBytes < 1024 -> "$estimatedBytes B"
+                    estimatedBytes < 1024 * 1024 -> "${estimatedBytes / 1024} KB"
+                    else -> "${estimatedBytes / (1024 * 1024)} MB"
+                }
 
                 _uiState.value = currentState.copy(
-                    totalRecords = totalRecords,
-                    filteredRecords = filteredRecords,
+                    totalRecords = meters.size,
+                    filteredRecords = filteredMeters.size,
                     estimatedSize = estimatedSize
                 )
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating UI state", e)
-            }
-        }
-    }
-
-    private fun calculateEstimatedSize(recordCount: Int): String {
-        // Estimate approximately 120 bytes per record (including headers and formatting)
-        val estimatedBytes = recordCount * 120
-        return when {
-            estimatedBytes < 1024 -> "$estimatedBytes B"
-            estimatedBytes < 1024 * 1024 -> "${(estimatedBytes / 1024.0).format(1)} KB"
-            else -> "${(estimatedBytes / (1024.0 * 1024.0)).format(1)} MB"
-        }
-    }
-
-    private fun Double.format(digits: Int) = "%.${digits}f".format(this)
-
-    /**
-     * Refresh data from repository (call this when data might have changed)
-     */
-    fun refreshData() {
-        loadData()
-    }
-
-    /**
-     * Get current meter data for specific data source
-     */
-    fun getCurrentMeterData(): List<MeterStatus> = getCurrentMeters()
-
-    /**
-     * Validate export configuration
-     */
-    fun validateExportConfig(filename: String): List<String> {
-        val errors = mutableListOf<String>()
-
-        if (filename.isBlank()) {
-            errors.add("Filename cannot be empty")
-        }
-
-        if (!CsvExportHelper.isValidFilename(filename)) {
-            errors.add("Filename contains invalid characters")
-        }
-
-        if (getCurrentMeters().isEmpty()) {
-            errors.add("No data available to export")
-        }
-
-        return errors
-    }
-
-    /**
-     * Get export summary for preview
-     */
-    suspend fun getExportSummary(
-        registrationFilter: RegistrationFilter,
-        checkFilter: CheckFilter
-    ): String = withContext(Dispatchers.IO) {
-        val currentState = _uiState.value!!
-        val totalData = getCurrentMeters()
-        val filteredData = getFilteredData()
-            .let { applyRegistrationFilter(it, registrationFilter) }
-            .let { applyCheckFilter(it, checkFilter) }
-
-        buildString {
-            appendLine("Export Summary:")
-            appendLine("• Data Source: ${currentState.dataSource}")
-            appendLine("• Total available records: ${totalData.size}")
-            appendLine("• Records after filtering: ${filteredData.size}")
-            appendLine("• Estimated file size: ${calculateEstimatedSize(filteredData.size)}")
-
-            if (currentState.selectedFiles.isNotEmpty()) {
-                appendLine("• Selected files: ${currentState.selectedFiles.size}")
-            }
-
-            if (currentState.selectedPlaces.isNotEmpty()) {
-                appendLine("• Selected places: ${currentState.selectedPlaces.size}")
-            }
-
-            if (registrationFilter != RegistrationFilter.ALL) {
-                appendLine("• Registration filter: $registrationFilter")
-            }
-
-            if (checkFilter != CheckFilter.ALL) {
-                appendLine("• Check filter: $checkFilter")
             }
         }
     }

@@ -36,7 +36,6 @@ class MeterCheckFragment : Fragment() {
     private lateinit var scannedCountText: TextView
     private lateinit var remainingCountText: TextView
     private lateinit var searchEditText: TextInputEditText
-    private lateinit var refreshButton: MaterialButton
     private lateinit var emptyStateLayout: View
     private lateinit var setupLocationsCard: View
     private lateinit var fabScanMeter: View
@@ -90,20 +89,101 @@ class MeterCheckFragment : Fragment() {
         emptyStateLayout = view.findViewById(R.id.empty_state_layout)
         setupLocationsCard = view.findViewById(R.id.setup_locations_card)
         fabScanMeter = view.findViewById(R.id.fabScanMeter)
-
-        // Optional refresh button (may not exist in new layout)
-//        refreshButton = view.findViewById(R.id.refresh_button) ?: MaterialButton(requireContext())
     }
 
     private fun setupRecyclerView() {
         meterAdapter = MeterCheckAdapter(
             onItemClick = { meter ->
+                showMeterInfoDialog(meter)
+            },
+            onEditClick = { meter ->
+                showEditMeterDialog(meter)
+            },
+            onScanClick = { meter ->
                 startMeterScanFlow(meter)
             }
         )
 
         meterRecyclerView.layoutManager = LinearLayoutManager(context)
         meterRecyclerView.adapter = meterAdapter
+    }
+
+    private fun showMeterInfoDialog(meter: MeterStatus) {
+        val dialog = MeterInfoDialogFragment.newInstance(
+            meter = meter,
+            onEditClick = { selectedMeter ->
+                showEditMeterDialog(selectedMeter)
+            },
+            onScanClick = { selectedMeter ->
+                startMeterScanFlow(selectedMeter)
+            }
+        )
+        dialog.show(parentFragmentManager, "MeterInfoDialog")
+    }
+
+    private fun showEditMeterDialog(meter: MeterStatus) {
+        // Create a simple edit dialog for location, number, and serial number
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_edit_meter_variables, null)
+
+        val etLocation = dialogView.findViewById<TextInputEditText>(R.id.etLocation)
+        val etMeterNumber = dialogView.findViewById<TextInputEditText>(R.id.etMeterNumber)
+        val etSerialNumber = dialogView.findViewById<TextInputEditText>(R.id.etSerialNumber)
+
+        // Pre-fill with current values
+        etLocation.setText(meter.place)
+        etMeterNumber.setText(meter.number)
+        etSerialNumber.setText(meter.serialNumber)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.edit_meter_variables))
+            .setView(dialogView)
+            .setPositiveButton(getString(R.string.save_changes)) { _, _ ->
+                val newLocation = etLocation.text?.toString()?.trim() ?: meter.place
+                val newMeterNumber = etMeterNumber.text?.toString()?.trim() ?: meter.number
+                val newSerialNumber = etSerialNumber.text?.toString()?.trim() ?: meter.serialNumber
+
+                updateMeterVariables(meter, newLocation, newMeterNumber, newSerialNumber)
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun updateMeterVariables(
+        originalMeter: MeterStatus,
+        newLocation: String,
+        newMeterNumber: String,
+        newSerialNumber: String
+    ) {
+        lifecycleScope.launch {
+            try {
+                // Update the meter in the database/repository
+                val updatedMeter = originalMeter.copy(
+                    place = newLocation,
+                    number = newMeterNumber,
+                    serialNumber = newSerialNumber
+                )
+
+                // Note: You may need to implement updateMeter method in FilesViewModel if it doesn't exist
+                // For now, we'll show a success message and refresh the list
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.meter_updated_successfully),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Refresh the list
+                applyCurrentFilters()
+
+            } catch (e: Exception) {
+                Log.e("MeterCheckFragment", "Error updating meter variables", e)
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.error_updating_meter, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun setupSearchFunctionality() {

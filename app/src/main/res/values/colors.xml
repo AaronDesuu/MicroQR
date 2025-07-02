@@ -32,9 +32,11 @@
     <color name="error_red">#F44336</color>
     <color name="success_green">#4CAF50</color>
     <color name="warning_orange">#FF9800</color>
+    <color name="info_blue">#2196F3</color>
 
     <!-- Background Colors -->
     <color name="background_light">#FAFAFA</color>
+    <color name="info_background">#E3F2FD</color>
     <color name="stroke_color">#E0E0E0</color>
 
     <!-- File Manager UI Colors (using your existing color scheme) -->

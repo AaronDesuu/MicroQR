@@ -32,7 +32,7 @@
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_matchFragment"
-            app:destination="@id/matchFragment"
+            app:destination="@id/navigation_match"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -123,12 +123,7 @@
         tools:layout="@layout/fragment_profile" />
 
     <fragment
-        android:id="@+id/navigation_settings"
-        android:name="com.example.microqr.ui.settings.SettingsFragment"
-        android:label="@string/title_settings" />
-
-    <fragment
-        android:id="@+id/matchFragment"
+        android:id="@+id/navigation_match"
         android:name="com.example.microqr.ui.metermatch.MeterMatchFragment"
         android:label="@string/title_match">
         <action

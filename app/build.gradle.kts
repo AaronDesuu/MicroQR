@@ -38,6 +38,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        encoding = "UTF-8"
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -56,6 +57,16 @@ android {
     packaging { // Added packaging options as they are common with Compose
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+
+    tasks.withType<JavaCompile> {
+        options.encoding = "UTF-8"
+    }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            freeCompilerArgs += "-Xstring-concat=inline"
         }
     }
 }

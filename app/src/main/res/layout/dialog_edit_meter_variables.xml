@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/edit_meter_variables_description"
+        android:textSize="14sp"
+        android:textColor="@color/secondary_text_color"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Location Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:hint="@string/location_header"
+        app:helperText="@string/location_helper_text"
+        app:helperTextTextColor="@color/secondary_text_color"
+        app:boxStrokeColor="@color/primary_color"
+        app:hintTextColor="@color/primary_color"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:maxLines="1"
+            android:textColor="@color/primary_text_color"
+            android:textColorHint="@color/secondary_text_color" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Meter Number Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:hint="@string/meter_number_header"
+        app:helperText="@string/meter_number_helper"
+        app:helperTextTextColor="@color/secondary_text_color"
+        app:boxStrokeColor="@color/primary_color"
+        app:hintTextColor="@color/primary_color"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etMeterNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions"
+            android:maxLines="1"
+            android:textColor="@color/primary_text_color"
+            android:textColorHint="@color/secondary_text_color" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Serial Number Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="@string/serial_number_header"
+        app:helperText="@string/serial_number_helper_text"
+        app:helperTextTextColor="@color/secondary_text_color"
+        app:boxStrokeColor="@color/primary_color"
+        app:hintTextColor="@color/primary_color"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSerialNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions"
+            android:maxLines="1"
+            android:textColor="@color/primary_text_color"
+            android:textColorHint="@color/secondary_text_color" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Warning Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@color/warning_orange"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical">
+
+            <!-- Warning Icon -->
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:text="⚠"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textStyle="bold" />
+
+            <!-- Warning Text -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/edit_variables_warning"
+                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:lineSpacingExtra="1dp" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

@@ -4,11 +4,14 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,6 +36,20 @@ class ExportFragment : Fragment() {
 
     private val viewModel: ExportViewModel by viewModels()
 
+    // For Android 11+ (API 30+) - Use MANAGE_EXTERNAL_STORAGE permission
+    private val requestManageStorageLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Environment.isExternalStorageManager()) {
+                startExport()
+            } else {
+                showToast(getString(R.string.export_error_no_permission))
+            }
+        }
+    }
+
+    // For Android 10 and below - Use legacy storage permission
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -54,45 +71,78 @@ class ExportFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupUI()
-        observeViewModel()
-        setupFilenameDefault()
+        setupObservers()
     }
 
     private fun setupUI() {
-        setupSpinners()
-        setupClickListeners()
-        setupDataSourceRadioButtons()
-    }
+        // Set up data source spinner
+        val dataSourceOptions = arrayOf(
+            getString(R.string.export_filter_all_data),
+            getString(R.string.export_filter_meter_check),
+            getString(R.string.export_filter_meter_match)
+        )
 
-    private fun setupSpinners() {
-        // Registration Status Spinner
+        binding.spinnerDataSource.adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            dataSourceOptions
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        // Set up registration status spinner
         val registrationOptions = arrayOf(
-            getString(R.string.export_filter_all_status),
+            getString(R.string.export_filter_all),
             getString(R.string.export_filter_registered_only),
             getString(R.string.export_filter_unregistered_only)
         )
+
         binding.spinnerRegistrationStatus.adapter = ArrayAdapter(
             requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
+            android.R.layout.simple_spinner_item,
             registrationOptions
-        )
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
 
-        // Check Status Spinner
+        // Set up check status spinner
         val checkOptions = arrayOf(
-            getString(R.string.export_filter_all_check_status),
+            getString(R.string.export_filter_all),
             getString(R.string.export_filter_checked_only),
             getString(R.string.export_filter_unchecked_only)
         )
+
         binding.spinnerCheckStatus.adapter = ArrayAdapter(
             requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
+            android.R.layout.simple_spinner_item,
             checkOptions
-        )
-    }
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
 
-    private fun setupClickListeners() {
+        // Set up listeners
+        binding.spinnerDataSource.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val dataSource = when (position) {
+                    1 -> ExportDataSource.METER_CHECK
+                    2 -> ExportDataSource.METER_MATCH
+                    else -> ExportDataSource.ALL
+                }
+                viewModel.setDataSource(dataSource)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Set up click listeners
+        binding.btnExport.setOnClickListener {
+            checkPermissionAndExport()
+        }
+
+        binding.btnPreview.setOnClickListener {
+            showPreviewDialog()
+        }
+
         binding.btnSelectFiles.setOnClickListener {
             showFileSelectionDialog()
         }
@@ -100,61 +150,17 @@ class ExportFragment : Fragment() {
         binding.btnSelectPlaces.setOnClickListener {
             showPlaceSelectionDialog()
         }
-
-        binding.btnClearFilters.setOnClickListener {
-            clearAllFilters()
-        }
-
-        binding.btnPreview.setOnClickListener {
-            showPreviewDialog()
-        }
-
-        binding.btnExport.setOnClickListener {
-            checkPermissionAndExport()
-        }
     }
 
-    private fun setupDataSourceRadioButtons() {
-        binding.rgDataSource.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.rbAllData -> {
-                    viewModel.setDataSource(ExportDataSource.ALL)
-                    binding.layoutCheckStatus.visibility = View.VISIBLE
-                }
-                R.id.rbMeterCheck -> {
-                    viewModel.setDataSource(ExportDataSource.METER_CHECK)
-                    binding.layoutCheckStatus.visibility = View.VISIBLE
-                }
-                R.id.rbMeterMatch -> {
-                    viewModel.setDataSource(ExportDataSource.METER_MATCH)
-                    binding.layoutCheckStatus.visibility = View.GONE
-                }
-            }
-        }
-    }
-
-    private fun observeViewModel() {
+    private fun setupObservers() {
         viewModel.uiState.observe(viewLifecycleOwner) { state ->
             updateSummary(state)
             updateFilterButtons(state)
         }
 
-        viewModel.exportProgress.observe(viewLifecycleOwner) { progress ->
-            binding.progressExport.visibility = if (progress.isInProgress) View.VISIBLE else View.GONE
-            binding.tvProgressMessage.visibility = if (progress.isInProgress) View.VISIBLE else View.GONE
-            binding.tvProgressMessage.text = progress.message
-
-            if (!progress.isInProgress && progress.isIndeterminate) {
-                binding.progressExport.isIndeterminate = false
-            } else {
-                binding.progressExport.progress = progress.progress
-            }
-        }
-
         viewModel.exportResult.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is ExportResult.Success -> {
-                    showToast(getString(R.string.export_success))
                     showExportSuccessDialog(result.filePath)
                 }
                 is ExportResult.Error -> {
@@ -165,96 +171,21 @@ class ExportFragment : Fragment() {
                 }
             }
         }
-    }
 
-    private fun setupFilenameDefault() {
-        val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-        val timestamp = dateFormat.format(Date())
-        binding.etFilename.setText(getString(R.string.export_filename_default, timestamp))
-    }
-
-    private fun showFileSelectionDialog() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val availableFiles = viewModel.getAvailableFiles()
-            if (availableFiles.isEmpty()) {
-                showToast(getString(R.string.export_filter_no_files_selected))
-                return@launch
+        viewModel.exportProgress.observe(viewLifecycleOwner) { progress ->
+            if (progress.isInProgress) {
+                binding.layoutProgress.visibility = View.VISIBLE
+                binding.progressExport.isIndeterminate = progress.isIndeterminate
+                if (!progress.isIndeterminate) {
+                    binding.progressExport.progress = progress.progress
+                }
+                binding.tvProgressMessage.text = progress.message
+                binding.btnExport.isEnabled = false
+            } else {
+                binding.layoutProgress.visibility = View.GONE
+                binding.btnExport.isEnabled = true
             }
-
-            val selectedFiles = viewModel.getSelectedFiles().toMutableSet()
-            val fileNames = availableFiles.toTypedArray()
-            val checkedItems = BooleanArray(fileNames.size) { index ->
-                fileNames[index] in selectedFiles
-            }
-
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.dialog_select_files))
-                .setMultiChoiceItems(fileNames, checkedItems) { _, which, isChecked ->
-                    if (isChecked) {
-                        selectedFiles.add(fileNames[which])
-                    } else {
-                        selectedFiles.remove(fileNames[which])
-                    }
-                }
-                .setPositiveButton(getString(R.string.btn_select_all)) { _, _ ->
-                    selectedFiles.addAll(availableFiles)
-                    viewModel.setSelectedFiles(selectedFiles)
-                }
-                .setNegativeButton(getString(R.string.btn_deselect_all)) { _, _ ->
-                    selectedFiles.clear()
-                    viewModel.setSelectedFiles(selectedFiles)
-                }
-                .setNeutralButton(getString(android.R.string.ok)) { _, _ ->
-                    viewModel.setSelectedFiles(selectedFiles)
-                }
-                .show()
         }
-    }
-
-    private fun showPlaceSelectionDialog() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val availablePlaces = viewModel.getAvailablePlaces()
-            if (availablePlaces.isEmpty()) {
-                showToast(getString(R.string.export_filter_no_places_selected))
-                return@launch
-            }
-
-            val selectedPlaces = viewModel.getSelectedPlaces().toMutableSet()
-            val placeNames = availablePlaces.toTypedArray()
-            val checkedItems = BooleanArray(placeNames.size) { index ->
-                placeNames[index] in selectedPlaces
-            }
-
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.dialog_select_places))
-                .setMultiChoiceItems(placeNames, checkedItems) { _, which, isChecked ->
-                    if (isChecked) {
-                        selectedPlaces.add(placeNames[which])
-                    } else {
-                        selectedPlaces.remove(placeNames[which])
-                    }
-                }
-                .setPositiveButton(getString(R.string.btn_select_all)) { _, _ ->
-                    selectedPlaces.addAll(availablePlaces)
-                    viewModel.setSelectedPlaces(selectedPlaces)
-                }
-                .setNegativeButton(getString(R.string.btn_deselect_all)) { _, _ ->
-                    selectedPlaces.clear()
-                    viewModel.setSelectedPlaces(selectedPlaces)
-                }
-                .setNeutralButton(getString(android.R.string.ok)) { _, _ ->
-                    viewModel.setSelectedPlaces(selectedPlaces)
-                }
-                .show()
-        }
-    }
-
-    private fun clearAllFilters() {
-        binding.rbAllData.isChecked = true
-        binding.spinnerRegistrationStatus.setSelection(0)
-        binding.spinnerCheckStatus.setSelection(0)
-        viewModel.clearAllFilters()
-        updateFilterButtons(viewModel.uiState.value!!)
     }
 
     private fun showPreviewDialog() {
@@ -283,7 +214,7 @@ class ExportFragment : Fragment() {
                 }
 
                 if (filteredData.size > 5) {
-                    append("... and ${filteredData.size - 5} more records")
+                    append("... ${getString(R.string.export_preview_more_records, filteredData.size - 5)}")
                 }
             }
 
@@ -297,6 +228,15 @@ class ExportFragment : Fragment() {
 
     private fun checkPermissionAndExport() {
         when {
+            // Android 11+ (API 30+) - Use scoped storage or MANAGE_EXTERNAL_STORAGE
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                if (Environment.isExternalStorageManager()) {
+                    startExport()
+                } else {
+                    showManageStoragePermissionDialog()
+                }
+            }
+            // Android 10 and below - Use legacy storage permission
             ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -306,7 +246,7 @@ class ExportFragment : Fragment() {
             shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(getString(R.string.export_permission_required))
-                    .setMessage(getString(R.string.export_permission_required))
+                    .setMessage(getString(R.string.export_permission_rationale))
                     .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
                         requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     }
@@ -317,6 +257,30 @@ class ExportFragment : Fragment() {
                 requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
+    }
+
+    private fun showManageStoragePermissionDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.export_storage_access_required))
+            .setMessage(getString(R.string.export_storage_access_message))
+            .setPositiveButton(getString(R.string.export_grant_permission)) { _, _ ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    try {
+                        val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                            data = Uri.parse("package:${requireContext().packageName}")
+                        }
+                        requestManageStorageLauncher.launch(intent)
+                    } catch (e: Exception) {
+                        // Fallback to general settings
+                        val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                        requestManageStorageLauncher.launch(intent)
+                    }
+                }
+            }
+            .setNegativeButton(getString(android.R.string.cancel)) { _, _ ->
+                showToast(getString(R.string.export_error_no_permission))
+            }
+            .show()
     }
 
     private fun startExport() {
@@ -355,9 +319,10 @@ class ExportFragment : Fragment() {
     }
 
     private fun updateSummary(state: ExportUiState) {
-        binding.tvTotalRecords.text = getString(R.string.export_total_records, state.totalRecords)
-        binding.tvFilteredRecords.text = getString(R.string.export_filtered_records, state.filteredRecords)
-        binding.tvEstimatedSize.text = getString(R.string.export_file_size_estimate, state.estimatedSize)
+        // Display just the numbers for cleaner look
+        binding.tvTotalRecords.text = state.totalRecords.toString()
+        binding.tvFilteredRecords.text = state.filteredRecords.toString()
+        binding.tvEstimatedSize.text = state.estimatedSize
     }
 
     private fun updateFilterButtons(state: ExportUiState) {
@@ -435,6 +400,74 @@ class ExportFragment : Fragment() {
 
     private fun showToast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showFileSelectionDialog() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val availableFiles = viewModel.getAvailableFiles()
+            if (availableFiles.isEmpty()) {
+                showToast(getString(R.string.export_no_files_available))
+                return@launch
+            }
+
+            val selectedFiles = viewModel.getSelectedFiles().toMutableSet()
+            val fileNames = availableFiles.toTypedArray()
+            val checkedItems = BooleanArray(fileNames.size) { index ->
+                fileNames[index] in selectedFiles
+            }
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.dialog_select_files))
+                .setMultiChoiceItems(fileNames, checkedItems) { _, which, isChecked ->
+                    if (isChecked) {
+                        selectedFiles.add(fileNames[which])
+                    } else {
+                        selectedFiles.remove(fileNames[which])
+                    }
+                }
+                .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                    viewModel.setSelectedFiles(selectedFiles)
+                }
+                .setNegativeButton(getString(android.R.string.cancel), null)
+                .setNeutralButton(getString(R.string.btn_select_all)) { _, _ ->
+                    viewModel.setSelectedFiles(availableFiles.toSet())
+                }
+                .show()
+        }
+    }
+
+    private fun showPlaceSelectionDialog() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val availablePlaces = viewModel.getAvailablePlaces()
+            if (availablePlaces.isEmpty()) {
+                showToast(getString(R.string.export_no_places_available))
+                return@launch
+            }
+
+            val selectedPlaces = viewModel.getSelectedPlaces().toMutableSet()
+            val placeNames = availablePlaces.toTypedArray()
+            val checkedItems = BooleanArray(placeNames.size) { index ->
+                placeNames[index] in selectedPlaces
+            }
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.dialog_select_places))
+                .setMultiChoiceItems(placeNames, checkedItems) { _, which, isChecked ->
+                    if (isChecked) {
+                        selectedPlaces.add(placeNames[which])
+                    } else {
+                        selectedPlaces.remove(placeNames[which])
+                    }
+                }
+                .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                    viewModel.setSelectedPlaces(selectedPlaces)
+                }
+                .setNegativeButton(getString(android.R.string.cancel), null)
+                .setNeutralButton(getString(R.string.btn_select_all)) { _, _ ->
+                    viewModel.setSelectedPlaces(availablePlaces.toSet())
+                }
+                .show()
+        }
     }
 
     override fun onDestroyView() {
