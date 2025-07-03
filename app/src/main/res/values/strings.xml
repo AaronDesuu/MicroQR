@@ -116,6 +116,124 @@
     <string name="serial_not_found_process_first">❌ \'%s\' NOT FOUND. Try processing your files for MeterCheck first.</string>
     <string name="serial_not_found_no_data">❌ \'%s\' NOT FOUND. No meter data is currently loaded.</string>
 
+    Continue
+    Edit
+
+    Now let me create the additional string resources that we need for the enhanced UI:
+
+    Perfect! I've successfully updated the DetectedFragment to include the new enhanced UI/UX flow while preserving all existing functionality. Here's a summary of what I've implemented:
+    ✅ Enhanced DetectedFragment Features:
+    🔄 Dual Flow System:
+
+    Enhanced UI: Used for METER_CHECK context with the new 3-step flow
+    Legacy UI: Preserves all existing functionality for backward compatibility
+    Smart Detection: Automatically chooses the appropriate UI based on context
+
+    📱 New Enhanced Flow States:
+
+    PROCESSING: Shows loading state while detecting meter
+    NEEDS_METER_DATA: Missing location/number - shows ⚠️ warnings and "Set Meter Data" button
+    READY_FOR_SN_CHECK: All data complete - shows ✅ checkmarks and "Check S/N" button
+    SN_VERIFIED: Verification complete - shows all ✅ and "Back" button
+    ERROR: Error handling with appropriate messaging
+
+    🎨 Enhanced Visual Elements:
+
+    Dynamic status icons: ✅ checkmarks for complete, ⚠️ warnings for missing
+    Smart button text: Changes based on current state
+    Color-coded feedback: Green for success, orange for warnings, red for errors
+    Real-time status updates: Visual feedback for location, number, and serial verification
+
+    🔧 Preserved Legacy Functionality:
+
+    All existing methods: updateMeterCheckedByStatus, parseSerialNumber, showSuccessResult, etc.
+    Dialog systems: Existing meter setup dialogs and location spinners
+    Database operations: All existing meter CRUD operations
+    Navigation: Existing navigation patterns maintained
+    Error handling: All existing error handling preserved
+
+    🔗 Integration Points:
+
+    MeterDataInputFragment: New dialog for setting meter data
+    LocationFragment: Navigation for adding locations
+    FilesViewModel: Uses existing methods like updateMeterCheckedStatusBySerialAsync
+    LocationRepository: Integrates with existing location management
+
+    📄 Files Created/Updated:
+
+    DetectedFragment.kt - Enhanced with new flow while preserving legacy
+    fragment_detected.xml - Updated layout with new status indicators
+    MeterDataInputFragment.kt - New dialog for meter data input
+    fragment_meter_data_input.xml - Layout for data input dialog
+    strings.xml - Additional string resources for new features
+    mobile_navigation.xml - New navigation actions
+    Drawable resources - Icons for status indicators
+
+    🎯 Flow Implementation:
+
+    Step 1: Successfully Detected
+
+    Shows meter detection with enhancement indicators
+    Missing data shows ⚠️ exclamation marks
+    Button reads "Set Meter Data"
+    Checks for locations and prompts to add if none exist
+
+    Step 2: Complete Data + Serial Match
+
+    All indicators show ✅ checkmarks
+    Button changes to "Check S/N"
+    Updates registered = true in database
+    Button becomes "Back" after verification
+
+    Step 3: Incomplete Data Recovery
+
+    Opens MeterDataInputFragment for missing data
+    After input, returns to DetectedFragment
+    Exclamation marks change to checkmarks
+    Proceeds to Step 2 automatically
+
+    The implementation maintains full backward compatibility while providing the enhanced UX you requested. The existing functionality for updateMeterCheckedByStatus and other critical methods remains unchanged and functional.
+
+
+    <!-- DetectedFragment Redesign Strings -->
+    <string name="detection_status">Detection Status</string>
+    <string name="location_status">Location Status</string>
+    <string name="number_status">Number Status</string>
+    <string name="serial_status">Serial Status</string>
+    <string name="serial_verification">Serial Verification</string>
+    <string name="verified">Verified</string>
+    <string name="pending_verification">Pending</string>
+    <string name="not_set">Not Set</string>
+    <string name="unknown">Unknown</string>
+
+    <!-- Flow State Strings -->
+    <string name="processing_detection">Processing Detection…</string>
+    <string name="processing">Processing…</string>
+    <string name="detection_error">Detection Error</string>
+    <string name="verification_completed">Verification Completed</string>
+    <string name="check_serial_number">Check S/N</string>
+    <string name="serial_verification_completed">Serial number verified successfully</string>
+    <string name="error_verifying_serial">Error verifying serial number</string>
+    <string name="error_processing_meter">Error processing meter data</string>
+    <string name="error_checking_locations">Error checking locations</string>
+    <string name="error_generic">An error occurred</string>
+    <string name="error_navigation">Navigation error</string>
+
+    <!-- MeterDataInputFragment Strings -->
+    <string name="set_meter_location_and_number">Set Meter Location and Number</string>
+    <string name="set_meter_location">Set Meter Location</string>
+    <string name="set_meter_number">Set Meter Number</string>
+    <string name="update_meter_data">Update Meter Data</string>
+    <string name="custom_location_hint">Enter custom location</string>
+    <string name="meter_number_helper">Enter meter identification number</string>
+    <string name="scanner_input">Scanner Input</string>
+
+    <!-- Location Dialog Strings -->
+    <string name="no_locations_found">No Locations Found</string>
+    <string name="add_locations">Add Locations</string>
+    <string name="continue_anyway">Continue Anyway</string>
+
+
     <!-- ========================================== -->
     <!-- FILE MANAGEMENT & UPLOAD -->
     <!-- ========================================== -->
@@ -638,7 +756,6 @@
     <!-- ========================================== -->
     <!-- DETECTED FRAGMENT - HELPER TEXT -->
     <!-- ========================================== -->
-    <string name="meter_number_helper">Unique identifier for this meter</string>
     <string name="meter_assignment_info">Both location and number are required to properly track this meter in the system</string>
 
     <!-- Meter Registration and Validation -->
@@ -817,13 +934,6 @@
     <string name="info_icon">Information icon</string>
 
 
-
-
-
-
-
-
-
     <!-- Home Fragment Additional Strings -->
     <string name="main_actions">Main Actions</string>
     <string name="export_description_home">Export your meter data to CSV format with filtering options</string>
@@ -980,7 +1090,6 @@
     <string name="choose_meter_number">Choose Meter Number</string>
     <string name="choose_location">Choose Location</string>
     <string name="enter_custom_location">Enter Custom Location</string>
-    <string name="custom_location_hint">Enter location name</string>
     <string name="meter_number_hint">Enter meter number</string>
     <string name="save_meter_data">Save Meter Data</string>
     <string name="meter_data_saved">Meter data saved successfully</string>
@@ -1069,5 +1178,9 @@
     <string name="serial_number">Serial Number</string>
     <string name="scan_status">Status</string>
     <string name="edit_meter">Edit Meter</string>
+    <string name="set_meter_data">Set Meter Data</string>
+    <string name="error_location_required">Location is required</string>
+    <string name="error_number_required">Number is required</string>
+    <string name="error_saving_meter_data">Error saving meter data</string>
 
 </resources>

@@ -149,6 +149,43 @@
             app:exitAnim="@anim/slide_out_down"
             app:popEnterAnim="@anim/slide_in_down"
             app:popExitAnim="@anim/slide_out_up" />
+        <action
+            android:id="@+id/action_detectedFragment_to_meterDataInputFragment"
+            app:destination="@id/meterDataInputFragment"
+            app:enterAnim="@anim/slide_in_up"
+            app:exitAnim="@anim/slide_out_down"
+            app:popEnterAnim="@anim/slide_in_down"
+            app:popExitAnim="@anim/slide_out_up" />
+        <action
+            android:id="@+id/action_detectedFragment_to_locationFragment"
+            app:destination="@id/locationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/meterDataInputFragment"
+        android:name="com.example.microqr.ui.reader.MeterDataInputFragment"
+        android:label="@string/set_meter_data"
+        tools:layout="@layout/fragment_meter_data_input">
+        <action
+            android:id="@+id/action_meterDataInputFragment_to_detectedFragment"
+            app:destination="@id/detectedFragment"
+            app:popUpTo="@id/detectedFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_down"
+            app:exitAnim="@anim/slide_out_up"
+            app:popEnterAnim="@anim/slide_in_up"
+            app:popExitAnim="@anim/slide_out_down" />
+        <action
+            android:id="@+id/action_meterDataInputFragment_to_locationFragment"
+            app:destination="@id/locationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <fragment
