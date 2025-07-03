@@ -29,7 +29,7 @@
     <string name="action_sign_in">ログイン</string>
     <string name="action_sign_in_short">サインイン</string>
     <string name="welcome">ようこそ！</string>
-    <string name="welcome_back">おかえりなさい</string>
+    <string name="welcome_back">MicroQRへようこそ</string>
     <string name="sign_in_to_continue">続行するにはサインインしてください</string>
     <string name="invalid_username">有効でないユーザー名です</string>
     <string name="invalid_password">パスワードは5文字以上である必要があります</string>
@@ -43,7 +43,7 @@
     <!-- ========================================== -->
     <!-- HOME SCREEN & GREETINGS -->
     <!-- ========================================== -->
-    <string name="welcome_back_home">おかえりなさい！</string>
+    <string name="welcome_back_home">MicroQRへようこそ！</string>
     <string name="ready_to_manage_meters">メーターの管理準備はできていますか？</string>
     <string name="ready_to_manage_your_meters">メーターの管理準備はできていますか？</string>
     <string name="qr_meter_management_system">QRメーター管理システム</string>
@@ -113,6 +113,94 @@
     <!-- Error Messages for Serial Check -->
     <string name="serial_not_found_process_first">❌ 「%s」が見つかりません。最初にMeterCheck用のファイルを処理してください。</string>
     <string name="serial_not_found_no_data">❌ 「%s」が見つかりません。現在読み込まれているメーターデータがありません。</string>
+
+
+    <!-- DetectedFragment Redesign Strings -->
+    <string name="detection_status">検出状態</string>
+    <string name="location_status">位置状態</string>
+    <string name="number_status">番号状態</string>
+    <string name="serial_status">シリアル状態</string>
+    <string name="serial_verification">シリアル確認</string>
+    <string name="verified">確認済み</string>
+    <string name="pending_verification">保留中</string>
+    <string name="not_set">未設定</string>
+    <string name="unknown">不明</string>
+
+    <!-- Flow State Strings -->
+    <string name="processing_detection">検出を処理中…</string>
+    <string name="processing">処理中…</string>
+    <string name="detection_error">検出エラー</string>
+    <string name="verification_completed">確認完了</string>
+    <string name="check_serial_number">シリアル番号を確認</string>
+    <string name="serial_verification_completed">シリアル番号が正常に確認されました</string>
+    <string name="error_verifying_serial">シリアル番号の確認中にエラーが発生しました</string>
+    <string name="error_processing_meter">メーターデータの処理中にエラーが発生しました</string>
+    <string name="error_checking_locations">ロケーションの確認中にエラーが発生しました</string>
+    <string name="error_generic">エラーが発生しました</string>
+    <string name="error_navigation">ナビゲーションエラー</string>
+
+    <!-- MeterDataInputFragment Strings -->
+    <string name="set_meter_location_and_number">メーターの位置と番号を設定</string>
+    <string name="set_meter_location">メーターの位置を設定</string>
+    <string name="set_meter_number">メーターの番号を設定</string>
+    <string name="update_meter_data">メーターデータを更新</string>
+    <string name="scanner_input">スキャナー入力</string>
+
+    <!-- Location Dialog Strings -->
+    <string name="no_locations_found">ロケーションが見つかりません</string>
+    <string name="add_locations">ロケーションを追加</string>
+    <string name="continue_anyway">このまま続行</string>
+
+    <!-- Database File Name Section -->
+    <string name="database_file_name">データベースファイル名</string>
+    <string name="database_file_description">このメーターを保存するためのデータベースファイル名を選択してください</string>
+    <string name="auto_generate_filename">ファイル名を自動生成</string>
+    <string name="auto_generated_filename">自動生成: %s</string>
+    <string name="enter_database_filename">データベースファイル名を入力</string>
+    <string name="filename_helper_text">英数字とアンダースコアのみ使用可能です。拡張子「.csv」は自動で追加されます</string>
+    <string name="add_new_meter_to_database">新しいメーターをデータベースに追加</string>
+
+    <!-- File Name Validation Errors -->
+    <string name="error_filename_required">データベースファイル名は必須です</string>
+    <string name="error_invalid_filename">無効なファイル名です。英数字とアンダースコアのみ使用してください</string>
+
+    <!-- File Name Examples and Hints -->
+    <string name="filename_example_hint">例: building_a_meters または office_2024</string>
+    <string name="filename_auto_prefix">scanned_meters</string>
+
+    <!-- Dialog Options -->
+    <string name="choose_filename_option">ファイル名のオプションを選択</string>
+    <string name="use_auto_generated">自動生成名を使用</string>
+    <string name="use_custom_name">カスタム名を作成</string>
+
+    <!-- Success Messages -->
+    <string name="meter_added_to_file">メーターがデータベースファイルに追加されました: %s</string>
+    <string name="new_database_file_created">新しいデータベースファイルが作成されました: %s</string>
+
+    <!-- Updated Dialog Messages -->
+    <string name="no_locations_message_new_meter">このメーターはまだデータベースに登録されていません。ロケーションが未設定です。先にロケーションを追加しますか？それとも手動で入力を続けますか？</string>
+    <string name="continue_with_manual_entry">手動入力を続ける</string>
+
+    <!-- Enhanced Navigation Flow Strings -->
+    <string name="meter_data_complete_ready_for_check">✅ メーターデータが完成しました！シリアル確認の準備ができました。</string>
+    <string name="data_updated_successfully">データが正常に更新されました</string>
+    <string name="data_complete_ready_for_verification">データが揃いました - 確認の準備ができました</string>
+    <string name="error_meter_not_found">更新後、メーターが見つかりませんでした</string>
+    <string name="auto_progressing_to_check">シリアル番号の確認に自動的に進行中…</string>
+
+    <!-- Flow Transition Messages -->
+    <string name="meter_data_saved_progressing">メーターデータが保存されました！確認に進行中…</string>
+    <string name="all_data_complete">すべての必要なデータが揃いました</string>
+    <string name="ready_for_serial_check">シリアル番号確認の準備ができました</string>
+
+    <!-- Button State Messages -->
+    <string name="preparing_verification">確認の準備中…</string>
+    <string name="verification_ready">確認の準備が完了</string>
+
+    <!-- Success Flow Messages -->
+    <string name="location_and_number_set">✅ 位置と番号が設定されました</string>
+    <string name="proceeding_to_verification">シリアル確認に進行中</string>
+
 
     <!-- ========================================== -->
     <!-- FILE MANAGEMENT & UPLOAD -->
@@ -1061,5 +1149,14 @@
     <string name="updateMeter">updateMeter</string>
     <string name="serial_number">S/N</string>
 
+
+    <string name="scan_status">ステータス</string>
+    <string name="edit_meter">メーターを編集</string>
+    <string name="set_meter_data">メーターのデータを設定</string>
+    <string name="error_location_required">位置情報が必要です</string>
+    <string name="error_number_required">番号が必要です</string>
+    <string name="error_saving_meter_data">メーターデータの保存中にエラーが発生しました</string>
+    <string name="enter_meter_number">メーター番号を入力</string>
+    <string name="save">保存</string>
 
 </resources>

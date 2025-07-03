@@ -116,85 +116,6 @@
     <string name="serial_not_found_process_first">❌ \'%s\' NOT FOUND. Try processing your files for MeterCheck first.</string>
     <string name="serial_not_found_no_data">❌ \'%s\' NOT FOUND. No meter data is currently loaded.</string>
 
-    Continue
-    Edit
-
-    Now let me create the additional string resources that we need for the enhanced UI:
-
-    Perfect! I've successfully updated the DetectedFragment to include the new enhanced UI/UX flow while preserving all existing functionality. Here's a summary of what I've implemented:
-    ✅ Enhanced DetectedFragment Features:
-    🔄 Dual Flow System:
-
-    Enhanced UI: Used for METER_CHECK context with the new 3-step flow
-    Legacy UI: Preserves all existing functionality for backward compatibility
-    Smart Detection: Automatically chooses the appropriate UI based on context
-
-    📱 New Enhanced Flow States:
-
-    PROCESSING: Shows loading state while detecting meter
-    NEEDS_METER_DATA: Missing location/number - shows ⚠️ warnings and "Set Meter Data" button
-    READY_FOR_SN_CHECK: All data complete - shows ✅ checkmarks and "Check S/N" button
-    SN_VERIFIED: Verification complete - shows all ✅ and "Back" button
-    ERROR: Error handling with appropriate messaging
-
-    🎨 Enhanced Visual Elements:
-
-    Dynamic status icons: ✅ checkmarks for complete, ⚠️ warnings for missing
-    Smart button text: Changes based on current state
-    Color-coded feedback: Green for success, orange for warnings, red for errors
-    Real-time status updates: Visual feedback for location, number, and serial verification
-
-    🔧 Preserved Legacy Functionality:
-
-    All existing methods: updateMeterCheckedByStatus, parseSerialNumber, showSuccessResult, etc.
-    Dialog systems: Existing meter setup dialogs and location spinners
-    Database operations: All existing meter CRUD operations
-    Navigation: Existing navigation patterns maintained
-    Error handling: All existing error handling preserved
-
-    🔗 Integration Points:
-
-    MeterDataInputFragment: New dialog for setting meter data
-    LocationFragment: Navigation for adding locations
-    FilesViewModel: Uses existing methods like updateMeterCheckedStatusBySerialAsync
-    LocationRepository: Integrates with existing location management
-
-    📄 Files Created/Updated:
-
-    DetectedFragment.kt - Enhanced with new flow while preserving legacy
-    fragment_detected.xml - Updated layout with new status indicators
-    MeterDataInputFragment.kt - New dialog for meter data input
-    fragment_meter_data_input.xml - Layout for data input dialog
-    strings.xml - Additional string resources for new features
-    mobile_navigation.xml - New navigation actions
-    Drawable resources - Icons for status indicators
-
-    🎯 Flow Implementation:
-
-    Step 1: Successfully Detected
-
-    Shows meter detection with enhancement indicators
-    Missing data shows ⚠️ exclamation marks
-    Button reads "Set Meter Data"
-    Checks for locations and prompts to add if none exist
-
-    Step 2: Complete Data + Serial Match
-
-    All indicators show ✅ checkmarks
-    Button changes to "Check S/N"
-    Updates registered = true in database
-    Button becomes "Back" after verification
-
-    Step 3: Incomplete Data Recovery
-
-    Opens MeterDataInputFragment for missing data
-    After input, returns to DetectedFragment
-    Exclamation marks change to checkmarks
-    Proceeds to Step 2 automatically
-
-    The implementation maintains full backward compatibility while providing the enhanced UX you requested. The existing functionality for updateMeterCheckedByStatus and other critical methods remains unchanged and functional.
-
-
     <!-- DetectedFragment Redesign Strings -->
     <string name="detection_status">Detection Status</string>
     <string name="location_status">Location Status</string>
@@ -265,6 +186,28 @@
     <!-- Updated Dialog Messages -->
     <string name="no_locations_message_new_meter">This meter is not in any database. No locations are configured yet. Would you like to add some locations first, or continue with manual entry?</string>
     <string name="continue_with_manual_entry">Continue with Manual Entry</string>
+
+    <!-- Add these strings to app/src/main/res/values/strings.xml -->
+
+    <!-- Enhanced Navigation Flow Strings -->
+    <string name="meter_data_complete_ready_for_check">✅ Meter data is complete! Ready for serial verification.</string>
+    <string name="data_updated_successfully">Data Updated Successfully</string>
+    <string name="data_complete_ready_for_verification">Data Complete - Ready for Verification</string>
+    <string name="error_meter_not_found">Meter not found after update</string>
+    <string name="auto_progressing_to_check">Auto-progressing to Check S/N...</string>
+
+    <!-- Flow Transition Messages -->
+    <string name="meter_data_saved_progressing">Meter data saved! Progressing to verification...</string>
+    <string name="all_data_complete">All required data is now complete</string>
+    <string name="ready_for_serial_check">Ready for serial number verification</string>
+
+    <!-- Button State Messages -->
+    <string name="preparing_verification">Preparing verification...</string>
+    <string name="verification_ready">Verification Ready</string>
+
+    <!-- Success Flow Messages -->
+    <string name="location_and_number_set">✅ Location and number have been set</string>
+    <string name="proceeding_to_verification">Proceeding to serial verification</string>
 
 
     <!-- ========================================== -->
@@ -826,7 +769,6 @@
 
     <!-- Progress Messages -->
     <string name="validating_meter_info">Validating meter information…</string>
-    <string name="updating_database">Updating database…</string>
 
     <!-- ========================================== -->
     <!-- CSV EXPORT FUNCTIONALITY -->
@@ -1217,5 +1159,40 @@
     <string name="error_saving_meter_data">Error saving meter data</string>
     <string name="enter_meter_number">enter meter number</string>
     <string name="save">save</string>
+
+    <!-- Loading States -->
+    <string name="saving_meter_data">Saving Meter Data</string>
+    <string name="saving_please_wait">Saving... Please Wait</string>
+    <string name="please_wait_message">Please wait while we process your data</string>
+    <string name="updating_database">Updating Database...</string>
+    <string name="verifying_changes">Verifying Changes...</string>
+    <string name="preparing_to_return">Preparing to Return...</string>
+
+    <!-- Database Refresh States -->
+    <string name="refreshing_data">Refreshing Data...</string>
+    <string name="database_update_in_progress">Database Update in Progress</string>
+    <string name="loading_updated_information">Loading Updated Information...</string>
+
+    <!-- Success Messages -->
+    <string name="meter_data_updated_successfully">✅ Meter data updated successfully!</string>
+    <string name="data_refresh_complete">Data refresh complete</string>
+    <string name="ready_for_verification_celebration">Ready for Verification! 🎉</string>
+
+    <!-- Error Recovery -->
+    <string name="retry_data_refresh">Retry Data Refresh</string>
+    <string name="could_not_refresh_data">Could not refresh meter data. Please try again.</string>
+    <string name="database_timeout_error">Database update timed out. Please retry.</string>
+
+    <!-- Progress Phases -->
+    <string name="phase_saving_to_database">Saving to database...</string>
+    <string name="phase_waiting_for_commit">Waiting for database commit...</string>
+    <string name="phase_refreshing_connections">Refreshing database connections...</string>
+    <string name="phase_verifying_save">Verifying data was saved...</string>
+    <string name="phase_preparing_navigation">Preparing navigation...</string>
+
+    <!-- Timing Messages -->
+    <string name="this_may_take_a_moment">This may take a moment...</string>
+    <string name="ensuring_data_consistency">Ensuring data consistency...</string>
+    <string name="finalizing_changes">Finalizing changes...</string>
 
 </resources>

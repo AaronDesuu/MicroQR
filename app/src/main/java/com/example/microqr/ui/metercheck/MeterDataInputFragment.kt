@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.example.microqr.R
 import com.example.microqr.databinding.FragmentMeterDataInputBinding
 import com.example.microqr.ui.files.FilesViewModel
@@ -135,13 +134,13 @@ class MeterDataInputFragment : DialogFragment() {
 
         // Update dialog title
         val title = if (isNewMeter) {
-            getString(R.string.add_new_meter_to_database)
+            "Add New Meter to Database"
         } else {
             when {
-                needsLocation && needsNumber -> getString(R.string.set_meter_location_and_number)
-                needsLocation -> getString(R.string.set_meter_location)
-                needsNumber -> getString(R.string.set_meter_number)
-                else -> getString(R.string.set_meter_data)
+                needsLocation && needsNumber -> "Set Meter Location and Number"
+                needsLocation -> "Set Meter Location"
+                needsNumber -> "Set Meter Number"
+                else -> "Set Meter Data"
             }
         }
         binding.dialogTitle.text = title
@@ -154,7 +153,7 @@ class MeterDataInputFragment : DialogFragment() {
 
         // Set default values
         binding.autoGenerateFileNameSwitch.isChecked = true
-        binding.fileNamePreview.text = getString(R.string.auto_generated_filename, defaultFileName)
+        binding.fileNamePreview.text = "Auto-generated: $defaultFileName.csv"
         binding.customFileNameLayout.visibility = View.GONE
 
         // Handle switch toggle
@@ -165,7 +164,7 @@ class MeterDataInputFragment : DialogFragment() {
                 binding.fileNamePreview.visibility = View.VISIBLE
                 val newTimestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
                 val newFileName = "scanned_meters_$newTimestamp"
-                binding.fileNamePreview.text = getString(R.string.auto_generated_filename, newFileName)
+                binding.fileNamePreview.text = "Auto-generated: $newFileName.csv"
             } else {
                 // Custom mode
                 binding.customFileNameLayout.visibility = View.VISIBLE
@@ -190,7 +189,7 @@ class MeterDataInputFragment : DialogFragment() {
                     binding.customLocationLayout.visibility = View.VISIBLE
                     binding.customLocationInput.setText(currentLocation)
                 } else {
-                    locations.add(getString(R.string.add_location))
+                    locations.add("Add Location")
 
                     val adapter = ArrayAdapter(
                         requireContext(),
@@ -208,7 +207,7 @@ class MeterDataInputFragment : DialogFragment() {
                     binding.locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                             val selectedItem = locations[position]
-                            if (selectedItem == getString(R.string.add_location)) {
+                            if (selectedItem == "Add Location") {
                                 binding.customLocationLayout.visibility = View.VISIBLE
                                 binding.customLocationInput.setText("")
                             } else {
@@ -250,7 +249,6 @@ class MeterDataInputFragment : DialogFragment() {
             currentNumber
         }
 
-        // Get database file name (if new meter)
         val databaseFileName = if (isNewMeter) {
             getDatabaseFileName()
         } else {
@@ -259,42 +257,42 @@ class MeterDataInputFragment : DialogFragment() {
 
         // Validate inputs
         if (needsLocation && selectedLocation.isEmpty()) {
-            Toast.makeText(requireContext(), getString(R.string.error_location_required), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Location is required", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (needsNumber && enteredNumber.isEmpty()) {
-            Toast.makeText(requireContext(), getString(R.string.error_number_required), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Number is required", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (isNewMeter && databaseFileName.isNullOrBlank()) {
-            Toast.makeText(requireContext(), getString(R.string.error_filename_required), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Database filename is required", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (isNewMeter && !isValidFileName(databaseFileName!!)) {
-            Toast.makeText(requireContext(), getString(R.string.error_invalid_filename), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Invalid filename. Use only letters, numbers, and underscores", Toast.LENGTH_SHORT).show()
             return
         }
 
-        Log.d(TAG, "Saving meter data: serial=$serialNumber, location=$selectedLocation, number=$enteredNumber, fileName=$databaseFileName")
-
-        binding.saveButton.isEnabled = false
+        Log.d(TAG, "Starting save operation...")
+        showLoadingState()
 
         lifecycleScope.launch {
             try {
+                // Phase 1: Save to database
+                Log.d(TAG, "Phase 1: Saving to database...")
+
                 if (isNewMeter) {
-                    // Create new meter with custom file name
                     filesViewModel.addNewMeterWithCustomFileName(
                         serialNumber = serialNumber,
                         location = selectedLocation,
                         number = enteredNumber,
                         fileName = databaseFileName!!
                     )
-                    Log.d(TAG, "✅ Successfully created new meter in file: $databaseFileName")
+                    Log.d(TAG, "✅ New meter created in database")
                 } else {
-                    // Update existing meter
                     val existingMeter = filesViewModel.findMeterBySerial(serialNumber)
                     if (existingMeter != null) {
                         val updatedMeter = existingMeter.copy(
@@ -302,36 +300,103 @@ class MeterDataInputFragment : DialogFragment() {
                             number = enteredNumber
                         )
                         filesViewModel.getMeterRepository().updateMeter(updatedMeter)
-                        Log.d(TAG, "✅ Successfully updated existing meter")
+                        Log.d(TAG, "✅ Existing meter updated in database")
                     } else {
                         throw IllegalStateException("Meter not found for update")
                     }
                 }
 
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), getString(R.string.meter_data_saved), Toast.LENGTH_SHORT).show()
-                    dismiss()
+                // Phase 2: Wait for database commit
+                Log.d(TAG, "Phase 2: Waiting for database refresh...")
+                updateLoadingMessage("Updating database...")
+                kotlinx.coroutines.delay(800)
 
-                    val bundle = Bundle().apply {
-                        putString("rawQrValue", serialNumber)
-                        putString("scanContext", "METER_CHECK")
-                        putBoolean("dataUpdated", true)
-                    }
-                    findNavController().navigate(R.id.action_meterDataInputFragment_to_detectedFragment, bundle)
+                // Phase 3: Verify changes
+                Log.d(TAG, "Phase 3: Verifying saved data...")
+                updateLoadingMessage("Verifying changes...")
+                kotlinx.coroutines.delay(300)
+
+                // Phase 4: Final completion
+                updateLoadingMessage("Completing save...")
+                kotlinx.coroutines.delay(400)
+
+                // Success - dismiss dialog and let DetectedFragment auto-refresh
+                withContext(Dispatchers.Main) {
+                    hideLoadingState()
+                    Toast.makeText(requireContext(), "✅ Meter data saved successfully!", Toast.LENGTH_SHORT).show()
+
+                    kotlinx.coroutines.delay(300)
+                    dismiss() // Simply dismiss - DetectedFragment will auto-refresh!
                 }
 
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Error saving meter data: ${e.message}", e)
+                Log.e(TAG, "❌ Error during save operation: ${e.message}", e)
                 withContext(Dispatchers.Main) {
-                    binding.saveButton.isEnabled = true
+                    hideLoadingState()
                     Toast.makeText(
                         requireContext(),
-                        getString(R.string.error_saving_meter_data) + ": ${e.message}",
+                        "Error saving meter data: ${e.message}",
                         Toast.LENGTH_LONG
                     ).show()
                 }
             }
         }
+    }
+
+    private fun showLoadingState() {
+        // Disable all input controls
+        binding.saveButton.isEnabled = false
+        binding.cancelButton.isEnabled = false
+        binding.locationSpinner.isEnabled = false
+        binding.numberInput.isEnabled = false
+        binding.customLocationInput.isEnabled = false
+
+        if (isNewMeter) {
+            binding.autoGenerateFileNameSwitch.isEnabled = false
+            binding.customFileNameInput.isEnabled = false
+        }
+
+        // Update save button to show loading
+        binding.saveButton.text = "Saving... Please Wait"
+
+        // Show loading overlay
+        binding.loadingOverlay.visibility = View.VISIBLE
+        binding.loadingProgressBar.visibility = View.VISIBLE
+        binding.loadingMessage.visibility = View.VISIBLE
+        binding.loadingMessage.text = "Saving Meter Data"
+
+        Log.d(TAG, "Loading state activated")
+    }
+
+    private suspend fun updateLoadingMessage(message: String) {
+        withContext(Dispatchers.Main) {
+            binding.loadingMessage.text = message
+            Log.d(TAG, "Loading message: $message")
+        }
+    }
+
+    private fun hideLoadingState() {
+        // Re-enable all controls
+        binding.saveButton.isEnabled = true
+        binding.cancelButton.isEnabled = true
+        binding.locationSpinner.isEnabled = true
+        binding.numberInput.isEnabled = true
+        binding.customLocationInput.isEnabled = true
+
+        if (isNewMeter) {
+            binding.autoGenerateFileNameSwitch.isEnabled = true
+            binding.customFileNameInput.isEnabled = true
+        }
+
+        // Reset save button text
+        binding.saveButton.text = "Save"
+
+        // Hide loading overlay
+        binding.loadingOverlay.visibility = View.GONE
+        binding.loadingProgressBar.visibility = View.GONE
+        binding.loadingMessage.visibility = View.GONE
+
+        Log.d(TAG, "Loading state deactivated")
     }
 
     private fun getSelectedLocation(): String {
@@ -341,7 +406,7 @@ class MeterDataInputFragment : DialogFragment() {
         val adapter = binding.locationSpinner.adapter as? ArrayAdapter<String>
         val selectedItem = adapter?.getItem(selectedPosition) ?: ""
 
-        return if (selectedItem == getString(R.string.add_location)) {
+        return if (selectedItem == "Add Location") {
             binding.customLocationInput.text?.toString()?.trim() ?: ""
         } else {
             selectedItem
@@ -351,13 +416,12 @@ class MeterDataInputFragment : DialogFragment() {
     private fun getDatabaseFileName(): String? {
         return if (binding.autoGenerateFileNameSwitch.isChecked) {
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            "scanned_meters_$timestamp"
+            "scanned_meters_$timestamp.csv"
         } else {
             binding.customFileNameInput.text?.toString()?.trim()?.let { name ->
                 if (name.isNotBlank()) {
-                    // Add .csv extension if not present
                     if (!name.endsWith(".csv", ignoreCase = true)) {
-                        "${name}.csv"
+                        "$name.csv"
                     } else {
                         name
                     }
@@ -367,11 +431,10 @@ class MeterDataInputFragment : DialogFragment() {
     }
 
     private fun isValidFileName(fileName: String): Boolean {
-        // Check for invalid characters
         val invalidChars = charArrayOf('/', '\\', '?', '%', '*', ':', '|', '"', '<', '>')
         return fileName.isNotBlank() &&
                 fileName.none { it in invalidChars } &&
-                fileName.length <= 100 // Reasonable length limit
+                fileName.length <= 100
     }
 
     override fun onDestroyView() {
