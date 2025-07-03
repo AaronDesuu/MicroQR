@@ -234,13 +234,13 @@
     <string name="pending_scan">スキャン待ち</string>
 
     <!-- Meter Actions -->
-    <string name="register_meter">メーターを登録</string>
+    <string name="register_meter">登録</string>
     <string name="scan_meter">メーターをスキャン</string>
-    <string name="verify_meter">メーターを確認</string>
+    <string name="verify_meter">確認</string>
     <string name="match_meter">メーターを照合</string>
     <string name="meter_check">メーターチェック</string>
     <string name="match_meters">メーターを照合</string>
-    <string name="check_meters">メーターを確認</string>
+    <string name="check_meters">確認</string>
     <string name="scan_register"><![CDATA[スキャン&登録]]></string>
 
     <!-- Meter Descriptions -->

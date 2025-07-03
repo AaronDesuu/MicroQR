@@ -234,6 +234,39 @@
     <string name="continue_anyway">Continue Anyway</string>
 
 
+    <!-- Add these strings to app/src/main/res/values/strings.xml -->
+
+    <!-- Database File Name Section -->
+    <string name="database_file_name">Database File Name</string>
+    <string name="database_file_description">Choose a name for the database file that will store this meter</string>
+    <string name="auto_generate_filename">Auto-generate file name</string>
+    <string name="auto_generated_filename">Auto-generated: %s</string>
+    <string name="enter_database_filename">Enter database file name</string>
+    <string name="filename_helper_text">Letters, numbers, and underscores only. .csv extension will be added automatically</string>
+    <string name="add_new_meter_to_database">Add New Meter to Database</string>
+
+    <!-- File Name Validation Errors -->
+    <string name="error_filename_required">Database file name is required</string>
+    <string name="error_invalid_filename">Invalid file name. Use only letters, numbers, and underscores</string>
+
+    <!-- File Name Examples and Hints -->
+    <string name="filename_example_hint">Example: building_a_meters or office_2024</string>
+    <string name="filename_auto_prefix">scanned_meters</string>
+
+    <!-- Dialog Options -->
+    <string name="choose_filename_option">Choose File Name Option</string>
+    <string name="use_auto_generated">Use Auto-Generated Name</string>
+    <string name="use_custom_name">Create Custom Name</string>
+
+    <!-- Success Messages -->
+    <string name="meter_added_to_file">Meter added to database file: %s</string>
+    <string name="new_database_file_created">New database file created: %s</string>
+
+    <!-- Updated Dialog Messages -->
+    <string name="no_locations_message_new_meter">This meter is not in any database. No locations are configured yet. Would you like to add some locations first, or continue with manual entry?</string>
+    <string name="continue_with_manual_entry">Continue with Manual Entry</string>
+
+
     <!-- ========================================== -->
     <!-- FILE MANAGEMENT & UPLOAD -->
     <!-- ========================================== -->
@@ -1182,5 +1215,7 @@
     <string name="error_location_required">Location is required</string>
     <string name="error_number_required">Number is required</string>
     <string name="error_saving_meter_data">Error saving meter data</string>
+    <string name="enter_meter_number">enter meter number</string>
+    <string name="save">save</string>
 
 </resources>

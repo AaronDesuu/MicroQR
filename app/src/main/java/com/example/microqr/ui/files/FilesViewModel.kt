@@ -300,10 +300,10 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Update meter location and number information
+     * Update meter location and number information - FIXED
      */
     suspend fun updateMeterLocationAndNumber(serialNumber: String, location: String, number: String) {
-        viewModelScope.launch {
+        return withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Updating meter location and number: $serialNumber -> location: $location, number: $number")
 
@@ -322,6 +322,7 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
                     Log.d(TAG, "✅ Updated ${matchingMeters.size} meters with serial $serialNumber")
                 } else {
                     Log.w(TAG, "⚠️ No meters found with serial number: $serialNumber")
+                    // Don't throw error here, might be creating new meter
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error updating meter location and number: ${e.message}", e)
@@ -331,29 +332,29 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Add a new meter to the database and in-memory data
+     * Add a new meter to the database and in-memory data - FIXED
      */
     suspend fun addNewMeter(serialNumber: String, location: String, number: String) {
-        withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             try {
                 val timestamp = System.currentTimeMillis()
-                val fileName = "manual_entry_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}"
+                val fileName = "scanner_input_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}"
 
                 // Create new meter
                 val newMeter = MeterStatus(
                     serialNumber = serialNumber,
                     number = number,
                     place = location,
-                    registered = true,
+                    registered = false,  // Will be set to true during S/N verification
                     fromFile = fileName,
                     isChecked = false,
                     isSelectedForProcessing = false
                 )
 
-                // Check if file entry exists for manual entries
+                // Check if file entry exists for scanner entries
                 var existingFile = repository.getFile(fileName)
                 if (existingFile == null) {
-                    // Create file entry for manual entries
+                    // Create file entry for scanner entries
                     val fileItem = FileItem(
                         fileName = fileName,
                         uploadDate = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
@@ -380,6 +381,98 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
                 throw e
             }
         }
+    }
+
+    /**
+     * Add a new meter to the database with a custom file name
+     */
+    suspend fun addNewMeterWithCustomFileName(
+        serialNumber: String,
+        location: String,
+        number: String,
+        fileName: String
+    ) {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Adding new meter with custom file name: $fileName")
+
+                // Validate and clean the file name
+                val cleanFileName = cleanFileName(fileName)
+
+                // Create new meter
+                val newMeter = MeterStatus(
+                    serialNumber = serialNumber,
+                    number = number,
+                    place = location,
+                    registered = false,  // Will be set to true during S/N verification
+                    fromFile = cleanFileName,
+                    isChecked = false,
+                    isSelectedForProcessing = false
+                )
+
+                // Check if file entry exists
+                var existingFile = repository.getFile(cleanFileName)
+                if (existingFile == null) {
+                    // Create new file entry
+                    val fileItem = FileItem(
+                        fileName = cleanFileName,
+                        uploadDate = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
+                        meterCount = 1,
+                        isValid = true,
+                        validationError = "",
+                        destination = ProcessingDestination.METER_CHECK
+                    )
+                    repository.insertFile(fileItem)
+                    Log.d(TAG, "Created new file entry: $cleanFileName")
+                } else {
+                    // Update meter count for existing file
+                    val updatedFile = existingFile.copy(
+                        meterCount = existingFile.meterCount + 1
+                    )
+                    repository.updateFile(updatedFile)
+                    Log.d(TAG, "Updated existing file meter count: $cleanFileName")
+                }
+
+                // Insert the meter
+                repository.insertMeters(listOf(newMeter))
+
+                Log.d(TAG, "✅ Added new meter to custom file: $cleanFileName")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error adding new meter with custom file name: ${e.message}", e)
+                throw e
+            }
+        }
+    }
+
+    /**
+     * Clean and validate the file name
+     */
+    private fun cleanFileName(fileName: String): String {
+        var cleaned = fileName.trim()
+
+        // Remove invalid characters
+        val invalidChars = charArrayOf('/', '\\', '?', '%', '*', ':', '|', '"', '<', '>')
+        invalidChars.forEach { char ->
+            cleaned = cleaned.replace(char, '_')
+        }
+
+        // Ensure it doesn't start with a dot
+        if (cleaned.startsWith(".")) {
+            cleaned = "file$cleaned"
+        }
+
+        // Ensure it has .csv extension
+        if (!cleaned.endsWith(".csv", ignoreCase = true)) {
+            cleaned = "$cleaned.csv"
+        }
+
+        // Limit length
+        if (cleaned.length > 100) {
+            val nameWithoutExt = cleaned.substringBeforeLast(".csv")
+            cleaned = "${nameWithoutExt.take(96)}.csv"
+        }
+
+        return cleaned
     }
 
     /**
