@@ -328,7 +328,7 @@
     <string name="match_meter">メーターを照合</string>
     <string name="meter_check">メーターチェック</string>
     <string name="match_meters">メーターを照合</string>
-    <string name="check_meters">確認</string>
+    <string name="check_meters">メーターを登録</string>
     <string name="scan_register"><![CDATA[スキャン&登録]]></string>
 
     <!-- Meter Descriptions -->
