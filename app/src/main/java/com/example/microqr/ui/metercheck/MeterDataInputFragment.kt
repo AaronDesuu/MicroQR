@@ -9,8 +9,10 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
 import com.example.microqr.R
 import com.example.microqr.databinding.FragmentMeterDataInputBinding
@@ -105,9 +107,9 @@ class MeterDataInputFragment : DialogFragment() {
             Log.e(TAG, "Error creating dialog: ${e.message}", e)
             // Return a simple dialog if there's an error
             return MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Error")
-                .setMessage("Failed to load meter input form: ${e.message}")
-                .setPositiveButton("OK") { _, _ -> dismiss() }
+                .setTitle(getString(R.string.error_generic))
+                .setMessage(getString(R.string.error_saving_meter_data))
+                .setPositiveButton(getString(R.string.save)) { _, _ -> dismiss() }
                 .create()
         }
     }
@@ -178,83 +180,157 @@ class MeterDataInputFragment : DialogFragment() {
         }
     }
 
+    private fun updateDialogTitle() {
+        val title = when {
+            needsLocation && needsNumber -> getString(R.string.set_meter_location_and_number)
+            needsLocation -> getString(R.string.set_meter_location)
+            needsNumber -> getString(R.string.set_meter_number)
+            else -> getString(R.string.update_meter_data)
+        }
+        binding.dialogTitle.text = title
+    }
+
     private fun setupDatabaseFileSection() {
         // Generate default file name
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val defaultFileName = "scanned_meters_$timestamp"
 
-        // Set default values
+        binding.fileNamePreview.text = getString(R.string.auto_generated_filename, defaultFileName)
         binding.autoGenerateFileNameSwitch.isChecked = true
-        binding.fileNamePreview.text = getString(R.string.auto_generated_filename, "$defaultFileName.csv")
+        binding.fileNamePreview.visibility = View.VISIBLE
         binding.customFileNameLayout.visibility = View.GONE
 
-        // Handle switch toggle
         binding.autoGenerateFileNameSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // Auto-generate mode
-                binding.customFileNameLayout.visibility = View.GONE
                 binding.fileNamePreview.visibility = View.VISIBLE
-                val newTimestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-                val newFileName = "scanned_meters_$newTimestamp"
-                binding.fileNamePreview.text = getString(R.string.auto_generated_filename, "$newFileName.csv")
+                binding.customFileNameLayout.visibility = View.GONE
             } else {
-                // Custom mode
-                binding.customFileNameLayout.visibility = View.VISIBLE
                 binding.fileNamePreview.visibility = View.GONE
-
-                // Pre-fill with a suggested name
-                if (binding.customFileNameInput.text.isNullOrBlank()) {
-                    val suggestedName = "scanned_meters_${SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())}"
-                    binding.customFileNameInput.setText(suggestedName)
-                }
+                binding.customFileNameLayout.visibility = View.VISIBLE
             }
         }
+    }
+
+    private fun generateAutoFileName(): String {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        return "scanned_meters_$timestamp"
     }
 
     private fun setupLocationSpinner() {
         lifecycleScope.launch {
             try {
-                val locations = locationRepository.getActiveLocationNames().toMutableList()
+                val locations = locationRepository.getActiveLocationNames()
 
-                if (locations.isEmpty()) {
-                    binding.locationSpinner.visibility = View.GONE
-                    binding.customLocationLayout.visibility = View.VISIBLE
-                    binding.customLocationInput.setText(currentLocation)
-                } else {
-                    locations.add(getString(R.string.add_locations))
+                if (locations.isNotEmpty()) {
+                    val spinnerItems = mutableListOf<String>().apply {
+                        add(getString(R.string.choose_location))  // FIXED: Show "場所を選択" as first option
+                        add(getString(R.string.custom_location_hint))  // Then "場所名を入力" for custom input
+                        addAll(locations)
+                    }
 
-                    val adapter = ArrayAdapter(
-                        requireContext(),
-                        android.R.layout.simple_spinner_item,
-                        locations
-                    )
+                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     binding.locationSpinner.adapter = adapter
 
-                    val currentIndex = locations.indexOf(currentLocation)
-                    if (currentIndex >= 0) {
-                        binding.locationSpinner.setSelection(currentIndex)
+                    // Set current location if it exists in the list
+                    if (currentLocation.isNotBlank()) {
+                        val locationIndex = locations.indexOf(currentLocation)
+                        if (locationIndex >= 0) {
+                            binding.locationSpinner.setSelection(locationIndex + 2) // +2 for choose_location and custom options
+                        }
                     }
 
                     binding.locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                            val selectedItem = parent?.getItemAtPosition(position) as String
-                            if (selectedItem == getString(R.string.add_locations)) {
-                                binding.customLocationLayout.visibility = View.VISIBLE
-                                binding.customLocationInput.setText("")
-                            } else {
-                                binding.customLocationLayout.visibility = View.GONE
+                            when (position) {
+                                0 -> {
+                                    // "場所を選択" selected - do nothing, keep dropdown closed
+                                    binding.customLocationLayout.visibility = View.GONE
+                                }
+                                1 -> {
+                                    // "場所名を入力" selected - show custom input
+                                    binding.customLocationLayout.visibility = View.VISIBLE
+                                    binding.customLocationInput.setText(currentLocation)
+                                }
+                                else -> {
+                                    // Existing location selected
+                                    binding.customLocationLayout.visibility = View.GONE
+                                }
                             }
                         }
+
                         override fun onNothingSelected(parent: AdapterView<*>?) {}
                     }
+                } else {
+                    // No existing locations - show custom input only
+                    binding.locationSpinner.visibility = View.GONE
+                    binding.customLocationLayout.visibility = View.VISIBLE
+                    binding.customLocationInput.setText(currentLocation)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error setting up location spinner: ${e.message}")
+                Log.e(TAG, "Error loading locations: ${e.message}", e)
+                // Fallback to custom input
                 binding.locationSpinner.visibility = View.GONE
                 binding.customLocationLayout.visibility = View.VISIBLE
                 binding.customLocationInput.setText(currentLocation)
             }
+        }
+    }
+
+    private fun setupLocationSpinner(locations: List<String>) {
+        try {
+            val spinnerItems = mutableListOf<String>().apply {
+                add(getString(R.string.custom_location_hint))
+                addAll(locations)
+            }
+
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.locationSpinner.adapter = adapter
+
+            binding.locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (position == 0) {
+                        // Custom location selected
+                        showCustomLocationInput()
+                    } else {
+                        // Existing location selected
+                        hideCustomLocationInput()
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up location spinner: ${e.message}", e)
+            showCustomLocationInput()
+        }
+    }
+
+    private fun showCustomLocationInput() {
+        binding.customLocationLayout.visibility = View.VISIBLE
+        binding.locationSpinner.visibility = View.GONE
+    }
+
+    private fun hideCustomLocationInput() {
+        binding.customLocationLayout.visibility = View.GONE
+        binding.locationSpinner.visibility = View.VISIBLE
+    }
+
+    private fun setupNumberSection() {
+        try {
+            Log.d(TAG, "Setting up meter number section")
+
+            // Pre-fill with current number if valid (FIXED: correct ID from layout)
+            if (currentNumber.isNotBlank() &&
+                currentNumber != getString(R.string.not_set) &&
+                currentNumber != getString(R.string.unknown)) {
+                binding.numberInput.setText(currentNumber)
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up number section: ${e.message}", e)
         }
     }
 
@@ -269,17 +345,11 @@ class MeterDataInputFragment : DialogFragment() {
     }
 
     private fun saveMeterData() {
-        val selectedLocation = if (needsLocation) {
-            getSelectedLocation()
-        } else {
-            currentLocation
-        }
+        Log.d(TAG, "saveMeterData called")
 
-        val enteredNumber = if (needsNumber) {
-            binding.numberInput.text?.toString()?.trim() ?: ""
-        } else {
-            currentNumber
-        }
+        // Validate inputs
+        val selectedLocation = getSelectedLocation()
+        val enteredNumber = getMeterNumber()
 
         // Validation
         if (needsLocation && selectedLocation.isBlank()) {
@@ -292,19 +362,6 @@ class MeterDataInputFragment : DialogFragment() {
             return
         }
 
-        // Database filename validation for new meters
-        if (isNewMeter) {
-            val filename = getDatabaseFileName()
-            if (filename.isNullOrBlank()) {
-                Toast.makeText(requireContext(), getString(R.string.error_filename_required), Toast.LENGTH_SHORT).show()
-                return
-            }
-            if (!isValidFileName(filename)) {
-                Toast.makeText(requireContext(), getString(R.string.error_invalid_filename), Toast.LENGTH_SHORT).show()
-                return
-            }
-        }
-
         // Show loading state
         showLoadingState()
 
@@ -312,12 +369,20 @@ class MeterDataInputFragment : DialogFragment() {
             try {
                 Log.d(TAG, "Starting meter data save process...")
 
-                if (isNewMeter) {
-                    // Phase 1: Create new meter with custom filename
-                    Log.d(TAG, "Phase 1: Creating new meter in database...")
-                    updateLoadingMessage(getString(R.string.adding_meter_to_database))
+                // Phase 1: Save to database
+                Log.d(TAG, "Phase 1: Saving to database...")
+                updateLoadingMessage(getString(R.string.phase_saving_to_database))
 
-                    val customFileName = getDatabaseFileName() ?: ""
+                if (isNewMeter) {
+                    val customFileName = if (binding.autoGenerateFileNameSwitch.isChecked) {
+                        generateAutoFileName()
+                    } else {
+                        binding.customFileNameInput.text?.toString()?.trim() ?: ""
+                    }
+
+                    if (customFileName.isBlank()) {
+                        throw IllegalArgumentException("Custom filename cannot be empty")
+                    }
 
                     // Use FilesViewModel method to add new meter with custom filename
                     filesViewModel.addNewMeterWithCustomFileName(
@@ -355,13 +420,21 @@ class MeterDataInputFragment : DialogFragment() {
                 updateLoadingMessage(getString(R.string.preparing_to_return))
                 kotlinx.coroutines.delay(400)
 
-                // Success - dismiss dialog and let DetectedFragment auto-refresh
+                // FIXED: Success - send callback to DetectedFragment and dismiss
                 withContext(Dispatchers.Main) {
                     hideLoadingState()
                     Toast.makeText(requireContext(), getString(R.string.meter_data_updated_successfully), Toast.LENGTH_SHORT).show()
 
                     kotlinx.coroutines.delay(300)
-                    dismiss() // Simply dismiss - DetectedFragment will auto-refresh!
+
+                    // CRITICAL FIX: Send fragment result to notify DetectedFragment
+                    setFragmentResult(
+                        DetectedFragment.METER_DATA_UPDATED_KEY,
+                        bundleOf("updated" to true)
+                    )
+
+                    Log.d(TAG, "📢 Sent meter data update callback to DetectedFragment")
+                    dismiss()
                 }
 
             } catch (e: Exception) {
@@ -383,78 +456,34 @@ class MeterDataInputFragment : DialogFragment() {
             binding.customLocationInput.text?.toString()?.trim() ?: ""
         } else {
             val selectedPosition = binding.locationSpinner.selectedItemPosition
-            val adapter = binding.locationSpinner.adapter as? ArrayAdapter<String>
-            val selectedItem = adapter?.getItem(selectedPosition) ?: ""
-            if (selectedItem == getString(R.string.add_locations)) "" else selectedItem
-        }
-    }
-
-    private fun getDatabaseFileName(): String? {
-        return if (binding.autoGenerateFileNameSwitch.isChecked) {
-            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            "scanned_meters_$timestamp.csv"
-        } else {
-            binding.customFileNameInput.text?.toString()?.trim()?.let { name ->
-                if (name.isNotBlank()) {
-                    if (!name.endsWith(".csv", ignoreCase = true)) {
-                        "$name.csv"
-                    } else {
-                        name
-                    }
-                } else null
+            if (selectedPosition > 0) {
+                binding.locationSpinner.selectedItem.toString()
+            } else {
+                ""
             }
         }
     }
 
-    private fun isValidFileName(filename: String): Boolean {
-        val invalidChars = charArrayOf('/', '\\', '?', '%', '*', ':', '|', '"', '<', '>')
-        return filename.isNotBlank() &&
-                filename.none { it in invalidChars } &&
-                filename.length <= 100
+    private fun getMeterNumber(): String {
+        return binding.numberInput.text?.toString()?.trim() ?: ""
     }
 
     private fun showLoadingState() {
-        // Disable all input controls
+        binding.loadingOverlay.visibility = View.VISIBLE
         binding.saveButton.isEnabled = false
         binding.cancelButton.isEnabled = false
-        binding.locationSpinner.isEnabled = false
-        binding.numberInput.isEnabled = false
-        binding.customLocationInput.isEnabled = false
-
-        if (isNewMeter) {
-            binding.autoGenerateFileNameSwitch.isEnabled = false
-            binding.customFileNameInput.isEnabled = false
-        }
-
-        // Update save button to show loading
-        binding.saveButton.text = getString(R.string.saving_please_wait)
-
-        Log.d(TAG, "Loading state activated")
-    }
-
-    private suspend fun updateLoadingMessage(message: String) {
-        withContext(Dispatchers.Main) {
-            Log.d(TAG, "Loading message: $message")
-        }
     }
 
     private fun hideLoadingState() {
-        // Re-enable all controls
+        binding.loadingOverlay.visibility = View.GONE
         binding.saveButton.isEnabled = true
         binding.cancelButton.isEnabled = true
-        binding.locationSpinner.isEnabled = true
-        binding.numberInput.isEnabled = true
-        binding.customLocationInput.isEnabled = true
+    }
 
-        if (isNewMeter) {
-            binding.autoGenerateFileNameSwitch.isEnabled = true
-            binding.customFileNameInput.isEnabled = true
+    private fun updateLoadingMessage(message: String) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            binding.loadingMessage.text = message
         }
-
-        // Reset save button text
-        binding.saveButton.text = getString(R.string.save)
-
-        Log.d(TAG, "Loading state deactivated")
     }
 
     override fun onDestroyView() {

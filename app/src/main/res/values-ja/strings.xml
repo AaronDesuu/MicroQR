@@ -131,7 +131,7 @@
     <string name="processing">処理中…</string>
     <string name="detection_error">検出エラー</string>
     <string name="verification_completed">確認完了</string>
-    <string name="check_serial_number">シリアル番号を確認</string>
+    <string name="check_serial_number">登録</string>
     <string name="serial_verification_completed">シリアル番号が正常に確認されました</string>
     <string name="error_verifying_serial">シリアル番号の確認中にエラーが発生しました</string>
     <string name="error_processing_meter">メーターデータの処理中にエラーが発生しました</string>
@@ -153,7 +153,6 @@
 
     <!-- Database File Name Section -->
     <string name="database_file_name">データベースファイル名</string>
-    <string name="database_file_description">このメーターを保存するためのデータベースファイル名を選択してください</string>
     <string name="auto_generate_filename">ファイル名を自動生成</string>
     <string name="auto_generated_filename">自動生成: %s</string>
     <string name="enter_database_filename">データベースファイル名を入力</string>
@@ -676,7 +675,7 @@
     <string name="save_and_continue">保存して続行</string>
     <string name="update_meter">メーターを更新</string>
     <string name="keep_current">現在の設定を保持</string>
-    <string name="cancel">キャンセル</string>
+    <string name="cancel">戻る</string>
 
     <!-- ========================================== -->
     <!-- DETECTED FRAGMENT - ステータスメッセージ -->
@@ -716,7 +715,7 @@
     <!-- DETECTED FRAGMENT - 場所オプション -->
     <!-- ========================================== -->
     <string name="select_location">場所を選択</string>
-    <string name="custom_location">カスタム場所</string>
+    <string name="custom_location">新しい場所</string>
     <string name="meter_location">メーター場所</string>
     <string name="meter_number">メーター番号</string>
 
@@ -1013,7 +1012,7 @@
     <string name="serial_added_to_database">シリアル番号がデータベースに追加されました</string>
     <string name="choose_meter_number">メーター番号を選択</string>
     <string name="choose_location">場所を選択</string>
-    <string name="enter_custom_location">カスタム場所を入力</string>
+    <string name="enter_custom_location">新規場所を追加</string>
     <string name="custom_location_hint">場所名を入力</string>
     <string name="meter_number_hint">メーター番号を入力</string>
     <string name="save_meter_data">メーターデータを保存</string>
@@ -1053,8 +1052,8 @@
     <string name="error_qr_scan_failed">QRコードのスキャンに失敗しました</string>
     <string name="error_database_update">データベースの更新に失敗しました</string>
     <string name="error_invalid_serial">無効なシリアル番号形式</string>
-    <string name="back">back</string>
-    <string name="next">next</string>
+    <string name="back">戻る</string>
+    <string name="next">次へ</string>
 
     <!-- Additional common strings (Japanese) -->
     <!-- Error Messages for Location Management -->
@@ -1152,11 +1151,47 @@
 
     <string name="scan_status">ステータス</string>
     <string name="edit_meter">メーターを編集</string>
-    <string name="set_meter_data">メーターのデータを設定</string>
+    <string name="set_meter_data">設定を行う</string>
     <string name="error_location_required">位置情報が必要です</string>
     <string name="error_number_required">番号が必要です</string>
     <string name="error_saving_meter_data">メーターデータの保存中にエラーが発生しました</string>
     <string name="enter_meter_number">メーター番号を入力</string>
     <string name="save">保存</string>
+
+
+    <!-- Loading States -->
+    <string name="saving_meter_data">メーターを保存中...</string>
+    <string name="saving_please_wait">保存中...お待ちください</string>
+    <string name="please_wait_message">データを処理中です。しばらくお待ちください</string>
+    <string name="verifying_changes">変更を確認中...</string>
+    <string name="preparing_to_return">戻る準備をしています...</string>
+
+    <!-- Database Refresh States -->
+    <string name="refreshing_data">データを更新中...</string>
+    <string name="database_update_in_progress">データベースの更新中</string>
+    <string name="loading_updated_information">更新された情報を読み込み中...</string>
+
+    <!-- Success Messages -->
+    <string name="meter_data_updated_successfully">✅ メーターのデータが正常に更新されました！</string>
+    <string name="data_refresh_complete">データの更新が完了しました</string>
+    <string name="ready_for_verification_celebration">確認の準備ができました！🎉</string>
+
+    <!-- Error Recovery -->
+    <string name="retry_data_refresh">データの更新を再試行</string>
+    <string name="could_not_refresh_data">メーターのデータを更新できませんでした。もう一度お試しください。</string>
+    <string name="database_timeout_error">データベースの更新がタイムアウトしました。再試行してください。</string>
+
+    <!-- Progress Phases -->
+    <string name="phase_saving_to_database">データベースに保存中...</string>
+    <string name="phase_waiting_for_commit">データベースへのコミットを待機中...</string>
+    <string name="phase_refreshing_connections">データベース接続を更新中...</string>
+    <string name="phase_verifying_save">データが保存されたか確認中...</string>
+    <string name="phase_preparing_navigation">ナビゲーションを準備中...</string>
+
+    <!-- Timing Messages -->
+    <string name="this_may_take_a_moment">しばらくお待ちください...</string>
+    <string name="ensuring_data_consistency">データの整合性を確認中...</string>
+    <string name="finalizing_changes">変更を確定中...</string>
+
 
 </resources>

@@ -159,7 +159,6 @@
 
     <!-- Database File Name Section -->
     <string name="database_file_name">Database File Name</string>
-    <string name="database_file_description">Choose a name for the database file that will store this meter</string>
     <string name="auto_generate_filename">Auto-generate file name</string>
     <string name="auto_generated_filename">Auto-generated: %s</string>
     <string name="enter_database_filename">Enter database file name</string>

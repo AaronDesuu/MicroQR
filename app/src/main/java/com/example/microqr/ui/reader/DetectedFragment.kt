@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.microqr.R
@@ -23,6 +24,7 @@ class DetectedFragment : Fragment() {
 
     companion object {
         private const val TAG = "DetectedFragment"
+        const val METER_DATA_UPDATED_KEY = "meter_data_updated"
     }
 
     private var _binding: FragmentDetectedBinding? = null
@@ -42,6 +44,7 @@ class DetectedFragment : Fragment() {
         NEEDS_METER_DATA,
         READY_FOR_SN_CHECK,
         SN_VERIFIED,
+        COMPLETED,  // NEW: Added completed state
         ERROR
     }
 
@@ -63,6 +66,15 @@ class DetectedFragment : Fragment() {
 
         if (rawQrValue.isBlank()) {
             Log.e(TAG, "ERROR: rawQrValue is null or blank!")
+        }
+
+        // FIXED: Setup fragment result listener for MeterDataInputFragment callback
+        setFragmentResultListener(METER_DATA_UPDATED_KEY) { _, bundle ->
+            val updated = bundle.getBoolean("updated", false)
+            if (updated) {
+                Log.d(TAG, "📢 Received meter data update callback")
+                refreshCurrentMeterData()
+            }
         }
     }
 
@@ -105,13 +117,19 @@ class DetectedFragment : Fragment() {
         }
     }
 
-    // Removed automatic onResume refresh - now using callback mechanism
     override fun onResume() {
         super.onResume()
-        Log.d(TAG, "DetectedFragment onResume called - using callback mechanism for refresh")
+        Log.d(TAG, "DetectedFragment onResume called")
+
+        // FIXED: Only auto-refresh if we have a detected serial and current meter
+        // This prevents unnecessary refreshes while still catching missed updates
+        if (detectedSerial.isNotBlank() && currentMeter != null) {
+            Log.d(TAG, "Auto-refreshing meter data on resume")
+            refreshCurrentMeterData()
+        }
     }
 
-    // FIXED: Enhanced refresh method with better error handling
+    // FIXED: Enhanced refresh method with better error handling and retry logic
     private fun refreshCurrentMeterData() {
         if (detectedSerial.isBlank()) {
             Log.w(TAG, "Cannot refresh - no detected serial")
@@ -167,45 +185,22 @@ class DetectedFragment : Fragment() {
                     evaluateMeterState(refreshedMeter)
                 } else {
                     Log.w(TAG, "⚠️ Could not find meter after refresh: $detectedSerial")
-                    // Keep current state if meter not found
-                    updateUI()
+                    // Keep current state if meter not found but don't show error
+                    currentMeter?.let { meter ->
+                        evaluateMeterState(meter)
+                    } ?: run {
+                        updateUI()
+                    }
                 }
 
             } catch (e: Exception) {
                 Log.e(TAG, "Error in refreshCurrentMeterData: ${e.message}", e)
                 // Fall back to current state on error
-                updateUI()
-            }
-        }
-    }
-
-    private fun processQrData() {
-        if (rawQrValue.isBlank()) {
-            showErrorState(getString(R.string.error_generic))
-            return
-        }
-
-        // Set initial state and UI
-        currentFlowState = FlowState.PROCESSING
-        detectedSerial = parseSerialNumber(rawQrValue)
-        updateUI()
-
-        // Process the meter data
-        lifecycleScope.launch {
-            try {
-                when (scanContext) {
-                    "METER_CHECK" -> {
-                        Log.d(TAG, "Handling MeterCheck context")
-                        handleMeterCheckContext()
-                    }
-                    else -> {
-                        Log.d(TAG, "Handling default context")
-                        handleDefaultContext()
-                    }
+                currentMeter?.let { meter ->
+                    evaluateMeterState(meter)
+                } ?: run {
+                    updateUI()
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error processing QR data: ${e.message}", e)
-                showErrorState(getString(R.string.error_processing_meter))
             }
         }
     }
@@ -300,200 +295,112 @@ class DetectedFragment : Fragment() {
         return match?.value ?: qrValue.trim()
     }
 
-    private fun handleMeterCheckContext() {
-        lifecycleScope.launch {
-            try {
-                kotlinx.coroutines.delay(1000)
-
-                val foundMeter = filesViewModel.findMeterBySerial(detectedSerial)
-                if (foundMeter != null) {
-                    currentMeter = foundMeter
-                    evaluateMeterState(foundMeter)
-                } else {
-                    Log.d(TAG, "Meter not found in database: $detectedSerial")
-                    handleMeterNotFound()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in handleMeterCheckContext: ${e.message}", e)
-                showErrorState(getString(R.string.error_checking_locations))
-            }
+    private fun processQrData() {
+        if (rawQrValue.isBlank()) {
+            showErrorState(getString(R.string.error_generic))
+            return
         }
-    }
 
-    private fun handleDefaultContext() {
+        // Set initial state and UI
+        currentFlowState = FlowState.PROCESSING
+        detectedSerial = parseSerialNumber(rawQrValue)
+        updateUI()
+
+        // Process the meter data
         lifecycleScope.launch {
             try {
-                kotlinx.coroutines.delay(1000)
-
-                val foundMeter = filesViewModel.findMeterBySerial(detectedSerial)
-                if (foundMeter != null) {
-                    currentMeter = foundMeter
-                    evaluateMeterState(foundMeter)
-                } else {
-                    Log.d(TAG, "Meter not found in any context: $detectedSerial")
-                    handleMeterNotFound()
+                when (scanContext) {
+                    "METER_CHECK" -> {
+                        Log.d(TAG, "Handling MeterCheck context")
+                        handleMeterCheckContext()
+                    }
+                    else -> {
+                        Log.d(TAG, "Handling default context")
+                        handleDefaultContext()
+                    }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error in handleDefaultContext: ${e.message}", e)
+                Log.e(TAG, "Error processing QR data: ${e.message}", e)
                 showErrorState(getString(R.string.error_processing_meter))
             }
         }
     }
 
+    private suspend fun handleMeterCheckContext() {
+        Log.d(TAG, "Looking for meter in database: $detectedSerial")
+
+        val foundMeter = filesViewModel.findMeterBySerial(detectedSerial)
+
+        if (foundMeter != null) {
+            Log.d(TAG, "✅ Meter found in database")
+            currentMeter = foundMeter
+            evaluateMeterState(foundMeter)
+        } else {
+            Log.d(TAG, "❌ Meter not found - creating new entry")
+            createNewMeter()
+        }
+    }
+
+    private suspend fun handleDefaultContext() {
+        Log.d(TAG, "Processing default QR scan context")
+        val foundMeter = filesViewModel.findMeterBySerial(detectedSerial)
+
+        if (foundMeter != null) {
+            currentMeter = foundMeter
+            evaluateMeterState(foundMeter)
+        } else {
+            createNewMeter()
+        }
+    }
+
+    private suspend fun createNewMeter() {
+        Log.d(TAG, "Creating new meter for serial: $detectedSerial")
+
+        try {
+            val newMeter = MeterStatus(
+                serialNumber = detectedSerial,
+                number = getString(R.string.not_set),
+                place = getString(R.string.not_set),
+                registered = false,
+                fromFile = getString(R.string.scanner_input),
+                isChecked = false,
+                isSelectedForProcessing = false
+            )
+
+            currentMeter = newMeter
+            Log.d(TAG, "✅ New meter created successfully")
+            evaluateMeterState(newMeter)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating new meter: ${e.message}", e)
+            showErrorState(getString(R.string.error_processing_meter))
+        }
+    }
+
     private fun evaluateMeterState(meter: MeterStatus) {
         Log.d(TAG, "Evaluating meter state for: ${meter.serialNumber}")
-        Log.d(TAG, "  Place: '${meter.place}'")
-        Log.d(TAG, "  Number: '${meter.number}'")
+        Log.d(TAG, "  Location: '${meter.place}' (valid: ${isValidMeterLocation(meter.place)})")
+        Log.d(TAG, "  Number: '${meter.number}' (valid: ${isValidMeterNumber(meter.number)})")
         Log.d(TAG, "  Registered: ${meter.registered}")
-        Log.d(TAG, "  Checked: ${meter.isChecked}")
 
         val hasValidLocation = isValidMeterLocation(meter.place)
         val hasValidNumber = isValidMeterNumber(meter.number)
 
         when {
-            hasValidLocation && hasValidNumber && !meter.isChecked -> {
-                Log.d(TAG, "Meter ready for S/N check")
-                currentFlowState = FlowState.READY_FOR_SN_CHECK
-                updateUI()
-            }
-            meter.isChecked -> {
-                Log.d(TAG, "Meter already verified")
-                currentFlowState = FlowState.SN_VERIFIED
-                updateUI()
-            }
             !hasValidLocation || !hasValidNumber -> {
-                Log.d(TAG, "Meter needs additional data")
+                Log.d(TAG, "➤ State: NEEDS_METER_DATA")
                 currentFlowState = FlowState.NEEDS_METER_DATA
-                updateUI()
+                showNeedsMeterDataState()
+            }
+            !meter.registered -> {
+                Log.d(TAG, "➤ State: READY_FOR_SN_CHECK")
+                currentFlowState = FlowState.READY_FOR_SN_CHECK
+                showReadyForCheckState()
             }
             else -> {
-                Log.d(TAG, "Meter in ready state")
-                currentFlowState = FlowState.READY_FOR_SN_CHECK
-                updateUI()
-            }
-        }
-    }
-
-    // FIXED: Use correct LocationRepository method
-    private fun handleMeterNotFound() {
-        lifecycleScope.launch {
-            try {
-                val availableLocations = locationRepository.getActiveLocationNames()
-
-                if (availableLocations.isEmpty()) {
-                    showNoLocationsDialog()
-                } else {
-                    // Create new meter with blank data
-                    currentMeter = MeterStatus(
-                        serialNumber = detectedSerial,
-                        place = "",
-                        number = "",
-                        fromFile = getString(R.string.scanner_input),
-                        registered = false,
-                        isChecked = false
-                    )
-                    currentFlowState = FlowState.NEEDS_METER_DATA
-                    updateUI()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error checking locations: ${e.message}", e)
-                showNoLocationsDialog()
-            }
-        }
-    }
-
-    private fun isValidMeterLocation(location: String?): Boolean {
-        return !location.isNullOrBlank() &&
-                location.trim() != getString(R.string.not_set) &&
-                location.trim() != getString(R.string.unknown)
-    }
-
-    private fun isValidMeterNumber(number: String?): Boolean {
-        return !number.isNullOrBlank() &&
-                number.trim() != getString(R.string.not_set) &&
-                number.trim() != getString(R.string.unknown)
-    }
-
-    private fun setupClickListeners() {
-        binding.nextButton.setOnClickListener {
-            when (currentFlowState) {
-                FlowState.NEEDS_METER_DATA -> openMeterDataInput()
-                FlowState.READY_FOR_SN_CHECK -> performSerialNumberCheck()
-                FlowState.SN_VERIFIED -> navigateBack()
-                else -> {
-                    Log.w(TAG, "Button clicked in invalid state: $currentFlowState")
-                }
-            }
-        }
-
-        binding.backButton.setOnClickListener {
-            navigateBack()
-        }
-    }
-
-    private fun openMeterDataInput() {
-        try {
-            currentMeter?.let { meter ->
-                Log.d(TAG, "Opening MeterDataInput for serial: ${meter.serialNumber}")
-
-                val needsLocation = !isValidMeterLocation(meter.place)
-                val needsNumber = !isValidMeterNumber(meter.number)
-                val isNewMeter = meter.fromFile == getString(R.string.scanner_input)
-
-                Log.d(TAG, "needsLocation: $needsLocation, needsNumber: $needsNumber, isNewMeter: $isNewMeter")
-
-                val fragment = MeterDataInputFragment.newInstance(
-                    serialNumber = meter.serialNumber,
-                    currentLocation = meter.place,
-                    currentNumber = meter.number,
-                    needsLocation = needsLocation,
-                    needsNumber = needsNumber,
-                    isNewMeter = isNewMeter
-                )
-
-                // Use DialogFragment.show() instead of Navigation Component
-                fragment.show(parentFragmentManager, "MeterDataInput")
-            } ?: run {
-                Log.e(TAG, "Cannot open MeterDataInput: currentMeter is null")
-                Toast.makeText(requireContext(), "Error: No meter data available", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error opening MeterDataInput: ${e.message}", e)
-            Toast.makeText(requireContext(), getString(R.string.error_navigation), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun performSerialNumberCheck() {
-        Log.d(TAG, "Performing S/N check for meter: ${currentMeter?.serialNumber}")
-
-        lifecycleScope.launch {
-            try {
-                currentMeter?.let { meter ->
-                    val updatedMeter = meter.copy(
-                        registered = true,
-                        isChecked = true
-                    )
-
-                    filesViewModel.getMeterRepository().updateMeter(updatedMeter)
-                    currentMeter = updatedMeter
-
-                    Log.d(TAG, "S/N check completed successfully")
-                    currentFlowState = FlowState.SN_VERIFIED
-                    updateUI()
-
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.serial_verification_completed),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error performing S/N check: ${e.message}", e)
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.error_verifying_serial),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Log.d(TAG, "➤ State: SN_VERIFIED")
+                currentFlowState = FlowState.SN_VERIFIED
+                showVerifiedState()
             }
         }
     }
@@ -504,6 +411,7 @@ class DetectedFragment : Fragment() {
             FlowState.NEEDS_METER_DATA -> showNeedsMeterDataState()
             FlowState.READY_FOR_SN_CHECK -> showReadyForCheckState()
             FlowState.SN_VERIFIED -> showVerifiedState()
+            FlowState.COMPLETED -> showCompletedState()  // NEW: Added completed state
             FlowState.ERROR -> showErrorState(getString(R.string.error_generic))
         }
     }
@@ -515,6 +423,13 @@ class DetectedFragment : Fragment() {
         binding.nextButton.text = getString(R.string.processing)
         binding.nextButton.isEnabled = false
         binding.nextButton.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.primary_color)
+
+        // Set serial number if available
+        if (detectedSerial.isNotBlank()) {
+            binding.detectedSerial.text = detectedSerial
+        }
+
+        // Show loading state for status rows
         updateStatusRows(false, false, false)
     }
 
@@ -551,8 +466,23 @@ class DetectedFragment : Fragment() {
     private fun showVerifiedState() {
         binding.statusIcon.setImageResource(R.drawable.ic_check_circle)
         binding.statusIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.success_green))
-        binding.titleText.text = getString(R.string.verification_completed)
-        binding.nextButton.text = getString(R.string.ready_for_verification_celebration)
+        binding.titleText.text = getString(R.string.serial_verification_completed)
+        binding.nextButton.text = getString(R.string.done)  // FIXED: Changed to "完了" (Complete)
+        binding.nextButton.isEnabled = true
+        binding.nextButton.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.success_green)
+
+        currentMeter?.let { meter ->
+            updateStatusRows(true, true, true)
+            updateMeterInfoDisplay(meter, true, true)
+        }
+    }
+
+    // NEW: Added completed state for final confirmation
+    private fun showCompletedState() {
+        binding.statusIcon.setImageResource(R.drawable.ic_check_circle)
+        binding.statusIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.success_green))
+        binding.titleText.text = getString(R.string.meter_scan_completed)
+        binding.nextButton.text = getString(R.string.back_to_meter_list)
         binding.nextButton.isEnabled = true
         binding.nextButton.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.success_green)
 
@@ -634,83 +564,157 @@ class DetectedFragment : Fragment() {
         }
     }
 
-    // FIXED: Update meter info display with correct binding names
     private fun updateMeterInfoDisplay(meter: MeterStatus, hasLocation: Boolean, hasNumber: Boolean) {
-        // Update serial number display
+        // Update the displayed meter information
         binding.detectedSerial.text = meter.serialNumber
 
-        // Update location display (using locationValue from layout)
-        try {
-            binding.locationValue.text = if (hasLocation) {
-                meter.place
-            } else {
-                getString(R.string.not_set)
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Could not update location display: ${e.message}")
-        }
+        // Update other display fields as needed based on your layout
+        if (_binding != null) {
+            try {
+                // Update values in the status rows based on actual layout
+                if (hasLocation) {
+                    binding.locationValue?.text = meter.place
+                } else {
+                    binding.locationValue?.text = getString(R.string.not_set)
+                }
 
-        // Update number display (using numberValue from layout)
-        try {
-            binding.numberValue.text = if (hasNumber) {
-                meter.number
-            } else {
-                getString(R.string.not_set)
+                if (hasNumber) {
+                    binding.numberValue?.text = meter.number
+                } else {
+                    binding.numberValue?.text = getString(R.string.not_set)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Some display fields not available in layout: ${e.message}")
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "Could not update number display: ${e.message}")
-        }
-
-        // Update serial status text
-        try {
-            binding.serialStatusText.text = if (meter.isChecked) {
-                getString(R.string.verified)
-            } else {
-                getString(R.string.pending_verification)
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Could not update serial status text: ${e.message}")
         }
     }
 
-    private fun showNoLocationsDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.no_locations_found))
-            .setMessage("This meter is not in any database. No locations are configured yet. Would you like to add some locations first, or continue with manual entry?")
-            .setPositiveButton(getString(R.string.add_locations)) { _, _ ->
-                navigateToLocationFragment()
+    private fun isValidMeterLocation(location: String?): Boolean {
+        return !location.isNullOrBlank() &&
+                location.trim() != getString(R.string.not_set) &&
+                location.trim() != getString(R.string.unknown)
+    }
+
+    private fun isValidMeterNumber(number: String?): Boolean {
+        return !number.isNullOrBlank() &&
+                number.trim() != getString(R.string.not_set) &&
+                number.trim() != getString(R.string.unknown)
+    }
+
+    private fun setupClickListeners() {
+        binding.nextButton.setOnClickListener {
+            when (currentFlowState) {
+                FlowState.NEEDS_METER_DATA -> openMeterDataInput()
+                FlowState.READY_FOR_SN_CHECK -> performSerialNumberCheck()
+                FlowState.SN_VERIFIED -> navigateToMeterCheck()  // FIXED: Navigate to MeterCheck on "完了"
+                FlowState.COMPLETED -> navigateToMeterCheck()    // NEW: Also handle completed state
+                FlowState.ERROR -> refreshCurrentMeterData()
+                else -> {
+                    Log.w(TAG, "Button clicked in invalid state: $currentFlowState")
+                }
             }
-            .setNegativeButton(getString(R.string.continue_anyway)) { _, _ ->
-                currentMeter = MeterStatus(
-                    serialNumber = detectedSerial,
-                    place = "",
-                    number = "",
-                    fromFile = getString(R.string.scanner_input),
-                    registered = false,
-                    isChecked = false
+        }
+
+        binding.backButton.setOnClickListener {
+            navigateBack()
+        }
+    }
+
+    private fun openMeterDataInput() {
+        try {
+            currentMeter?.let { meter ->
+                Log.d(TAG, "Opening MeterDataInput for serial: ${meter.serialNumber}")
+
+                val needsLocation = !isValidMeterLocation(meter.place)
+                val needsNumber = !isValidMeterNumber(meter.number)
+                val isNewMeter = meter.fromFile == getString(R.string.scanner_input)
+
+                Log.d(TAG, "needsLocation: $needsLocation, needsNumber: $needsNumber, isNewMeter: $isNewMeter")
+
+                val fragment = MeterDataInputFragment.newInstance(
+                    serialNumber = meter.serialNumber,
+                    currentLocation = meter.place,
+                    currentNumber = meter.number,
+                    needsLocation = needsLocation,
+                    needsNumber = needsNumber,
+                    isNewMeter = isNewMeter
                 )
-                currentFlowState = FlowState.NEEDS_METER_DATA
-                updateUI()
+
+                // Use DialogFragment.show() instead of Navigation Component
+                fragment.show(parentFragmentManager, "MeterDataInput")
+            } ?: run {
+                Log.e(TAG, "Cannot open MeterDataInput - currentMeter is null")
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.error_generic),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-            .setCancelable(false)
-            .show()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening MeterDataInput: ${e.message}", e)
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.error_navigation),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
-    private fun navigateToLocationFragment() {
+    // ORIGINAL LOGIC PRESERVED: Serial Number Check just updates database, no camera
+    private fun performSerialNumberCheck() {
+        Log.d(TAG, "Performing S/N check for meter: ${currentMeter?.serialNumber}")
+
+        lifecycleScope.launch {
+            try {
+                currentMeter?.let { meter ->
+                    val updatedMeter = meter.copy(
+                        registered = true,
+                        isChecked = true
+                    )
+
+                    filesViewModel.getMeterRepository().updateMeter(updatedMeter)
+                    currentMeter = updatedMeter
+
+                    Log.d(TAG, "S/N check completed successfully")
+                    currentFlowState = FlowState.SN_VERIFIED  // FIXED: Go to verified state first
+                    updateUI()
+
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.serial_verification_completed),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error performing S/N check: ${e.message}", e)
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.error_verifying_serial),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    // NEW: Navigate to MeterCheckFragment
+    private fun navigateToMeterCheck() {
         try {
-            findNavController().navigate(R.id.action_detectedFragment_to_locationFragment)
+            Log.d(TAG, "Navigating to MeterCheckFragment")
+            findNavController().navigate(R.id.action_detectedFragment_to_meterCheckFragment)
         } catch (e: Exception) {
-            Log.e(TAG, "Navigation to LocationFragment failed: ${e.message}", e)
-            Toast.makeText(requireContext(), getString(R.string.error_navigation), Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "Error navigating to MeterCheck: ${e.message}", e)
+            // Fallback to popping back
+            navigateBack()
         }
     }
 
     private fun navigateBack() {
         try {
-            findNavController().navigate(R.id.action_detectedFragment_to_meterCheckFragment)
-        } catch (e: Exception) {
-            Log.e(TAG, "Navigation back failed: ${e.message}", e)
+            Log.d(TAG, "Navigating back from DetectedFragment")
             findNavController().popBackStack()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error navigating back: ${e.message}", e)
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
 
