@@ -373,7 +373,7 @@
     <string name="meter_number_label">🔢 Number: %s</string>
     <string name="meter_serial_label">🏷️ Serial: %s</string>
     <string name="meter_location_label">📍 Location: %s</string>
-    <string name="meter_source_label">📁 Source: %s</string>
+    <string name="meter_source_label">📁</string>
     <string name="status_summary">📋 Status Summary:</string>
     <string name="registration_status">• Registration: %s</string>
     <string name="qr_scan_status" translatable="false">• QR Scan: %s</string>
@@ -565,7 +565,6 @@
     <string name="meter_match_unmatched">Unmatched</string>
     <string name="meter_match_no_results">No results to display</string>
     <string name="meter_match_clear_all">Clear All</string>
-    <string name="meter_match_meter_results">Meter Results</string>
     <string name="meter_match_empty_state_description">No meters found</string>
     <string name="meter_match_empty_title">No meters found</string>
     <string name="meter_match_empty_subtitle">Try adjusting your search or filter criteria.</string>
@@ -1211,6 +1210,21 @@
     <string name="error_meter_already_exists">Meter with this serial number already exists in the selected file</string>
     <string name="database_file_description">file description</string>
     <string name="select_file_prompt">Select File</string>
+
+    <!-- New strings for dialog_meter_info_match -->
+    <string name="scan_meter_match">Scan Meter</string>
+    <string name="mark_as_scanned_match">Mark as Scanned</string>
+    <string name="cd_mark_as_scanned">Mark meter as scanned</string>
+
+    <!-- Additional strings if needed for icons -->
+    <string name="meter_info_match_dialog_title">Meter Information - Match</string>
+    <!-- Confirmation dialog strings -->
+    <string name="confirm_mark_scanned">Confirm Mark as Scanned</string>
+    <string name="confirm_mark_scanned_message">Mark meter %1$s (Serial: %2$s) as scanned?\n\nThis will update the meter status in the database.</string>
+    <string name="confirm_unmark_scanned">Confirm Mark as Unscanned</string>
+    <string name="confirm_unmark_scanned_message">Mark meter %1$s (Serial: %2$s) as unscanned?\n\nThis will update the meter status in the database.</string>
+    <string name="batch_reading">Meter Batch Read</string>
+    <string name="batch_reading_text">Batch Read all Meters on the list</string>
 
 
 </resources>

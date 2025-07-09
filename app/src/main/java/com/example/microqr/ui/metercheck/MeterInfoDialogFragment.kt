@@ -64,7 +64,7 @@ class MeterInfoDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.dialog_meter_info, container, false)
+        return inflater.inflate(R.layout.dialog_meter_info_check, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -76,7 +76,7 @@ class MeterMatchAdapter(
                 }
                 else -> {
                     // Pending: Default badge, pending status
-                    Tuple4(R.string.status_pending_scan, R.color.md_theme_light_onSurface, R.color.md_theme_light_primary, R.drawable.ic_pending_24)
+                    Tuple4(R.string.status_pending_scan, R.color.md_theme_light_onSurface, R.color.primary_color, R.drawable.ic_pending_24)
                 }
             }
 

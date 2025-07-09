@@ -220,6 +220,70 @@
 
             </HorizontalScrollView>
 
+            <!-- Setup Locations Button -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/setup_locations_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_meter_small_24"
+                        android:contentDescription="@string/batch_reading"
+                        android:background="@drawable/circle_background_primary"
+                        android:padding="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/batch_reading"
+                            android:textColor="@color/primary_text_color"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/batch_reading_text"
+                            android:textColor="@color/secondary_text_color"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_forward_24"
+                        android:contentDescription="@string/navigate_forward"
+                        app:tint="@color/primary_color" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Statistics Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -251,7 +315,7 @@
                             android:text="@string/zero"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary" />
+                            android:textColor="@color/primary" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -345,24 +409,6 @@
                 tools:text="Data from: meter_data_2024.csv, old_meters.csv" />
 
             <!-- Section Header -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/meter_match_meter_results"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface" />
-            </LinearLayout>
 
             <!-- Enhanced RecyclerView Container -->
             <com.google.android.material.card.MaterialCardView

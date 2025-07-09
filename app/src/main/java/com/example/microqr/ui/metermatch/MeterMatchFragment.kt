@@ -3,6 +3,8 @@ package com.example.microqr.ui.metermatch
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -430,41 +432,169 @@ class MeterMatchFragment : Fragment() {
             .show()
     }
 
+    // Add this method to replace the existing showMeterDetailDialog method in MeterMatchFragment.kt
+
     private fun showMeterDetailDialog(meter: MeterStatus) {
-        val scanStatusText = if (meter.isChecked) getString(R.string.already_scanned) else getString(R.string.pending_scan_status)
-        val message = getString(R.string.meter_information) + "\n\n" +
-                getString(R.string.meter_number_label, meter.number) + "\n" +
-                getString(R.string.meter_serial_label, meter.serialNumber) + "\n" +
-                getString(R.string.meter_location_label, meter.place) + "\n" +
-                getString(R.string.meter_source_label, meter.fromFile) + "\n\n" +
-                getString(R.string.status_summary) + "\n" +
-                getString(R.string.qr_scan_status, scanStatusText)
+        // Inflate the custom dialog layout
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_meter_info_match, null)
 
-        val dialogBuilder = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.meter_details))
-            .setMessage(message)
-            .setPositiveButton(getString(R.string.ok)) { dialog, _ -> dialog.dismiss() }
+        // Create the dialog
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
 
-        // Only show scan option if not already scanned
-        if (!meter.isChecked) {
-            dialogBuilder.setNeutralButton(getString(R.string.scan_meter)) { _, _ ->
-                navigateToScanMeter(meter)
-            }
-        }
+        // Set up the dialog views and populate data
+        setupDialogViews(dialogView, meter, dialog)
 
-        // Option to manually toggle scan status
-        dialogBuilder.setNegativeButton(
-            if (meter.isChecked) getString(R.string.mark_as_unscanned) else getString(R.string.mark_as_scanned)
-        ) { _, _ ->
-            filesViewModel.updateMeterCheckedStatus(meter.serialNumber, !meter.isChecked, meter.fromFile)
-            Toast.makeText(context,
-                if (!meter.isChecked) getString(R.string.mark_as_scanned) else getString(R.string.mark_as_unscanned),
-                Toast.LENGTH_SHORT).show()
-        }
-
-        dialogBuilder.show()
+        dialog.show()
     }
 
+    private fun setupDialogViews(dialogView: View, meter: MeterStatus, dialog: androidx.appcompat.app.AlertDialog) {
+        // Find views
+        val tvMeterNumber = dialogView.findViewById<TextView>(R.id.tvDialogMeterNumber)
+        val tvStatus = dialogView.findViewById<TextView>(R.id.tvDialogStatus)
+        val tvSerialNumber = dialogView.findViewById<TextView>(R.id.tvDialogSerialNumber)
+        val tvLocation = dialogView.findViewById<TextView>(R.id.tvDialogLocation)
+        val tvSourceFile = dialogView.findViewById<TextView>(R.id.tvDialogSourceFile)
+        val btnCloseDialog = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCloseDialog)
+        val btnScanMeter = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnScanMeter)
+        val btnMarkAsScanned = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnMarkAsScanned)
+
+        // Populate meter data
+        tvMeterNumber.text = meter.number
+        tvSerialNumber.text = meter.serialNumber
+        tvLocation.text = meter.place
+        tvSourceFile.text = meter.fromFile
+
+        // Set status text and color
+        val statusText = if (meter.isChecked) {
+            getString(R.string.already_scanned)
+        } else {
+            getString(R.string.pending_scan_status)
+        }
+        tvStatus.text = statusText
+
+        // Set status color
+        val statusColor = if (meter.isChecked) {
+            ContextCompat.getColor(requireContext(), R.color.success_green)
+        } else {
+            ContextCompat.getColor(requireContext(), R.color.warning_orange)
+        }
+        tvStatus.setTextColor(statusColor)
+
+        // Set up close button
+        btnCloseDialog.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // Set up scan button
+        btnScanMeter.setOnClickListener {
+            dialog.dismiss()
+            navigateToScanMeter(meter)
+        }
+
+        // Set up mark as scanned button
+        setupMarkAsScannedButton(btnMarkAsScanned, meter, dialog)
+    }
+
+    private fun setupMarkAsScannedButton(
+        btnMarkAsScanned: com.google.android.material.button.MaterialButton,
+        meter: MeterStatus,
+        dialog: androidx.appcompat.app.AlertDialog
+    ) {
+        // Update button text and behavior based on current scan status
+        if (meter.isChecked) {
+            // Already scanned - show "Mark as Unscanned" option
+            btnMarkAsScanned.text = getString(R.string.mark_as_unscanned)
+            btnMarkAsScanned.setIconResource(R.drawable.ic_cancel_24) // You might need to add this icon
+            btnMarkAsScanned.setOnClickListener {
+                // Show confirmation dialog for unmarking
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(getString(R.string.confirm_unmark_scanned))
+                    .setMessage(getString(R.string.confirm_unmark_scanned_message, meter.number, meter.serialNumber))
+                    .setPositiveButton(getString(R.string.mark_as_unscanned)) { _, _ ->
+                        markMeterAsUnscanned(meter)
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton(getString(R.string.cancel)) { confirmDialog, _ ->
+                        confirmDialog.dismiss()
+                    }
+                    .show()
+            }
+        } else {
+            // Not scanned - show "Mark as Scanned" option
+            btnMarkAsScanned.text = getString(R.string.mark_as_scanned_match)
+            btnMarkAsScanned.setIconResource(R.drawable.ic_check_circle)
+            btnMarkAsScanned.setOnClickListener {
+                // Show confirmation dialog for marking as scanned
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(getString(R.string.confirm_mark_scanned))
+                    .setMessage(getString(R.string.confirm_mark_scanned_message, meter.number, meter.serialNumber))
+                    .setPositiveButton(getString(R.string.mark_as_scanned_match)) { _, _ ->
+                        markMeterAsScanned(meter)
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton(getString(R.string.cancel)) { confirmDialog, _ ->
+                        confirmDialog.dismiss()
+                    }
+                    .show()
+            }
+        }
+    }
+
+    private fun markMeterAsScanned(meter: MeterStatus) {
+        try {
+            // Update the meter status in the database
+            filesViewModel.updateMeterCheckedStatus(meter.serialNumber, true, meter.fromFile)
+
+            // Show success message
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.meter_marked_as_scanned, meter.number),
+                Toast.LENGTH_SHORT
+            ).show()
+
+            // Log the action
+            Log.d("MeterMatchFragment", "✅ Meter ${meter.number} (Serial: ${meter.serialNumber}) marked as scanned from ${meter.fromFile}")
+
+        } catch (e: Exception) {
+            Log.e("MeterMatchFragment", "❌ Error marking meter as scanned: ${e.message}")
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.error_update_scan_status),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun markMeterAsUnscanned(meter: MeterStatus) {
+        try {
+            // Update the meter status in the database
+            filesViewModel.updateMeterCheckedStatus(meter.serialNumber, false, meter.fromFile)
+
+            // Show success message
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.meter_marked_as_not_scanned, meter.number),
+                Toast.LENGTH_SHORT
+            ).show()
+
+            // Log the action
+            Log.d("MeterMatchFragment", "❌ Meter ${meter.number} (Serial: ${meter.serialNumber}) marked as unscanned from ${meter.fromFile}")
+
+        } catch (e: Exception) {
+            Log.e("MeterMatchFragment", "❌ Error marking meter as unscanned: ${e.message}")
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.error_update_scan_status),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    // Keep the existing navigateToScanMeter method unchanged
     private fun navigateToScanMeter(meter: MeterStatus) {
         try {
             val bundle = MeterDetailScanFragment.createBundle(meter)
