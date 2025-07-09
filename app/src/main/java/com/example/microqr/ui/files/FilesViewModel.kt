@@ -475,6 +475,79 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
         return cleaned
     }
 
+    // Add these methods to FilesViewModel.kt
+
+    /**
+     * Get list of existing MeterCheck file names
+     */
+    suspend fun getMeterCheckFiles(): List<String> {
+        return try {
+            val allFiles = repository.getAllFiles().first()
+            allFiles.filter { it.destination == ProcessingDestination.METER_CHECK && it.isValid }
+                .map { it.fileName }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting MeterCheck files: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    /**
+     * Add a new meter to an existing MeterCheck file
+     */
+    suspend fun addMeterToExistingFile(
+        serialNumber: String,
+        location: String,
+        number: String,
+        fileName: String
+    ) {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Adding meter to existing file: $fileName")
+
+                // Check if file exists and is MeterCheck
+                val existingFile = repository.getFile(fileName)
+                if (existingFile == null) {
+                    throw IllegalArgumentException("File not found: $fileName")
+                }
+
+                if (existingFile.destination != ProcessingDestination.METER_CHECK) {
+                    throw IllegalArgumentException("File is not processed for MeterCheck: $fileName")
+                }
+
+                // Create new meter
+                val newMeter = MeterStatus(
+                    serialNumber = serialNumber,
+                    number = number,
+                    place = location,
+                    registered = false,  // Will be set to true during S/N verification
+                    fromFile = fileName,
+                    isChecked = false,
+                    isSelectedForProcessing = false
+                )
+
+                // Check if meter with same serial already exists in this file
+                val existingMeter = repository.getMeter(serialNumber, fileName)
+                if (existingMeter != null) {
+                    throw IllegalArgumentException("Meter with serial $serialNumber already exists in file $fileName")
+                }
+
+                // Update file meter count
+                val updatedFile = existingFile.copy(
+                    meterCount = existingFile.meterCount + 1
+                )
+                repository.updateFile(updatedFile)
+
+                // Insert the meter
+                repository.insertMeters(listOf(newMeter))
+
+                Log.d(TAG, "✅ Added meter to existing file: $fileName")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error adding meter to existing file: ${e.message}", e)
+                throw e
+            }
+        }
+    }
+
     /**
      * Get repository access for direct database operations
      */

@@ -5,11 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.microqr.R
+import com.example.microqr.ui.files.FilesViewModel
 import com.example.microqr.ui.files.MeterStatus
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 
 class MeterInfoDialogFragment : DialogFragment() {
 
@@ -18,7 +24,11 @@ class MeterInfoDialogFragment : DialogFragment() {
     private var onScanClick: ((MeterStatus) -> Unit)? = null
     private var onDeleteClick: ((MeterStatus) -> Unit)? = null
 
+    // Add FilesViewModel reference for delete functionality
+    private val filesViewModel: FilesViewModel by activityViewModels()
+
     companion object {
+        private const val TAG = "MeterInfoDialogFragment"
         private const val ARG_METER_SERIAL = "meter_serial"
         private const val ARG_METER_NUMBER = "meter_number"
         private const val ARG_METER_LOCATION = "meter_location"
@@ -79,63 +89,43 @@ class MeterInfoDialogFragment : DialogFragment() {
     private fun setupViews(view: View) {
         val currentMeter = meter ?: return
 
-        // Header information
-        val tvDialogMeterNumber = view.findViewById<TextView>(R.id.tvDialogMeterNumber)
-        val tvDialogStatus = view.findViewById<TextView>(R.id.tvDialogStatus)
+        // Setup meter number in the badge (from layout: tvDialogMeterNumber)
+        view.findViewById<TextView>(R.id.tvDialogMeterNumber)?.text = formatMeterNumber(currentMeter.number)
 
-        // Detail information
-        val tvDialogSerialNumber = view.findViewById<TextView>(R.id.tvDialogSerialNumber)
-        val tvDialogLocation = view.findViewById<TextView>(R.id.tvDialogLocation)
-        val tvDialogSourceFile = view.findViewById<TextView>(R.id.tvDialogSourceFile)
-        val tvDialogScanStatus = view.findViewById<TextView>(R.id.tvDialogScanStatus)
+        // Setup serial number (from layout: tvDialogSerialNumber)
+        view.findViewById<TextView>(R.id.tvDialogSerialNumber)?.text = currentMeter.serialNumber
 
-        // Set meter number badge
-        tvDialogMeterNumber.text = formatMeterNumber(currentMeter.number)
-
-        // Set status summary
-        val registrationStatus = if (currentMeter.registered) {
-            getString(R.string.status_registered)
+        // Setup location (from layout: tvDialogLocation)
+        val tvLocation = view.findViewById<TextView>(R.id.tvDialogLocation)
+        if (isLocationValid(currentMeter.place)) {
+            tvLocation?.text = currentMeter.place
+            tvLocation?.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_text_color))
         } else {
-            getString(R.string.status_not_registered)
+            tvLocation?.text = getString(R.string.location_unknown)
+            tvLocation?.setTextColor(ContextCompat.getColor(requireContext(), R.color.warning_orange))
         }
-        val scanStatus = if (currentMeter.isChecked) {
-            getString(R.string.status_scanned)
-        } else {
-            getString(R.string.status_not_scanned)
-        }
-        tvDialogStatus.text = "$registrationStatus • $scanStatus"
 
-        // Set detail information
-        tvDialogSerialNumber.text = currentMeter.serialNumber
-        tvDialogLocation.text = currentMeter.place
-        tvDialogSourceFile.text = getShortFileName(currentMeter.fromFile)
+        // Setup source file (from layout: tvDialogSourceFile)
+        view.findViewById<TextView>(R.id.tvDialogSourceFile)?.text = getShortFileName(currentMeter.fromFile)
 
-        // Set scan status with color
-        tvDialogScanStatus.text = scanStatus
+        // Setup scan status (from layout: tvDialogScanStatus)
+        val tvScanStatus = view.findViewById<TextView>(R.id.tvDialogScanStatus)
         if (currentMeter.isChecked) {
-            tvDialogScanStatus.setTextColor(
-                ContextCompat.getColor(requireContext(), R.color.success_green)
-            )
+            tvScanStatus?.text = getString(R.string.status_scanned)
+            tvScanStatus?.setTextColor(ContextCompat.getColor(requireContext(), R.color.success_green))
         } else {
-            tvDialogScanStatus.setTextColor(
-                ContextCompat.getColor(requireContext(), R.color.warning_orange)
-            )
+            tvScanStatus?.text = getString(R.string.status_not_scanned)
+            tvScanStatus?.setTextColor(ContextCompat.getColor(requireContext(), R.color.warning_orange))
         }
 
-        // Highlight incomplete information
-        val isLocationValid = isLocationValid(currentMeter.place)
-        val isMeterNumberValid = isMeterNumberValid(currentMeter.number)
-
-        if (!isLocationValid) {
-            tvDialogLocation.setTextColor(
-                ContextCompat.getColor(requireContext(), R.color.warning_orange)
-            )
-        }
-
-        if (!isMeterNumberValid) {
-            tvDialogMeterNumber.setTextColor(
-                ContextCompat.getColor(requireContext(), R.color.warning_orange)
-            )
+        // Setup status text (from layout: tvDialogStatus)
+        val tvStatus = view.findViewById<TextView>(R.id.tvDialogStatus)
+        if (currentMeter.registered) {
+            tvStatus?.text = getString(R.string.status_registered)
+            tvStatus?.setTextColor(ContextCompat.getColor(requireContext(), R.color.success_green))
+        } else {
+            tvStatus?.text = getString(R.string.status_not_registered)
+            tvStatus?.setTextColor(ContextCompat.getColor(requireContext(), R.color.error_red))
         }
     }
 
@@ -147,30 +137,77 @@ class MeterInfoDialogFragment : DialogFragment() {
         val btnClose = view.findViewById<MaterialButton>(R.id.btnClose)
         val btnDeleteMeter = view.findViewById<MaterialButton>(R.id.btnDeleteMeter)
 
-        btnEditVariables.setOnClickListener {
+        btnEditVariables?.setOnClickListener {
             onEditClick?.invoke(currentMeter)
             dismiss()
         }
 
-        btnScanMeter.setOnClickListener {
+        btnScanMeter?.setOnClickListener {
             onScanClick?.invoke(currentMeter)
             dismiss()
         }
 
-        btnDeleteMeter.setOnClickListener {
-            onDeleteClick?.invoke(currentMeter)
-            dismiss()
+        btnDeleteMeter?.setOnClickListener {
+            showDeleteMeterConfirmation(currentMeter)
         }
 
-        btnClose.setOnClickListener {
+        btnClose?.setOnClickListener {
             dismiss()
         }
 
         // Set content descriptions for accessibility
-        btnEditVariables.contentDescription = getString(R.string.cd_edit_meter)
-        btnScanMeter.contentDescription = getString(R.string.cd_scan_meter)
-        btnClose.contentDescription = getString(R.string.cd_close_dialog)
-        btnDeleteMeter.contentDescription = getString(R.string.cd_delete_meter)
+        btnEditVariables?.contentDescription = getString(R.string.cd_edit_meter)
+        btnScanMeter?.contentDescription = getString(R.string.cd_scan_meter)
+        btnClose?.contentDescription = getString(R.string.cd_close_dialog)
+        btnDeleteMeter?.contentDescription = getString(R.string.cd_delete_meter)
+    }
+
+    private fun showDeleteMeterConfirmation(meter: MeterStatus) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.confirm_delete_meter_title))
+            .setMessage(
+                getString(
+                    R.string.confirm_delete_meter_message,
+                    meter.number,
+                    meter.serialNumber
+                )
+            )
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(getString(R.string.delete_meter)) { _, _ ->
+                deleteMeter(meter)
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun deleteMeter(meter: MeterStatus) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Get the repository from FilesViewModel
+                val repository = filesViewModel.getMeterRepository()
+
+                // Delete the meter using the repository method
+                repository.deleteMeter(meter.serialNumber, meter.fromFile)
+
+                // Show success message
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.meter_deleted_successfully, meter.number),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Close the dialog - the LiveData will automatically update the UI
+                dismiss()
+
+            } catch (e: Exception) {
+                // Show error message
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.error_deleting_meter, e.message),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     override fun onStart() {

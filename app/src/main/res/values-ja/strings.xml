@@ -1193,5 +1193,18 @@
     <string name="ensuring_data_consistency">データの整合性を確認中...</string>
     <string name="finalizing_changes">変更を確定中...</string>
 
+    <string name="loading_overlay_background">オーバーレイ背景を読み込み中</string>
+    <!-- NEW: Existing Files Feature Strings -->
+    <string name="existing_files_section">既存のMeterCheckファイル</string>
+    <string name="choose_file_option">ファイルオプションを選択</string>
+    <string name="create_new_file">新しいファイルを作成</string>
+    <string name="add_to_existing_file">既存のファイルに追加</string>
+    <string name="select_existing_file">既存のファイルを選択</string>
+    <string name="existing_files_description">このメーターを既存のMeterCheckファイルに追加するか、新しいファイルを作成してください</string>
+    <string name="meter_added_to_existing_file">✅ メーターが既存のファイルに追加されました: %s</string>
+    <string name="error_file_not_found">ファイルが見つかりません: %s</string>
+    <string name="error_file_not_metercheck">選択されたファイルはMeterCheck用に処理されていません</string>
+    <string name="error_meter_already_exists">このシリアル番号のメーターは選択されたファイルに既に存在します</string>
+
 
 </resources>

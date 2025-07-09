@@ -85,64 +85,123 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <!-- Auto-generate switch -->
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:text="@string/database_file_description"
+                    android:textColor="@color/secondary_text_color"
+                    android:textSize="12sp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/auto_generate_file_name_switch"
+                <!-- Existing Files Section -->
+                <LinearLayout
+                    android:id="@+id/existing_files_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="12dp"
-                        android:checked="true"
-                        android:text="@string/auto_generate_filename"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/choose_file_option"
                         android:textColor="@color/primary_text_color"
                         android:textSize="14sp"
-                        app:thumbTint="@color/primary_color"
-                        app:trackTint="@color/primary_color_light" />
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/existing_files_description"
+                        android:textColor="@color/secondary_text_color"
+                        android:textSize="12sp" />
+
+                    <!-- Existing Files Spinner -->
+                    <Spinner
+                        android:id="@+id/existing_files_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/rounded_border_background"
+                        android:paddingHorizontal="16dp"
+                        android:prompt="@string/select_file_prompt" />
 
                 </LinearLayout>
 
-                <!-- File name preview (for auto-generate mode) -->
-                <TextView
-                    android:id="@+id/file_name_preview"
+                <!-- New File Options Layout -->
+                <LinearLayout
+                    android:id="@+id/new_file_options_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:background="@drawable/rounded_border_background"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="12dp"
-                    android:textColor="@color/secondary_text_color"
-                    android:textSize="14sp"
-                    android:visibility="visible"
-                    tools:text="Auto-generated: scanned_meters_20241201_143022.csv" />
+                    android:orientation="vertical"
+                    android:visibility="visible">
 
-                <!-- Custom file name input (for manual mode) -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/custom_file_name_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/enter_database_filename"
-                    android:visibility="gone"
-                    app:boxStrokeColor="@color/primary_color"
-                    app:helperText="@string/filename_helper_text"
-                    app:helperTextTextColor="@color/secondary_text_color"
-                    app:hintTextColor="@color/secondary_text_color"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/custom_file_name_input"
+                    <!-- Auto-generate switch -->
+                    <LinearLayout
+                        android:id="@+id/auto_generate_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:maxLines="1"
-                        android:textColor="@color/primary_text_color" />
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="visible">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/auto_generate_file_name_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="12dp"
+                            android:checked="true"
+                            android:text="@string/auto_generate_filename"
+                            android:textColor="@color/primary_text_color"
+                            android:textSize="14sp"
+                            app:thumbTint="@color/primary_color"
+                            app:trackTint="@color/primary_color_light" />
+
+                    </LinearLayout>
+
+                    <!-- File name preview (for auto-generate mode) -->
+                    <TextView
+                        android:id="@+id/file_name_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/rounded_border_background"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp"
+                        android:textColor="@color/secondary_text_color"
+                        android:textSize="14sp"
+                        android:visibility="visible"
+                        tools:text="Auto-generated: scanned_meters_20241201_143022.csv" />
+
+                    <!-- Custom file name input (for manual mode) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/custom_file_name_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/enter_database_filename"
+                        android:visibility="gone"
+                        app:boxStrokeColor="@color/primary_color"
+                        app:helperText="@string/filename_helper_text"
+                        app:helperTextTextColor="@color/secondary_text_color"
+                        app:hintTextColor="@color/secondary_text_color"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/custom_file_name_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:textColor="@color/primary_text_color" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
 
             </LinearLayout>
 

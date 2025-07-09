@@ -1138,8 +1138,7 @@
 
     <!-- Edit Variables Dialog -->
     <string name="edit_meter_variables_description">Modify the meter location, number, and serial number. Changes will be saved to the database.</string>
-    <string name="location_helper_text">Enter the physical location of this meter</string>
-    <string name="serial_number_helper_text">Unique serial number from the meter hardware</string>
+
     <string name="edit_variables_warning">Caution: Changing these values will update the meter record in the database. Make sure the information is accurate.</string>
     <string name="save_changes">Save Changes</string>
     <string name="meter_updated_successfully">Meter updated successfully</string>
@@ -1193,5 +1192,25 @@
     <string name="this_may_take_a_moment">This may take a moment...</string>
     <string name="ensuring_data_consistency">Ensuring data consistency...</string>
     <string name="finalizing_changes">Finalizing changes...</string>
+
+
+    <!-- Loading Overlay Strings -->
+    <string name="loading_overlay_background">Loading Overlay Background</string>
+
+
+    <!-- NEW: Existing Files Feature Strings -->
+    <string name="existing_files_section">Existing MeterCheck Files</string>
+    <string name="choose_file_option">Choose File Option</string>
+    <string name="create_new_file">Create new file</string>
+    <string name="add_to_existing_file">Add to existing file</string>
+    <string name="select_existing_file">Select existing file</string>
+    <string name="existing_files_description">Add this meter to an existing MeterCheck file or create a new one</string>
+    <string name="meter_added_to_existing_file">✅ Meter added to existing file: %s</string>
+    <string name="error_file_not_found">File not found: %s</string>
+    <string name="error_file_not_metercheck">Selected file is not processed for MeterCheck</string>
+    <string name="error_meter_already_exists">Meter with this serial number already exists in the selected file</string>
+    <string name="database_file_description">file description</string>
+    <string name="select_file_prompt">Select File</string>
+
 
 </resources>

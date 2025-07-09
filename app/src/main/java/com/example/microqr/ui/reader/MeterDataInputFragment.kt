@@ -200,6 +200,9 @@ class MeterDataInputFragment : DialogFragment() {
         binding.fileNamePreview.visibility = View.VISIBLE
         binding.customFileNameLayout.visibility = View.GONE
 
+        // ADDED: Setup existing files section
+        setupExistingFilesSection()
+
         binding.autoGenerateFileNameSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 binding.fileNamePreview.visibility = View.VISIBLE
@@ -208,6 +211,78 @@ class MeterDataInputFragment : DialogFragment() {
                 binding.fileNamePreview.visibility = View.GONE
                 binding.customFileNameLayout.visibility = View.VISIBLE
             }
+        }
+    }
+
+    // NEW: Setup existing MeterCheck files option
+    private fun setupExistingFilesSection() {
+        lifecycleScope.launch {
+            try {
+                // Get existing MeterCheck files from FilesViewModel
+                val existingFiles = filesViewModel.getMeterCheckFiles()
+
+                if (existingFiles.isNotEmpty()) {
+                    // Show existing files option
+                    binding.existingFilesSection?.visibility = View.VISIBLE
+                    setupExistingFilesSpinner(existingFiles)
+                } else {
+                    // Hide existing files section if no files available
+                    binding.existingFilesSection?.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading existing files: ${e.message}", e)
+                binding.existingFilesSection?.visibility = View.GONE
+            }
+        }
+    }
+
+    // NEW: Setup spinner for existing files
+    private fun setupExistingFilesSpinner(existingFiles: List<String>) {
+        try {
+            val spinnerItems = mutableListOf<String>().apply {
+                add(getString(R.string.select_file_prompt))  // "ファイルを選択" as first item (placeholder)
+                add(getString(R.string.create_new_file))      // Option to create new file
+                addAll(existingFiles)                         // Existing files
+            }
+
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.existingFilesSpinner?.adapter = adapter
+
+            // Set default selection to the placeholder (position 0)
+            binding.existingFilesSpinner?.setSelection(0)
+
+            binding.existingFilesSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    when (position) {
+                        0 -> {
+                            // "ファイルを選択" selected - hide all file options (placeholder state)
+                            binding.newFileOptionsLayout?.visibility = View.GONE
+                            binding.autoGenerateLayout?.visibility = View.GONE
+                            binding.fileNamePreview?.visibility = View.GONE
+                            binding.customFileNameLayout?.visibility = View.GONE
+                        }
+                        1 -> {
+                            // "Create new file" selected - show file name options
+                            binding.newFileOptionsLayout?.visibility = View.VISIBLE
+                            binding.autoGenerateLayout?.visibility = View.VISIBLE
+                            binding.fileNamePreview?.visibility = if (binding.autoGenerateFileNameSwitch.isChecked) View.VISIBLE else View.GONE
+                            binding.customFileNameLayout?.visibility = if (binding.autoGenerateFileNameSwitch.isChecked) View.GONE else View.VISIBLE
+                        }
+                        else -> {
+                            // Existing file selected - hide ALL file name options
+                            binding.newFileOptionsLayout?.visibility = View.GONE
+                            binding.autoGenerateLayout?.visibility = View.GONE
+                            binding.fileNamePreview?.visibility = View.GONE
+                            binding.customFileNameLayout?.visibility = View.GONE
+                        }
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up existing files spinner: ${e.message}", e)
         }
     }
 
@@ -347,20 +422,47 @@ class MeterDataInputFragment : DialogFragment() {
     private fun saveMeterData() {
         Log.d(TAG, "saveMeterData called")
 
-        // Validate inputs
-        val selectedLocation = getSelectedLocation()
-        val enteredNumber = getMeterNumber()
+        // FIXED: Always get both current values AND updated values, then merge them
+        val updatedLocation = if (needsLocation) {
+            getSelectedLocation()
+        } else {
+            ""  // No update needed for location
+        }
 
-        // Validation
-        if (needsLocation && selectedLocation.isBlank()) {
+        val updatedNumber = if (needsNumber) {
+            getMeterNumber()
+        } else {
+            ""  // No update needed for number
+        }
+
+        // FIXED: Merge current values with updated values
+        val finalLocation = if (needsLocation && updatedLocation.isNotBlank()) {
+            updatedLocation  // Use new location
+        } else {
+            currentLocation  // Keep current location
+        }
+
+        val finalNumber = if (needsNumber && updatedNumber.isNotBlank()) {
+            updatedNumber    // Use new number
+        } else {
+            currentNumber    // Keep current number
+        }
+
+        // Validation - only validate fields that are being updated
+        if (needsLocation && updatedLocation.isBlank()) {
             Toast.makeText(requireContext(), getString(R.string.error_location_required), Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (needsNumber && enteredNumber.isBlank()) {
+        if (needsNumber && updatedNumber.isBlank()) {
             Toast.makeText(requireContext(), getString(R.string.error_number_required), Toast.LENGTH_SHORT).show()
             return
         }
+
+        Log.d(TAG, "Final values to save:")
+        Log.d(TAG, "  Serial: $serialNumber")
+        Log.d(TAG, "  Location: '$finalLocation' (current: '$currentLocation', updated: '$updatedLocation')")
+        Log.d(TAG, "  Number: '$finalNumber' (current: '$currentNumber', updated: '$updatedNumber')")
 
         // Show loading state
         showLoadingState()
@@ -374,30 +476,52 @@ class MeterDataInputFragment : DialogFragment() {
                 updateLoadingMessage(getString(R.string.phase_saving_to_database))
 
                 if (isNewMeter) {
-                    val customFileName = if (binding.autoGenerateFileNameSwitch.isChecked) {
-                        generateAutoFileName()
+                    // UPDATED: Check if adding to existing file or creating new file
+                    val selectedPosition = binding.existingFilesSpinner?.selectedItemPosition ?: 0
+                    val useExistingFile = selectedPosition > 1  // Position 0 = placeholder, 1 = create new, 2+ = existing files
+
+                    if (useExistingFile) {
+                        // ADDED: Add to existing MeterCheck file
+                        val selectedFileName = binding.existingFilesSpinner?.selectedItem?.toString() ?: ""
+
+                        filesViewModel.addMeterToExistingFile(
+                            serialNumber = serialNumber,
+                            location = finalLocation,
+                            number = finalNumber,
+                            fileName = selectedFileName
+                        )
+                        Log.d(TAG, "✅ Meter added to existing file: $selectedFileName")
+                    } else if (selectedPosition == 1) {
+                        // UPDATED: Create new file (position 1)
+                        val customFileName = if (binding.autoGenerateFileNameSwitch.isChecked) {
+                            generateAutoFileName()
+                        } else {
+                            binding.customFileNameInput.text?.toString()?.trim() ?: ""
+                        }
+
+                        if (customFileName.isBlank()) {
+                            throw IllegalArgumentException("Custom filename cannot be empty")
+                        }
+
+                        // Use FilesViewModel method to add new meter with custom filename
+                        filesViewModel.addNewMeterWithCustomFileName(
+                            serialNumber = serialNumber,
+                            location = finalLocation,
+                            number = finalNumber,
+                            fileName = customFileName.removeSuffix(".csv")
+                        )
+                        Log.d(TAG, "✅ New meter created in database")
                     } else {
-                        binding.customFileNameInput.text?.toString()?.trim() ?: ""
+                        // Position 0 = placeholder selected, show error
+                        throw IllegalArgumentException("Please select a file option")
                     }
-
-                    if (customFileName.isBlank()) {
-                        throw IllegalArgumentException("Custom filename cannot be empty")
-                    }
-
-                    // Use FilesViewModel method to add new meter with custom filename
-                    filesViewModel.addNewMeterWithCustomFileName(
-                        serialNumber = serialNumber,
-                        location = selectedLocation,
-                        number = enteredNumber,
-                        fileName = customFileName.removeSuffix(".csv")
-                    )
-                    Log.d(TAG, "✅ New meter created in database")
                 } else {
                     val existingMeter = filesViewModel.findMeterBySerial(serialNumber)
                     if (existingMeter != null) {
+                        // FIXED: Push both current values and updated values merged
                         val updatedMeter = existingMeter.copy(
-                            place = selectedLocation,
-                            number = enteredNumber
+                            place = finalLocation,   // Merged current + updated location
+                            number = finalNumber     // Merged current + updated number
                         )
                         filesViewModel.getMeterRepository().updateMeter(updatedMeter)
                         Log.d(TAG, "✅ Existing meter updated in database")
@@ -420,14 +544,14 @@ class MeterDataInputFragment : DialogFragment() {
                 updateLoadingMessage(getString(R.string.preparing_to_return))
                 kotlinx.coroutines.delay(400)
 
-                // FIXED: Success - send callback to DetectedFragment and dismiss
+                // Success - send callback to DetectedFragment and dismiss
                 withContext(Dispatchers.Main) {
                     hideLoadingState()
                     Toast.makeText(requireContext(), getString(R.string.meter_data_updated_successfully), Toast.LENGTH_SHORT).show()
 
                     kotlinx.coroutines.delay(300)
 
-                    // CRITICAL FIX: Send fragment result to notify DetectedFragment
+                    // Send fragment result to notify DetectedFragment
                     setFragmentResult(
                         DetectedFragment.METER_DATA_UPDATED_KEY,
                         bundleOf("updated" to true)

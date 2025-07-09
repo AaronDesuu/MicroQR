@@ -21,8 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:hint="@string/location_header"
-        app:helperText="@string/location_helper_text"
-        app:helperTextTextColor="@color/secondary_text_color"
+
         app:boxStrokeColor="@color/primary_color"
         app:hintTextColor="@color/primary_color"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -44,8 +43,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:hint="@string/meter_number_header"
-        app:helperText="@string/meter_number_helper"
-        app:helperTextTextColor="@color/secondary_text_color"
         app:boxStrokeColor="@color/primary_color"
         app:hintTextColor="@color/primary_color"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -67,8 +64,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:hint="@string/serial_number_header"
-        app:helperText="@string/serial_number_helper_text"
-        app:helperTextTextColor="@color/secondary_text_color"
         app:boxStrokeColor="@color/primary_color"
         app:hintTextColor="@color/primary_color"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
