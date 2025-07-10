@@ -1262,18 +1262,4 @@
     <string name="finish">完了</string>
 
 
-    <!-- Add these missing strings to app/src/main/res/values-ja/strings.xml -->
-
-    <!-- Additional strings for integrated edit dialog -->
-    <string name="no_changes_detected">変更が検出されませんでした</string>
-    <string name="error_updating_meter_data">メーターデータの更新中にエラーが発生しました</string>
-
-    <!-- Additional validation and helper strings -->
-    <string name="please_select_valid_location">有効なロケーションを選択してください</string>
-    <string name="meter_data_validation_failed">メーターデータの検証に失敗しました</string>
-    <string name="refreshing_meter_list">メーターリストを更新中...</string>
-
-    <!-- Navigation error messages -->
-    <string name="unable_to_navigate_to_locations">ロケーション設定に移動できません</string>
-    <string name="location_fragment_unavailable">ロケーション管理は現在利用できません</string>
 </resources>

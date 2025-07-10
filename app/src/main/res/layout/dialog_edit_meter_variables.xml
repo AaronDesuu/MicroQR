@@ -15,19 +15,51 @@
         android:textColor="@color/secondary_text_color"
         android:layout_marginBottom="16dp" />
 
-    <!-- Location Input -->
+    <!-- Location Selection Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/location_header"
+        android:textSize="16sp"
+        android:textColor="@color/primary_text_color"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Location Dropdown -->
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/locationDropdownLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:hint="@string/choose_location"
+        app:boxStrokeColor="@color/primary_color"
+        app:hintTextColor="@color/primary_color"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/locationDropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:textColor="@color/primary_text_color"
+            android:textColorHint="@color/secondary_text_color" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Custom Location Input (Initially Hidden) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/customLocationLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:hint="@string/location_header"
-
+        android:hint="@string/custom_location_hint"
+        android:visibility="gone"
         app:boxStrokeColor="@color/primary_color"
         app:hintTextColor="@color/primary_color"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etLocation"
+            android:id="@+id/etCustomLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textCapWords"
@@ -36,6 +68,23 @@
             android:textColorHint="@color/secondary_text_color" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Add Location Button (Initially Hidden) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/add_location"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:icon="@drawable/ic_add_24"
+        app:iconSize="16dp"
+        app:iconTint="@color/primary_color"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:strokeColor="@color/primary_color"
+        android:textColor="@color/primary_color"
+        app:cornerRadius="4dp" />
 
     <!-- Meter Number Input -->
     <com.google.android.material.textfield.TextInputLayout

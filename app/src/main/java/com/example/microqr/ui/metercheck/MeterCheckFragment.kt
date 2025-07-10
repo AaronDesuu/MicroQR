@@ -24,6 +24,10 @@ import com.example.microqr.ui.files.MeterStatus
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
+import android.widget.ArrayAdapter
+import com.example.microqr.data.repository.LocationRepository
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
+
 
 class MeterCheckFragment : Fragment() {
 
@@ -43,6 +47,11 @@ class MeterCheckFragment : Fragment() {
     private lateinit var emptyStateLayout: View
     private lateinit var fabScanMeter: com.google.android.material.floatingactionbutton.FloatingActionButton
 
+    companion object {
+        private const val TAG = "MeterCheckFragment"
+    }
+    private lateinit var locationRepository: LocationRepository
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -60,6 +69,7 @@ class MeterCheckFragment : Fragment() {
         setupSearchView()
         setupFilterButtons()
         setupObservers()
+        locationRepository = LocationRepository(requireContext())
     }
 
     override fun onDestroyView() {
@@ -448,59 +458,184 @@ class MeterCheckFragment : Fragment() {
     }
 
     private fun showEditMeterDialog(meter: MeterStatus) {
-        // Create a simple edit dialog for location, number, and serial number
+        // Create the edit dialog with LocationFragment integration
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_edit_meter_variables, null)
 
-        val etLocation = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etLocation)
+        // Get references to the new location-related views
+        val locationDropdown = dialogView.findViewById<MaterialAutoCompleteTextView>(R.id.locationDropdown)
+        val customLocationLayout = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.customLocationLayout)
+        val etCustomLocation = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etCustomLocation)
+        val btnAddLocation = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnAddLocation)
+
+        // Get references to existing views
         val etMeterNumber = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etMeterNumber)
         val etSerialNumber = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etSerialNumber)
 
         // Pre-fill with current values
-        etLocation.setText(meter.place)
         etMeterNumber.setText(meter.number)
         etSerialNumber.setText(meter.serialNumber)
+
+        // Setup location dropdown with data from LocationRepository
+        var currentSelectedLocation = meter.place
+        setupLocationDropdown(locationDropdown, customLocationLayout, etCustomLocation, btnAddLocation, currentSelectedLocation) { selectedLocation ->
+            currentSelectedLocation = selectedLocation
+        }
+
+        // Handle add location button
+        btnAddLocation.setOnClickListener {
+            val customLocationName = etCustomLocation.text?.toString()?.trim()
+            if (!customLocationName.isNullOrEmpty()) {
+                addLocationToDatabase(customLocationName) { success ->
+                    if (success) {
+                        currentSelectedLocation = customLocationName
+                        setupLocationDropdown(locationDropdown, customLocationLayout, etCustomLocation, btnAddLocation, currentSelectedLocation) { selectedLocation ->
+                            currentSelectedLocation = selectedLocation
+                        }
+                        // Hide custom location input after adding
+                        customLocationLayout.isVisible = false
+                        btnAddLocation.isVisible = false
+                        etCustomLocation.setText("")
+                    }
+                }
+            }
+        }
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.edit_meter_variables))
             .setView(dialogView)
             .setPositiveButton(getString(R.string.save_changes)) { _, _ ->
-                val newLocation = etLocation.text?.toString()?.trim() ?: meter.place
+                val newLocation = currentSelectedLocation
                 val newMeterNumber = etMeterNumber.text?.toString()?.trim() ?: meter.number
                 val newSerialNumber = etSerialNumber.text?.toString()?.trim() ?: meter.serialNumber
 
-                // Show progress while updating
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        // If only location and number changed, use the specific method
-                        if (newSerialNumber == meter.serialNumber) {
-                            filesViewModel.updateMeterLocationAndNumber(meter.serialNumber, newLocation, newMeterNumber)
-                        } else {
-                            // For serial number changes, update via repository
-                            val updatedMeter = meter.copy(
-                                place = newLocation,
-                                number = newMeterNumber,
-                                serialNumber = newSerialNumber
-                            )
-                            filesViewModel.getMeterRepository().updateMeter(updatedMeter)
-                        }
+                // Update meter in database
+                updateMeterInDatabase(meter, newLocation, newMeterNumber, newSerialNumber)
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
 
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.meter_updated_successfully),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } catch (e: Exception) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Failed to update meter: ${e.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+    // Add these new methods to your MeterCheckFragment class
+    private fun setupLocationDropdown(
+        dropdown: MaterialAutoCompleteTextView,
+        customLocationLayout: com.google.android.material.textfield.TextInputLayout,
+        customLocationEditText: com.google.android.material.textfield.TextInputEditText,
+        addLocationButton: com.google.android.material.button.MaterialButton,
+        currentLocation: String,
+        onLocationSelected: (String) -> Unit
+    ) {
+        lifecycleScope.launch {
+            try {
+                // Get location names from repository (returns Flow<List<String>>)
+                locationRepository.getAllActiveLocations().collect { locationNames ->
+                    val locationList = locationNames.toMutableList()
+
+                    // Add custom location option using localized string
+                    val customLocationOption = getString(R.string.enter_custom_location)
+                    locationList.add(customLocationOption)
+
+                    val adapter = ArrayAdapter<String>(
+                        requireContext(),
+                        android.R.layout.simple_dropdown_item_1line,
+                        locationList
+                    )
+                    dropdown.setAdapter(adapter)
+
+                    // Set current location if it exists in the list
+                    if (locationNames.contains(currentLocation)) {
+                        dropdown.setText(currentLocation, false)
+                    } else if (currentLocation.isNotEmpty()) {
+                        // Current location not in list, show as custom
+                        dropdown.setText(currentLocation, false)
+                    }
+
+                    dropdown.setOnItemClickListener { _, _, position, _ ->
+                        val selectedLocation = locationList[position]
+
+                        if (selectedLocation == customLocationOption) {
+                            // Show custom location input
+                            customLocationLayout.isVisible = true
+                            addLocationButton.isVisible = true
+                            customLocationEditText.requestFocus()
+                        } else {
+                            // Hide custom location input
+                            customLocationLayout.isVisible = false
+                            addLocationButton.isVisible = false
+                            onLocationSelected(selectedLocation)
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error setting up location dropdown: ${e.message}", e)
+                Toast.makeText(requireContext(), getString(R.string.error_loading_locations), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton(getString(R.string.cancel_location), null)
-            .show()
+        }
+    }
+
+    private fun addLocationToDatabase(locationName: String, onComplete: (Boolean) -> Unit) {
+        lifecycleScope.launch {
+            try {
+                val result = locationRepository.addLocation(locationName)
+                if (result.isSuccess) {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.location_added, locationName),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onComplete(true)
+                } else {
+                    val errorMessage = when (result.exceptionOrNull()?.message) {
+                        "Location already exists" -> getString(R.string.location_already_exists)
+                        "Location name cannot be empty" -> getString(R.string.location_name_required)
+                        else -> getString(R.string.error_adding_location)
+                    }
+                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                    onComplete(false)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error adding location: ${e.message}", e)
+                Toast.makeText(requireContext(), getString(R.string.error_adding_location), Toast.LENGTH_SHORT).show()
+                onComplete(false)
+            }
+        }
+    }
+
+    private fun updateMeterInDatabase(
+        originalMeter: MeterStatus,
+        newLocation: String,
+        newMeterNumber: String,
+        newSerialNumber: String
+    ) {
+        lifecycleScope.launch {
+            try {
+                // Create updated meter object following FilesViewModel pattern
+                val updatedMeter = originalMeter.copy(
+                    place = newLocation,
+                    number = newMeterNumber,
+                    serialNumber = newSerialNumber
+                )
+
+                // Use FilesViewModel's MeterRepository to update the meter
+                filesViewModel.getMeterRepository().updateMeter(updatedMeter)
+
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.meter_updated_successfully),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                Log.d(TAG, "✅ Meter updated successfully: ${updatedMeter.serialNumber}")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating meter: ${e.message}", e)
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.error_updating_meter, e.message),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     // Public method for QR scanner integration (maintaining compatibility)

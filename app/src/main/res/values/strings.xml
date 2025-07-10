@@ -1269,18 +1269,4 @@
     <string name="continuous_reading_current_place">Place</string>
     <string name="continuous_reading_target_serial" translatable="false">S/N</string>
 
-    <!-- Add these missing strings to app/src/main/res/values/strings.xml -->
-
-    <!-- Additional strings for integrated edit dialog -->
-    <string name="no_changes_detected">No changes detected</string>
-    <string name="error_updating_meter_data">Error updating meter data</string>
-
-    <!-- Additional validation and helper strings -->
-    <string name="please_select_valid_location">Please select a valid location</string>
-    <string name="meter_data_validation_failed">Meter data validation failed</string>
-    <string name="refreshing_meter_list">Refreshing meter list...</string>
-
-    <!-- Navigation error messages -->
-    <string name="unable_to_navigate_to_locations">Unable to navigate to location settings</string>
-    <string name="location_fragment_unavailable">Location management is currently unavailable</string>
 </resources>
