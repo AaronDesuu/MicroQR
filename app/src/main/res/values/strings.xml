@@ -367,14 +367,11 @@
     <string name="meter_details">Meter Details</string>
     <string name="meter_details_card">Meter Details</string>
     <string name="meter_number_header">Meter Number</string>
-    <string name="serial_number_header">Serial Number</string>
-    <string name="location_header">Location</string>
+    <string name="serial_number_header" translatable="false">S/N 🏷️</string>
     <string name="scan_status_header">Scan Status</string>
-    <string name="meter_number_label">🔢 Number: %s</string>
-    <string name="meter_serial_label">🏷️ Serial: %s</string>
-    <string name="meter_location_label">📍 Location: %s</string>
-    <string name="meter_source_label">📁</string>
-    <string name="status_summary">📋 Status Summary:</string>
+    <string name="location_header" translatable="false">📍</string>
+    <string name="meter_serial_label">Serial Number</string>
+    <string name="meter_source_label" translatable="false">📁</string>
     <string name="registration_status">• Registration: %s</string>
     <string name="qr_scan_status" translatable="false">• QR Scan: %s</string>
 
@@ -1226,5 +1223,64 @@
     <string name="batch_reading">Meter Batch Read</string>
     <string name="batch_reading_text">Batch Read all Meters on the list</string>
 
+    <!-- Add these strings to your existing strings.xml file -->
 
+    <!-- Continuous Reading Feature -->
+    <string name="continuous_reading_title">Continuous Reading</string>
+    <string name="continuous_reading_instructions">Position QR code within the frame to scan meters sequentially</string>
+    <string name="continuous_reading_progress">Reading Progress</string>
+    <string name="continuous_reading_progress_label">Progress</string>
+    <string name="continuous_reading_progress_initial">0/0</string>
+    <string name="continuous_reading_current_meter">Current Meter</string>
+    <string name="continuous_reading_waiting">Waiting to start…</string>
+    <string name="continuous_reading_completed">All meters completed!</string>
+    <string name="continuous_reading_skip">Skip</string>
+    <string name="continuous_reading_complete">Complete</string>
+    <string name="continuous_reading_no_meters">No meters available for continuous reading</string>
+    <string name="continuous_reading_meter_scanned">✅ Meter %s scanned successfully</string>
+    <string name="continuous_reading_no_unscanned_meters">All meters have already been scanned</string>
+
+    <!-- Continuous Reading Confirmations -->
+    <string name="continuous_reading_confirm_title">Start Continuous Reading?</string>
+    <string name="continuous_reading_confirm_message">Start continuous reading for %d unscanned meters?\n\nYou will scan each meter sequentially using the camera.</string>
+    <string name="continuous_reading_skip_confirm_title">Skip Meter?</string>
+    <string name="continuous_reading_skip_confirm_message">Skip scanning meter %s?\n\nYou can continue with the next meter in the sequence.</string>
+    <string name="continuous_reading_exit_confirm_title">Exit Continuous Reading?</string>
+    <string name="continuous_reading_exit_confirm_message">Are you sure you want to exit continuous reading?\n\nYour current progress will be lost.</string>
+
+    <!-- Continuous Reading Summary -->
+    <string name="continuous_reading_summary_title">📊 Continuous Reading Complete</string>
+    <string name="continuous_reading_summary_total">Total meters: %d</string>
+    <string name="continuous_reading_summary_scanned">Successfully scanned: %d</string>
+    <string name="continuous_reading_summary_skipped">Skipped: %d</string>
+    <string name="continuous_reading_all_done">Scanning complete</string>
+    <string name="continuous_reading_finished">All done!</string>
+    <string name="continuous_reading_scan_instructions">Scan QR code for meter %1$s (S/N: %2$s)</string>
+    <string name="continuous_reading_database_updated">📝 Database updated: %d meters marked as scanned</string>
+    <string name="continuous_reading_skipped_remain_unscanned">⏭️ Skipped meters remain unscanned in database</string>
+
+
+    <!-- Additional UI strings -->
+    <string name="start">Start</string>
+    <string name="skip">Skip</string>
+    <string name="exit">Exit</string>
+    <string name="finish">Finish</string>
+    <string name="navigation_error" translatable="false">Navigation error occurred</string>
+    <string name="continuous_reading_current_place">Place</string>
+    <string name="continuous_reading_target_serial" translatable="false">S/N</string>
+
+    <!-- Add these missing strings to app/src/main/res/values/strings.xml -->
+
+    <!-- Additional strings for integrated edit dialog -->
+    <string name="no_changes_detected">No changes detected</string>
+    <string name="error_updating_meter_data">Error updating meter data</string>
+
+    <!-- Additional validation and helper strings -->
+    <string name="please_select_valid_location">Please select a valid location</string>
+    <string name="meter_data_validation_failed">Meter data validation failed</string>
+    <string name="refreshing_meter_list">Refreshing meter list...</string>
+
+    <!-- Navigation error messages -->
+    <string name="unable_to_navigate_to_locations">Unable to navigate to location settings</string>
+    <string name="location_fragment_unavailable">Location management is currently unavailable</string>
 </resources>

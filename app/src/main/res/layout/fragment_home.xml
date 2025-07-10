@@ -168,7 +168,7 @@
                             android:layout_height="48dp"
                             android:contentDescription="@string/check_meters"
                             android:src="@drawable/ic_checklist_24"
-                            app:tint="@color/primary_color" />
+                            app:tint="@color/file_csv_icon" />
 
                         <TextView
                             android:layout_width="wrap_content"

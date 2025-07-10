@@ -163,7 +163,7 @@ class MeterDetailScanFragment : Fragment() {
         binding.meterPlaceText.text = targetMeter.place
 
         // Update instruction text with proper localization
-        binding.instructionText.text = getString(R.string.scanning_for_meter, targetMeter.number)
+//        binding.instructionText.text = getString(R.string.scanning_for_meter, targetMeter.number)
 
         // Setup initial states
         binding.progressBar.visibility = View.GONE

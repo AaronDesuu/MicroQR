@@ -47,28 +47,63 @@
     <!-- QR Scan Frame -->
     <FrameLayout
         android:id="@+id/scan_frame_container"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="320dp"
+        android:layout_height="320dp"
+        app:layout_constraintTop_toBottomOf="@+id/top_controls"
+        app:layout_constraintBottom_toTopOf="@+id/instruction_text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.3">
 
+        <!-- Scanning Frame -->
         <View
             android:id="@+id/scan_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/qr_scan_frame" />
+            android:background="@drawable/enhanced_qr_scan_frame" />
 
-        <!-- Scanning animation line -->
+        <!-- Animated Scanning Line -->
         <View
             android:id="@+id/scan_line"
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/scan_line_gradient"
+            android:layout_height="3dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/enhanced_scan_line_gradient"
             android:visibility="visible" />
+
+        <!-- Corner Indicators -->
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="8dp"
+            android:src="@drawable/corner_top_left"
+            app:tint="@color/scan_frame_accent" />
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:src="@drawable/corner_top_right"
+            app:tint="@color/scan_frame_accent" />
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="8dp"
+            android:src="@drawable/corner_bottom_left"
+            app:tint="@color/scan_frame_accent" />
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="8dp"
+            android:src="@drawable/corner_bottom_right"
+            app:tint="@color/scan_frame_accent" />
 
     </FrameLayout>
 

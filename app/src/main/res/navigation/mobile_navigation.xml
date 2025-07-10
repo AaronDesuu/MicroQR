@@ -133,6 +133,13 @@
             app:exitAnim="@anim/slide_out_down"
             app:popEnterAnim="@anim/slide_in_down"
             app:popExitAnim="@anim/slide_out_up" />
+        <action
+            android:id="@+id/action_matchFragment_to_continuousReadingFragment"
+            app:destination="@id/continuousReadingFragment"
+            app:enterAnim="@anim/slide_in_up"
+            app:exitAnim="@anim/slide_out_down"
+            app:popEnterAnim="@anim/slide_in_down"
+            app:popExitAnim="@anim/slide_out_up" />
     </fragment>
 
     <fragment
@@ -193,6 +200,12 @@
         android:name="com.example.microqr.ui.metermatch.MeterDetailScanFragment"
         android:label="@string/scan_qr_code"
         tools:layout="@layout/fragment_meter_detail_scan" />
+
+    <fragment
+        android:id="@+id/continuousReadingFragment"
+        android:name="com.example.microqr.ui.metermatch.ContinuousReadingFragment"
+        android:label="@string/continuous_reading_title"
+        tools:layout="@layout/fragment_continuous_reading" />
 
     <fragment
         android:id="@+id/navigation_export"

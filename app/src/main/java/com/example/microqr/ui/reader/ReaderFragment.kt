@@ -200,13 +200,13 @@ class ReaderFragment : Fragment() {
     private fun startScanLineAnimation() {
         _binding?.let { binding ->
             binding.viewFinder.post {
-                val viewFinderHeight = binding.viewFinder.height
-                if (viewFinderHeight > 0) { // Ensure height is calculated
+                val scanFrameHeight = binding.scanFrameContainer.height
+                if (scanFrameHeight > 0) {
                     scanLineAnimator = ObjectAnimator.ofFloat(
                         binding.scanLine,
                         "translationY",
                         0f,
-                        viewFinderHeight.toFloat()
+                        scanFrameHeight.toFloat()
                     ).apply {
                         duration = 2000
                         repeatCount = ValueAnimator.INFINITE

@@ -204,7 +204,7 @@
     <!-- ========================================== -->
     <!-- FILE MANAGEMENT & UPLOAD -->
     <!-- ========================================== -->
-    <string name="upload_meter_csv_file">メーターCSVファイルをアップロード</string>
+    <string name="upload_meter_csv_file">CSVアップロード</string>
     <string name="upload_and_manage_your_csv_meter_files">CSVメーターファイルをアップロードして管理</string>
     <string name="uploaded_files">アップロード済みファイル</string>
     <string name="no_files_uploaded_yet">まだファイルがアップロードされていません</string>
@@ -358,16 +358,11 @@
     <string name="meter_details">メーター詳細</string>
     <string name="meter_details_card">メーター詳細</string>
     <string name="meter_number_header">メーター番号</string>
-    <string name="serial_number_header">シリアル番号</string>
-    <string name="location_header">場所</string>
     <string name="scan_status_header">スキャンステータス</string>
-    <string name="meter_number_label">🔢 番号: %s</string>
-    <string name="meter_serial_label">🏷️ シリアル: %s</string>
-    <string name="meter_location_label">📍 場所: %s</string>
-    <string name="meter_source_label">📁 ソース: %s</string>
-    <string name="status_summary">📋 ステータス概要:</string>
     <string name="registration_status">• 登録: %s</string>
     <string name="qr_scan_status" translatable="false">• QRスキャン: %s</string>
+    <string name="meter_serial_label">S/N</string>
+
 
     <!-- Meter Actions -->
     <string name="mark_as_unscanned">未スキャンとしてマーク</string>
@@ -1221,4 +1216,64 @@
 
     <string name="batch_reading">連続読み取り</string>
     <string name="batch_reading_text">以下のメーターを連続読み取る</string>
+
+    <!-- Add these strings to your existing values-ja/strings.xml file -->
+
+    <!-- Continuous Reading Feature -->
+    <string name="continuous_reading_title">連続読み取り</string>
+    <string name="continuous_reading_instructions">フレーム内にQRコードを合わせて、メーターを順次スキャンしてください</string>
+    <string name="continuous_reading_progress">読み取り進行状況</string>
+    <string name="continuous_reading_progress_label">進行状況</string>
+    <string name="continuous_reading_progress_initial">0/0</string>
+    <string name="continuous_reading_current_meter">現在のメーター</string>
+    <string name="continuous_reading_waiting">開始を待機中…</string>
+    <string name="continuous_reading_completed">全てのメーターが完了しました！</string>
+    <string name="continuous_reading_skip">スキップ</string>
+    <string name="continuous_reading_complete">完了</string>
+    <string name="continuous_reading_no_meters">連続読み取り用のメーターがありません</string>
+    <string name="continuous_reading_meter_scanned">✅ メーター %s のスキャンが完了しました</string>
+    <string name="continuous_reading_no_unscanned_meters">全てのメーターは既にスキャン済みです</string>
+
+    <!-- Continuous Reading Confirmations -->
+    <string name="continuous_reading_confirm_title">連続読み取りを開始しますか？</string>
+    <string name="continuous_reading_confirm_message">%d個の未スキャンメーターの連続読み取りを開始しますか？\n\nカメラを使用してメーターを順次スキャンします。</string>
+    <string name="continuous_reading_skip_confirm_title">メーターをスキップしますか？</string>
+    <string name="continuous_reading_skip_confirm_message">メーター %s のスキャンをスキップしますか？\n\n次のメーターに進むことができます。</string>
+    <string name="continuous_reading_exit_confirm_title">連続読み取りを終了しますか？</string>
+    <string name="continuous_reading_exit_confirm_message">連続読み取りを終了してもよろしいですか？\n\n現在の進行状況は失われます。</string>
+
+    <!-- Continuous Reading Summary -->
+    <string name="continuous_reading_summary_title">📊 連続読み取り完了</string>
+    <string name="continuous_reading_summary_total">総メーター数: %d</string>
+    <string name="continuous_reading_summary_scanned">正常にスキャン済み: %d</string>
+    <string name="continuous_reading_summary_skipped">スキップ済み: %d</string>
+    <string name="continuous_reading_all_done">スキャン完了</string>
+    <string name="continuous_reading_finished">全て完了！</string>
+    <string name="continuous_reading_scan_instructions">メーター %1$s のQRコードをスキャンしてください (S/N: %2$s)</string>
+    <string name="continuous_reading_database_updated">📝 データベース更新: %d個のメーターをスキャン済みにマークしました</string>
+    <string name="continuous_reading_skipped_remain_unscanned">⏭️ スキップされたメーターはデータベース内で未スキャンのままです</string>
+
+    <string name="continuous_reading_current_place">場所</string>
+
+    <!-- Additional UI strings -->
+    <string name="start">開始</string>
+    <string name="skip">スキップ</string>
+    <string name="exit">終了</string>
+    <string name="finish">完了</string>
+
+
+    <!-- Add these missing strings to app/src/main/res/values-ja/strings.xml -->
+
+    <!-- Additional strings for integrated edit dialog -->
+    <string name="no_changes_detected">変更が検出されませんでした</string>
+    <string name="error_updating_meter_data">メーターデータの更新中にエラーが発生しました</string>
+
+    <!-- Additional validation and helper strings -->
+    <string name="please_select_valid_location">有効なロケーションを選択してください</string>
+    <string name="meter_data_validation_failed">メーターデータの検証に失敗しました</string>
+    <string name="refreshing_meter_list">メーターリストを更新中...</string>
+
+    <!-- Navigation error messages -->
+    <string name="unable_to_navigate_to_locations">ロケーション設定に移動できません</string>
+    <string name="location_fragment_unavailable">ロケーション管理は現在利用できません</string>
 </resources>

@@ -55,6 +55,7 @@ class MeterMatchFragment : Fragment() {
         setupSearchView()
         setupFilterButtons()
         setupObservers()
+        setupBatchReadingButton()
 
         Log.d("MeterMatchFragment", "onViewCreated completed")
     }
@@ -605,6 +606,61 @@ class MeterMatchFragment : Fragment() {
         } catch (e: Exception) {
             Log.e("MeterMatchFragment", "Navigation error: ${e.message}")
             Toast.makeText(context, getString(R.string.unable_start_camera), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Add this to your existing MeterMatchFragment.kt
+
+    private fun setupBatchReadingButton() {
+        // Find the batch reading card/button in your layout
+        binding.setupLocationsCard.setOnClickListener {
+            startBatchReading()
+        }
+    }
+
+    private fun startBatchReading() {
+        // Get unscanned meters from the current UI state
+        val uiState = viewModel.uiState.value
+        val unscannedMeters = uiState.filteredMeters.filter { meter -> !meter.isChecked }
+
+        if (unscannedMeters.isEmpty()) {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.continuous_reading_no_unscanned_meters),
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        // Show confirmation dialog
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.continuous_reading_confirm_title))
+            .setMessage(
+                getString(
+                    R.string.continuous_reading_confirm_message,
+                    unscannedMeters.size
+                )
+            )
+            .setPositiveButton(getString(R.string.start)) { _, _ ->
+                navigateToContinuousReading(unscannedMeters)
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun navigateToContinuousReading(meters: List<MeterStatus>) {
+        try {
+            val bundle = ContinuousReadingFragment.createBundle(meters)
+            findNavController().navigate(
+                R.id.action_matchFragment_to_continuousReadingFragment,
+                bundle
+            )
+        } catch (e: Exception) {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.navigation_error),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
